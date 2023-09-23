@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  doom-depth:
+    build:
+      context: docker/
+    container_name: doom-depth
+    image: doom-depth:base
+    working_dir: /app
+    volumes:
+      - ./src:/app
+    tty: true
+    stdin_open: true
+
