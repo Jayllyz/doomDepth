@@ -1,4 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#endif
+int getInputInt();
+char getInputChar();
+char *getInputString(unsigned size);
+
+#endif /* UTILS_H */
