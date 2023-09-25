@@ -4,5 +4,7 @@
 int getInputInt();
 char getInputChar();
 char *getInputString(unsigned size);
+void clearBuffer();
+void clearScreen();
 
 #endif /* UTILS_H */

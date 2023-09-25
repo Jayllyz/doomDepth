@@ -42,3 +42,18 @@ char *getInputString(unsigned size)
     free(line);
     return NULL;
 }
+
+void clearBuffer()
+{
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { }
+}
+
+void clearScreen()
+{
+#ifdef _WIN32
+    system("cls");
+#else
+    printf("\033[2J\033[1;1H");
+#endif
+}
