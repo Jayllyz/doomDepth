@@ -7,6 +7,7 @@ services:
     container_name: doom-depth
     image: doom-depth:base
     working_dir: /app
+    restart: always
     volumes:
       - ./src:/app
     tty: true
