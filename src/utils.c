@@ -7,13 +7,9 @@
 
 int getInputInt()
 {
-    char line[BUFFER_SIZE];
-    int i;
-    if (fgets(line, sizeof(line), stdin)) {
-        if (1 == sscanf(line, "%d", &i)) {
-            return i;
-        }
-    }
+    int value;
+    if (scanf("%d", &value) == 1)
+        return value;
     return -1;
 }
 
