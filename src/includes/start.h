@@ -1,8 +1,21 @@
 #ifndef START_H
 #define START_H
 
-int createPlayer(char *name, int classId);
+typedef struct {
+    int id;
+    char *name;
+    int level;
+    int experience;
+    int life;
+    int attack;
+    int defense;
+    int mana;
+    int gold;
+    int classId;
+} Player;
+
+int createPlayer(char *name, int classId, Player *p);
 int eraseDatabase();
-int playerSetup();
+int playerSetup(Player *p);
 
 #endif /* START_H */
