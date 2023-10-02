@@ -7,14 +7,22 @@
 #define HEIGHT 50
 #define WIDTH 150
 
-void printGameSize()
+void printGameMenu()
 {
-    for (int i = 0; i < HEIGHT; i++) {
-        for (int j = 0; j < WIDTH; j++) {
-            printf("*");
-        }
-        printf("\n");
+    FILE *fp = fopen("ascii/menu.txt", "r");
+
+    if (fp == NULL) {
+        printf("Fichier du menu introuvable\n");
+        return;
     }
+
+    int c = fgetc(fp);
+    while (c != EOF) {
+        printf("%c", c);
+        c = fgetc(fp);
+    }
+
+    fclose(fp);
 }
 
 int main(int argc, char **argv)
@@ -23,12 +31,7 @@ int main(int argc, char **argv)
     int choice;
 
     do {
-        printf("=====================================\n");
-        printf("Bienvenue dans le jeu doomDepth\n");
-        printf("1. Nouvelle partie\n");
-        printf("2. Charger une partie\n");
-        printf("3. Quitter\n");
-        printf("=====================================\n");
+        printGameMenu();
         printf("Votre choix : ");
         choice = getInputInt();
         clearBuffer();
