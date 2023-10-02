@@ -7,7 +7,7 @@
 
 #define DB_FILE "db/doomdepth.sqlite"
 
-int createPlayer(char *name, int classId)
+int createPlayer(char *name, int classId, Player *p)
 {
     sqlite3 *db;
     char *err_msg = 0;
@@ -19,8 +19,17 @@ int createPlayer(char *name, int classId)
         return 1;
     }
 
-    char *sql = sqlite3_mprintf(
-        "INSERT INTO PLAYER(name, level, experience, life, attack, defense, mana, gold, class_id) VALUES('%s', 1, 0, 50, 10, 10, 10, 0, %d);", name, classId);
+    int level = 1;
+    int experience = 0;
+    int life = 50;
+    int attack = 10;
+    int defense = 10;
+    int mana = 25;
+    int gold = 0;
+
+    char *sql
+        = sqlite3_mprintf("INSERT INTO PLAYER (name, level, experience, life, attack, defense, mana, gold, class_id) VALUES ('%s', %d, %d, %d, %d, %d, %d, %d, %d);",
+            name, level, experience, life, attack, defense, mana, gold, classId);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -30,6 +39,16 @@ int createPlayer(char *name, int classId)
         sqlite3_close(db);
         return 1;
     }
+
+    p->name = name;
+    p->level = level;
+    p->experience = experience;
+    p->life = life;
+    p->attack = attack;
+    p->defense = defense;
+    p->mana = mana;
+    p->gold = gold;
+    p->classId = classId;
 
     sqlite3_free(sql);
     sqlite3_free(err_msg);
@@ -66,7 +85,7 @@ int eraseDatabase()
     return 0;
 }
 
-int playerSetup()
+int playerSetup(Player *p)
 {
     int erase = eraseDatabase();
     if (erase != 0)
@@ -88,5 +107,5 @@ int playerSetup()
         clearBuffer();
     } while (choice < 1 || choice > 3);
 
-    return createPlayer(name, choice);
+    return createPlayer(name, choice, p);
 }
