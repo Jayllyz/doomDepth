@@ -1,5 +1,6 @@
 #include "includes/start.h"
 #include "includes/utils.h"
+#include "includes/ansii_print.h"
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +8,7 @@
 #define HEIGHT 50
 #define WIDTH 150
 #define MENU_FILE "ascii/menu.txt"
+#define DRAGON "ascii/dragon.txt"
 
 void printGameMenu()
 {
@@ -26,6 +28,25 @@ void printGameMenu()
     fclose(fp);
 }
 
+void printDragonAnsiiWay()
+{
+    FILE *fp = fopen(DRAGON, "r");
+
+    if (fp == NULL) {
+        printf("Fichier du dragon introuvable\n");
+        return;
+    }
+
+    char * content = readFileContent(fp);
+    changeTextColor("red");
+    printStringAtCoordinate(100, 0, content);
+    changeTextColor("reset");
+    printf("\n"); // To avoid the cursor to be on the last line of the file which will cut the dragon
+
+    free(content);
+    fclose(fp);
+}
+
 int main(int argc, char **argv)
 {
     clearScreen();
@@ -34,6 +55,7 @@ int main(int argc, char **argv)
 
     do {
         printGameMenu();
+        printDragonAnsiiWay();
         printf("Votre choix : ");
         choice = getInputInt();
         clearBuffer();
