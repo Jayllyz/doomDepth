@@ -1,6 +1,6 @@
+#include "includes/ansii_print.h"
 #include "includes/start.h"
 #include "includes/utils.h"
-#include "includes/ansii_print.h"
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +37,7 @@ void printDragonAnsiiWay()
         return;
     }
 
-    char * content = readFileContent(fp);
+    char *content = readFileContent(fp);
     changeTextColor("red");
     printStringAtCoordinate(100, 0, content);
     changeTextColor("reset");
