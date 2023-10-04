@@ -8,6 +8,8 @@
 #include <time.h>
 
 #define DB_FILE "db/doomdepth.sqlite"
+#define WIN_FILE "ascii/win.txt"
+#define DEFEAT_FILE "ascii/defeat.txt"
 
 int randomMonster(int level)
 {
@@ -86,6 +88,7 @@ Monster *loadFightScene(Player *p)
     //TODO : Print player
 
     clearScreen();
+    printf("%s \nNiveau %d \nattack : %d \ndefense : %d\n", p->name, p->level, p->attack, p->defense);
     int monsterId = randomMonster(p->level);
 
     Monster *m = getMonsterInfo(monsterId);
@@ -95,8 +98,11 @@ Monster *loadFightScene(Player *p)
     FILE *fp = fopen(file, "r");
     char *content = readFileContent(fp);
 
-    printStringAtCoordinate(50, 0, content);
-    movCursor(0, 25);
+    printStringAtCoordinate(50, 1, content);
+    int lines = countLines(file);
+    movCursor(0, lines + 1);
+
+    printf("---------------------------------------------------------------------------------\n");
 
     printf("Vous avez rencontré un %s de niveau %d\n", m->name, m->level);
 
@@ -108,6 +114,8 @@ Monster *loadFightScene(Player *p)
 int normalAttack(Player *p, Monster *m)
 {
     int damage = p->attack - m->defense;
+    if (damage <= 0)
+        damage = 1;
 
     int randomCC = rand() % 100;
     if (randomCC < 15) {
@@ -126,15 +134,17 @@ int normalAttack(Player *p, Monster *m)
     }
 
     printf("Vous avez infligé %d dégats au monstre\n", damage);
-    printf("Il lui reste %d points de vie\n", m->life);
+    printf("Il lui reste %02d points de vie\n", m->life);
 
     return m->life;
 }
 
 int monsterAttack(Player *p, Monster *m)
 {
-    int randomAttack = rand() % m->attack;
+    int randomAttack = (rand() % m->attack) + 1;
     int damage = randomAttack - p->defense;
+    if (damage <= 0)
+        damage = 1;
 
     int randomCC = rand() % 100;
     if (randomCC < 15) {
@@ -153,7 +163,7 @@ int monsterAttack(Player *p, Monster *m)
     }
 
     printf("Le monstre vous a infligé %d dégats\n", damage);
-    printf("Il vous reste %d points de vie\n", p->life);
+    printf("Il vous reste %02d points de vie\n", p->life);
 
     return p->life;
 }
@@ -175,19 +185,45 @@ void rewards(Player *p, Monster *m)
     if (p->experience + xp >= 50)
         levelUp(p);
 
+    FILE *fp = fopen(WIN_FILE, "r");
+
+    if (fp == NULL) {
+        printf("Fichier de victoire introuvable\n");
+        return;
+    }
+
+    char *content = readFileContent(fp);
+    printStringAtCoordinate(0, 0, content);
+
     printf("Vous avez gagné %d points d'expérience\n", xp);
-    printf("Progression : %d/%d\n", p->experience + xp, 50);
+    printf("Progression exp : %d/%d\n", p->experience + xp, 50);
     printf("Vous avez gagné %d pièces d'or\n", gold);
+    printf("Total or : %d\n", p->gold + gold);
 
     p->experience += xp;
     p->gold += gold;
     printf("Appuyez sur entrée pour continuer\n");
     getInputChar();
+    free(content);
+}
+
+void defeat()
+{
+    FILE *fp = fopen(DEFEAT_FILE, "r");
+
+    if (fp == NULL) {
+        printf("Fichier de défaite introuvable\n");
+        return;
+    }
+
+    char *content = readFileContent(fp);
+    printStringAtCoordinate(0, 0, content);
+
+    printf("Vous êtes mort\n");
 }
 
 void clearLinesFrom(int startLine)
 {
-
     printf("\033[%d;1H", startLine);
     printf("\033[J");
 }
@@ -196,15 +232,17 @@ int fightMonster(Player *p, Monster *m)
 {
     int playerLife = p->life;
     int monsterLife = m->life;
-    int damageNormalAttack = p->attack;
+    int damageNormalAttack = p->attack - m->defense;
     int choice;
-
+    char *filePath = (char *)malloc(sizeof(char) * 100);
+    sprintf(filePath, "ascii/monster/%d.txt", m->id);
+    int lines = countLines(filePath);
     while (playerLife > 0 && monsterLife > 0) {
 
         do {
-            movCursor(0, 26);
-            printf("(Vous) HP : %d\n", playerLife);
-            printf("(%s) HP : %d\n", m->name, monsterLife);
+            movCursor(0, lines + 4);
+            printf("%s HP : %02d\n", p->name, playerLife);
+            printf("%s HP : %02d\n\n", m->name, monsterLife);
             printf("Choisissez une action :\n");
             printf("1 - Attaque normal (%d dégats)\n", damageNormalAttack);
             printf("2 - Utiliser une compétence (coming soon)\n");
@@ -215,13 +253,17 @@ int fightMonster(Player *p, Monster *m)
             clearBuffer();
         } while (choice < 1 || choice > 4);
 
-        clearLinesFrom(30);
-        movCursor(0, 40);
+        clearLinesFrom(lines + 9);
+        movCursor(0, lines + 14);
 
         switch (choice) {
         case 1:
             monsterLife = normalAttack(p, m);
             playerLife = monsterAttack(p, m);
+            break;
+
+        case 4:
+            playerLife = 0;
             break;
 
         default:
@@ -232,7 +274,7 @@ int fightMonster(Player *p, Monster *m)
     }
 
     if (playerLife <= 0) {
-        printf("Vous êtes mort\n");
+        defeat();
         return 0;
     }
     else {

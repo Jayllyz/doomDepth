@@ -84,3 +84,26 @@ char *readFileContent(FILE *fp)
     content[file_size] = '\0';
     return content;
 }
+
+int countLines(char *filePath)
+{
+    FILE *file = fopen(filePath, "r");
+
+    if (file == NULL) {
+        perror("Erreur lors de l'ouverture du fichier");
+        return -1;
+    }
+
+    int lineCount = 0;
+    int c;
+
+    while ((c = fgetc(file)) != EOF) {
+        if (c == '\n') {
+            lineCount++;
+        }
+    }
+
+    fclose(file);
+
+    return lineCount;
+}

@@ -14,5 +14,9 @@ typedef struct {
 int randomMonster(int level);
 Monster *loadFightScene(Player *p);
 int fightMonster(Player *p, Monster *m);
+void clearLinesFrom(int startLine);
+void defeat();
+void rewards(Player *p, Monster *m);
+void levelUp(Player *p);
 
 #endif // FIGHT_H
