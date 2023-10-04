@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(doomDepth VERSION 1.0.0)
 
-set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "-Wall")
 
 find_package(PkgConfig REQUIRED)
@@ -22,5 +22,5 @@ if(CLANG_FORMAT)
     )
 endif()
 
-add_executable(doomDepth src/main.c src/utils.c src/start.c)
+add_executable(doomDepth src/main.c src/utils.c src/start.c src/ansii_print.c src/fight.c)
 target_link_libraries(doomDepth ${SQLITE3_LIBRARIES})
