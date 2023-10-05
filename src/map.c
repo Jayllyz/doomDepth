@@ -1,7 +1,7 @@
 #include "includes/map.h"
 #include "includes/ansii_print.h"
-#include "includes/utils.h"
 #include "includes/fight.h"
+#include "includes/utils.h"
 
 void saveCursorPos()
 {

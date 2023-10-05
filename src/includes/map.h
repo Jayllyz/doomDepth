@@ -1,6 +1,5 @@
 #include "start.h"
 
-
 typedef struct {
     int map_top;
     int map_left;

@@ -80,7 +80,7 @@ int main(int argc, char **argv)
         playerSetup(p);
         clearScreen();
         printf("Votre personnage a bien ete cree, \nvous etes niveau %d\n", p->level);
-        isMap = map("ascii/map.txt", DRAGON, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP,  p);
+        isMap = map("ascii/map.txt", DRAGON, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
         if (isMap == 1) {
             printf("Error in map function");
             return 1;
