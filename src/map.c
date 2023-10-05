@@ -1,5 +1,6 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
+#include "includes/map.h"
+#include "includes/utils.h"
 
 void saveCursorPos()
 {
@@ -16,7 +17,7 @@ void clearLine()
     printf("\033[K");
 }
 
-char signAtCoordinate(char *map, int x, int y, Map m)
+char signAtCoordinate(const char *map, int x, int y, Map m)
 {
     return map[(y - m.map_top) * 11 + (x - m.map_left) / 2];
 }
@@ -215,7 +216,7 @@ void movDown(int *x, int *y, char *map, Map m)
     eventHandler(signAtCoordinate(map, *x, *y, m), m);
 }
 
-int map(char *filename, char *monster, int map_width, int map_height, int map_left, int map_top)
+int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top)
 {
     Map m = {map_top, map_left, map_width, map_height};
 
@@ -225,8 +226,9 @@ int map(char *filename, char *monster, int map_width, int map_height, int map_le
         return 1;
     }
     FILE *fp2 = fopen(monster, "r");
-    if (fp == NULL) {
+    if (fp2 == NULL) {
         printf("Could not open file %s\n", monster);
+        fclose(fp);
         return 1;
     }
 
@@ -254,11 +256,11 @@ int map(char *filename, char *monster, int map_width, int map_height, int map_le
     printf("1 ... Up    2 ... Down\n3 ... Left    4 ... Right\n-1 ... Quit\n");
     saveCursorPos();
 
-    while (ans != -1) {
-
+    do {
         restoreCursorPos();
         clearLine();
-        scanf("%d", &ans);
+        ans = getInputInt();
+        clearBuffer();
 
         switch (ans) {
         case 1:
@@ -273,10 +275,9 @@ int map(char *filename, char *monster, int map_width, int map_height, int map_le
         case 4:
             movRight(&x, &y, map, m);
             break;
-        default:
-            break;
         }
-    }
+
+    } while (ans != -1);
 
     fclose(fp);
 

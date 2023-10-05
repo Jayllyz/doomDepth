@@ -8,7 +8,7 @@ typedef struct {
 void saveCursorPos();
 void restoreCursorPos();
 void clearLine();
-char signAtCoordinate(char *map, int x, int y, Map m);
+char signAtCoordinate(const char *map, int x, int y, Map m);
 char convertSigntoChar(char sign);
 void setSignColor(char sign);
 void printSignWithColor(char sign);
@@ -21,4 +21,4 @@ void movRight(int *x, int *y, char *map, Map m);
 void movLeft(int *x, int *y, char *map, Map m);
 void movUp(int *x, int *y, char *map, Map m);
 void movDown(int *x, int *y, char *map, Map m);
-int map(char *filename, char *monster, int map_width, int map_height, int map_left, int map_top);
+int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top);
