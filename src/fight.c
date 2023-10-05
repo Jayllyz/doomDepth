@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
@@ -133,8 +133,8 @@ int normalAttack(Player *p, Monster *m)
         m->life = 0;
     }
 
-    printf("Vous avez infligé %d dégats au monstre\n", damage);
-    printf("Il lui reste %02d points de vie\n", m->life);
+    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au monstre\n", damage);
+    printf("Il lui reste \033[0;31m%02d\033[0m points de vie\n", m->life);
 
     return m->life;
 }
@@ -162,8 +162,8 @@ int monsterAttack(Player *p, Monster *m)
         p->life = 0;
     }
 
-    printf("Le monstre vous a infligé %d dégats\n", damage);
-    printf("Il vous reste %02d points de vie\n", p->life);
+    printf("Le monstre vous a infligé \033[0;31m%d\033[0m dégats\n", damage);
+    printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
 
     return p->life;
 }
@@ -193,7 +193,9 @@ void rewards(Player *p, Monster *m)
     }
 
     char *content = readFileContent(fp);
+    changeTextColor("green");
     printStringAtCoordinate(0, 0, content);
+    changeTextColor("reset");
 
     printf("Vous avez gagné %d points d'expérience\n", xp);
     printf("Progression exp : %d/%d\n", p->experience + xp, 50);
@@ -217,7 +219,9 @@ void defeat()
     }
 
     char *content = readFileContent(fp);
+    changeTextColor("red");
     printStringAtCoordinate(0, 0, content);
+    changeTextColor("reset");
 
     printf("Vous êtes mort\n");
 }
@@ -241,8 +245,11 @@ int fightMonster(Player *p, Monster *m)
 
         do {
             movCursor(0, lines + 4);
+            changeTextColor("green");
             printf("%s HP : %02d\n", p->name, playerLife);
+            changeTextColor("red");
             printf("%s HP : %02d\n\n", m->name, monsterLife);
+            changeTextColor("reset");
             printf("Choisissez une action :\n");
             printf("1 - Attaque normal (%d dégats)\n", damageNormalAttack);
             printf("2 - Utiliser une compétence (coming soon)\n");

@@ -27,6 +27,21 @@ int createPlayer(char *name, int classId, Player *p)
     int mana = 25;
     int gold = 0;
 
+    switch (classId) {
+    case 1: // Guerrier
+        attack += 2;
+        defense += 2;
+        break;
+    case 2: // Mage
+        attack += 2;
+        mana += 2;
+        break;
+    case 3: // Archer
+        attack += 3;
+        life += 1;
+        break;
+    }
+
     char *sql
         = sqlite3_mprintf("INSERT INTO PLAYER (name, level, experience, life, attack, defense, mana, gold, class_id) VALUES ('%s', %d, %d, %d, %d, %d, %d, %d, %d);",
             name, level, experience, life, attack, defense, mana, gold, classId);
@@ -95,13 +110,14 @@ int playerSetup(Player *p)
     int choice;
     printf("Entrez votre nom de joueur : ");
     name = getInputString(30);
-    printf("Bonjour %s\n", name);
+    clearScreen();
+    printf("Bonjour %s\n\n", name);
 
     do {
         printf("Choisissez votre classe :\n");
-        printf("1. Warrior\n");
-        printf("2. Mage\n");
-        printf("3. Rogue\n");
+        printf("1. Guerrier   | +2 Attaque  | +2 Defense\n");
+        printf("2. Mage       | +2 Attaque  | +2 Mana\n");
+        printf("3. Archer     | +3 Attaque  | +1 Vie\n");
         printf("Votre choix : ");
         choice = getInputInt();
         clearBuffer();
