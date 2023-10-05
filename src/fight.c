@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
@@ -272,7 +272,15 @@ int showPlayerSpells(Player *p)
         printf("0 - Retour\n");
         for (int i = 0; i < MAX_PLAYER_SPELL; i++) {
             if (p->spell[i]->id != -1) {
-                printf("%d - %s | %d mana\n", i + 1, p->spell[i]->name, p->spell[i]->mana);
+                if (p->spell[i]->mana > p->mana)
+                    changeTextColor("red");
+
+                if (strcmp(p->spell[i]->type, "Soin") == 0)
+                    printf("%d - %s | %d mana (Soin de %d) \n", i + 1, p->spell[i]->name, p->spell[i]->mana, p->spell[i]->attack);
+                else
+                    printf("%d - %s | %d mana (%d dégats)\n", i + 1, p->spell[i]->name, p->spell[i]->mana, p->spell[i]->attack);
+
+                changeTextColor("reset");
             }
         }
         printf("Votre choix : ");
