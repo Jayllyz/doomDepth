@@ -1,14 +1,17 @@
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/start.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #define HEIGHT 50
 #define WIDTH 150
 #define MENU_FILE "ascii/menu.txt"
-#define DRAGON "ascii/dragon.txt"
+#define DRAGON "ascii/monster/5.txt"
 
 void printGameMenu()
 {
@@ -50,6 +53,7 @@ void printDragonAnsiiWay()
 int main(int argc, char **argv)
 {
     clearScreen();
+    srand(time(NULL));
     Player *p = (Player *)malloc((sizeof(Player)));
     int choice;
 
@@ -67,6 +71,8 @@ int main(int argc, char **argv)
         printf("Nouvelle partie\n");
         playerSetup(p);
         printf("Votre personnage a bien ete cree, vous etes niveau %d\n", p->level);
+        while (p->life > 0)
+            fightMonster(p, loadFightScene(p));
         break;
     case 2:
         clearScreen();
