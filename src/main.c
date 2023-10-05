@@ -2,6 +2,7 @@
 #include "includes/fight.h"
 #include "includes/start.h"
 #include "includes/utils.h"
+#include "includes/map.h"
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,6 +13,11 @@
 #define WIDTH 150
 #define MENU_FILE "ascii/menu.txt"
 #define DRAGON "ascii/monster/5.txt"
+
+#define MAP_LEFT 5
+#define MAP_TOP 5
+#define MAP_WIDTH 20
+#define MAP_HEIGHT 9
 
 void printGameMenu()
 {
