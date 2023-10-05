@@ -106,11 +106,6 @@ void printMapAtCoordinate(int x, int y, char *m) {
 }
 
 
-void movCursor(int x, int y) {
-    printf("\033[%d;%dH", y, x);
-}
-
-
 
 void printSignAtCoordinate(char * map, int x, int y, Map m){
     setSignColor((signAtCoordinate(map, x, y, m)));
