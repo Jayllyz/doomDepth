@@ -1,5 +1,5 @@
-#include "includes/ansii_print.h"
 #include "includes/map.h"
+#include "includes/ansii_print.h"
 #include "includes/utils.h"
 
 void saveCursorPos()
