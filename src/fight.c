@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
@@ -10,6 +10,7 @@
 #define DB_FILE "db/doomdepth.sqlite"
 #define WIN_FILE "ascii/win.txt"
 #define DEFEAT_FILE "ascii/defeat.txt"
+#define MAX_PLAYER_SPELL 2
 
 int randomMonster(int level)
 {
@@ -111,7 +112,7 @@ Monster *loadFightScene(Player *p)
     return m;
 }
 
-int normalAttack(Player *p, Monster *m)
+void normalAttack(Player *p, Monster *m)
 {
     int damage = p->attack - m->defense;
     if (damage <= 0)
@@ -135,11 +136,9 @@ int normalAttack(Player *p, Monster *m)
 
     printf("Vous avez infligé \033[0;32m%d\033[0m dégats au monstre\n", damage);
     printf("Il lui reste \033[0;31m%02d\033[0m points de vie\n", m->life);
-
-    return m->life;
 }
 
-int monsterAttack(Player *p, Monster *m)
+void monsterAttack(Player *p, Monster *m)
 {
     int randomAttack = (rand() % m->attack) + 1;
     int damage = randomAttack - p->defense;
@@ -164,8 +163,6 @@ int monsterAttack(Player *p, Monster *m)
 
     printf("Le monstre vous a infligé \033[0;31m%d\033[0m dégats\n", damage);
     printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
-
-    return p->life;
 }
 
 void levelUp(Player *p)
@@ -232,27 +229,72 @@ void clearLinesFrom(int startLine)
     printf("\033[J");
 }
 
+void usePlayerSpell(Player *p, Monster *m, int spellId)
+{
+    int damage = p->spell[spellId]->attack - m->defense;
+    if (damage <= 0)
+        damage = 1;
+
+    int randomCC = rand() % 100;
+    if (randomCC < 10) {
+        damage *= 2;
+        printf("Coup critique !\n");
+    }
+
+    if (damage < 0) {
+        damage = 0;
+    }
+
+    m->life -= damage;
+
+    if (m->life < 0) {
+        m->life = 0;
+    }
+
+    printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
+    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au monstre\n", damage);
+    printf("Il lui reste \033[0;31m%02d\033[0m points de vie\n", m->life);
+}
+
+int showPlayerSpells(Player *p)
+{
+    int choice;
+
+    do {
+        printf("Vos sorts :\n");
+        for (int i = 0; i < MAX_PLAYER_SPELL; i++) {
+            if (p->spell[i]->id != -1) {
+                printf("%d - %s\n", i + 1, p->spell[i]->name);
+            }
+        }
+        printf("Votre choix : ");
+        choice = getInputInt();
+        clearBuffer();
+    } while (choice < 1 || choice > MAX_PLAYER_SPELL);
+
+    return choice - 1;
+}
+
 int fightMonster(Player *p, Monster *m)
 {
-    int playerLife = p->life;
-    int monsterLife = m->life;
     int damageNormalAttack = p->attack - m->defense;
     int choice;
-    char *filePath = (char *)malloc(sizeof(char) * 100);
+    int spellChoice;
+    char *filePath = (char *)malloc(sizeof(char) * 50);
     sprintf(filePath, "ascii/monster/%d.txt", m->id);
     int lines = countLines(filePath);
-    while (playerLife > 0 && monsterLife > 0) {
+    while (p->life > 0 && m->life > 0) {
 
         do {
             movCursor(0, lines + 4);
             changeTextColor("green");
-            printf("%s HP : %02d\n", p->name, playerLife);
+            printf("%s HP : %02d\n", p->name, p->life);
             changeTextColor("red");
-            printf("%s HP : %02d\n\n", m->name, monsterLife);
+            printf("%s HP : %02d\n\n", m->name, m->life);
             changeTextColor("reset");
             printf("Choisissez une action :\n");
             printf("1 - Attaque normal (%d dégats)\n", damageNormalAttack);
-            printf("2 - Utiliser une compétence (coming soon)\n");
+            printf("2 - Utiliser une compétence\n");
             printf("3 - Utiliser un objet (coming soon)\n");
             printf("4 - Abandonner\n");
             printf("Votre choix : ");
@@ -265,12 +307,22 @@ int fightMonster(Player *p, Monster *m)
 
         switch (choice) {
         case 1:
-            monsterLife = normalAttack(p, m);
-            playerLife = monsterAttack(p, m);
+            normalAttack(p, m);
+            monsterAttack(p, m);
+            break;
+        case 2:
+            clearLinesFrom(lines + 4);
+            movCursor(0, lines + 4);
+
+            spellChoice = showPlayerSpells(p);
+            clearLinesFrom(lines + 9);
+            movCursor(0, lines + 14);
+            usePlayerSpell(p, m, spellChoice);
+            clearLinesFrom(lines + 4);
             break;
 
         case 4:
-            playerLife = 0;
+            p->life = 0;
             break;
 
         default:
@@ -278,9 +330,10 @@ int fightMonster(Player *p, Monster *m)
         }
 
         choice = 0;
+        spellChoice = 0;
     }
 
-    if (playerLife <= 0) {
+    if (p->life <= 0) {
         defeat();
         return 0;
     }
