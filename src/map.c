@@ -1,6 +1,7 @@
 #include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/utils.h"
+#include "includes/fight.h"
 
 void saveCursorPos()
 {
@@ -129,7 +130,7 @@ void printPlayerAtCoordinate(int x, int y)
     changeTextColor("reset");
 }
 
-void eventHandler(char sign, Map m)
+void eventHandler(char sign, Map m, Player *p)
 {
     switch (sign) {
     case '0':
@@ -138,7 +139,9 @@ void eventHandler(char sign, Map m)
         break;
     case '2':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
+
         printf("Fight begins!");
+        fightMonster(p, loadFightScene(p));
         break;
     case '3':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
@@ -151,7 +154,7 @@ void eventHandler(char sign, Map m)
     }
 }
 
-void movRight(int *x, int *y, char *map, Map m)
+void movRight(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
     if (signAtCoordinate(map, *x + 2, *y, m) == '1') {
@@ -163,10 +166,10 @@ void movRight(int *x, int *y, char *map, Map m)
         *x = m.map_left - 2 + m.map_width - 2; // -2 come from map border
     }
     printPlayerAtCoordinate(*x, *y);
-    eventHandler(signAtCoordinate(map, *x, *y, m), m);
+    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
-void movLeft(int *x, int *y, char *map, Map m)
+void movLeft(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
     if (signAtCoordinate(map, *x - 2, *y, m) == '1') {
@@ -179,10 +182,10 @@ void movLeft(int *x, int *y, char *map, Map m)
     }
     printPlayerAtCoordinate(*x, *y);
 
-    eventHandler(signAtCoordinate(map, *x, *y, m), m);
+    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
-void movUp(int *x, int *y, char *map, Map m)
+void movUp(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
 
@@ -195,10 +198,10 @@ void movUp(int *x, int *y, char *map, Map m)
         *y = m.map_top + 1;
     }
     printPlayerAtCoordinate(*x, *y);
-    eventHandler(signAtCoordinate(map, *x, *y, m), m);
+    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
-void movDown(int *x, int *y, char *map, Map m)
+void movDown(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
 
@@ -213,10 +216,10 @@ void movDown(int *x, int *y, char *map, Map m)
         *y = m.map_top + m.map_height - 2;
     }
     printPlayerAtCoordinate(*x, *y);
-    eventHandler(signAtCoordinate(map, *x, *y, m), m);
+    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
-int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top)
+int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
 {
     Map m = {map_top, map_left, map_width, map_height};
 
@@ -264,16 +267,16 @@ int map(const char *filename, const char *monster, int map_width, int map_height
 
         switch (ans) {
         case 1:
-            movUp(&x, &y, map, m);
+            movUp(&x, &y, map, m, p);
             break;
         case 2:
-            movDown(&x, &y, map, m);
+            movDown(&x, &y, map, m, p);
             break;
         case 3:
-            movLeft(&x, &y, map, m);
+            movLeft(&x, &y, map, m, p);
             break;
         case 4:
-            movRight(&x, &y, map, m);
+            movRight(&x, &y, map, m, p);
             break;
         }
 
