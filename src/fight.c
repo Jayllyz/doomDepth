@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
@@ -231,6 +231,11 @@ void clearLinesFrom(int startLine)
 
 void usePlayerSpell(Player *p, Monster *m, int spellId)
 {
+    if (p->mana < p->spell[spellId]->mana) {
+        printf("Vous n'avez pas assez de mana pour utiliser ce sort\n");
+        return;
+    }
+
     int damage = p->spell[spellId]->attack - m->defense;
     if (damage <= 0)
         damage = 1;
@@ -251,6 +256,7 @@ void usePlayerSpell(Player *p, Monster *m, int spellId)
         m->life = 0;
     }
 
+    p->mana -= p->spell[spellId]->mana;
     printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
     printf("Vous avez infligé \033[0;32m%d\033[0m dégats au monstre\n", damage);
     printf("Il lui reste \033[0;31m%02d\033[0m points de vie\n", m->life);
@@ -262,14 +268,18 @@ int showPlayerSpells(Player *p)
 
     do {
         printf("Vos sorts :\n");
+        printf("Mana : \033[0;34m%02d\033[0m\n", p->mana);
+        printf("0 - Retour\n");
         for (int i = 0; i < MAX_PLAYER_SPELL; i++) {
             if (p->spell[i]->id != -1) {
-                printf("%d - %s\n", i + 1, p->spell[i]->name);
+                printf("%d - %s | %d mana\n", i + 1, p->spell[i]->name, p->spell[i]->mana);
             }
         }
         printf("Votre choix : ");
         choice = getInputInt();
         clearBuffer();
+        if (choice == 0)
+            return -1;
     } while (choice < 1 || choice > MAX_PLAYER_SPELL);
 
     return choice - 1;
@@ -294,7 +304,7 @@ int fightMonster(Player *p, Monster *m)
             changeTextColor("reset");
             printf("Choisissez une action :\n");
             printf("1 - Attaque normal (%d dégats)\n", damageNormalAttack);
-            printf("2 - Utiliser une compétence\n");
+            printf("2 - Utiliser une compétence - Mana : \033[0;34m%02d\033[0m\n", p->mana);
             printf("3 - Utiliser un objet (coming soon)\n");
             printf("4 - Abandonner\n");
             printf("Votre choix : ");
@@ -312,13 +322,16 @@ int fightMonster(Player *p, Monster *m)
             break;
         case 2:
             clearLinesFrom(lines + 4);
-            movCursor(0, lines + 4);
+            movCursor(0, lines + 7);
 
             spellChoice = showPlayerSpells(p);
+            if (spellChoice == -1) {
+                choice = 0;
+                continue;
+            }
             clearLinesFrom(lines + 9);
             movCursor(0, lines + 14);
             usePlayerSpell(p, m, spellChoice);
-            clearLinesFrom(lines + 4);
             break;
 
         case 4:
@@ -334,6 +347,7 @@ int fightMonster(Player *p, Monster *m)
     }
 
     if (p->life <= 0) {
+        clearScreen();
         defeat();
         return 0;
     }
