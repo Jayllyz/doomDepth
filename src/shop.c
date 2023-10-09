@@ -2,12 +2,12 @@
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
 #include "includes/utils.h"
+#include <math.h>
 #include <sqlite3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>
 
 #define SHOP "ascii/shop.txt"
 #define ITEMS "ascii/shop/items.txt"
@@ -15,7 +15,7 @@
 
 #define NB_ITEMS_EACH_ROW 2 //number of items on each row
 #define NB_COL_ITEMS 6 //number of columns for the ascii item element
-#define NB_ROW_ITEMS 10 //number of rows for an item in the shop 
+#define NB_ROW_ITEMS 10 //number of rows for an item in the shop
 
 #define ID_USER 1 //DEV PURPOSE
 
@@ -161,8 +161,7 @@ void printItems(stuff *itemsList, int itemCount)
         else if (itemsOnCurrentLine % NB_ITEMS_EACH_ROW == 0) {
             length = 0;
         }
-        else
-        {
+        else {
             length += strlen(itemsList[i].description) + 30;
         }
 
@@ -174,22 +173,22 @@ void printItems(stuff *itemsList, int itemCount)
 
         movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 11 + ligne);
         printf("Identifiant: %d", itemsList[i].id);
-        
+
         movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 12 + ligne);
         printf("Nom: %s", itemsList[i].name);
-        
+
         movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 13 + ligne);
         printf("Description: %s", itemsList[i].description);
-        
+
         movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 14 + ligne);
         printf("Attaque: %d", itemsList[i].attack);
-        
+
         movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 15 + ligne);
         printf("Défense: %d", itemsList[i].defense);
-        
+
         movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 16 + ligne);
         printf("Grade: %d", itemsList[i].grade);
-        
+
         movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 17 + ligne);
         printf("Type: %s", itemsList[i].type);
 
@@ -388,7 +387,7 @@ void initShop()
     printShopAnsiiWay();
 
     movCursor(60, 8);
-    
+
     changeTextColor("yellow");
     printf("Gold: %d", getplayerGold());
     changeTextColor("reset");
@@ -420,22 +419,20 @@ void initShop()
     }
 
     switch (choice) {
-        case 1:
-            //buyItem();
-            break;
-        case 2:
-            //sellItem();
-            break;
-        case 3:
-            return;
+    case 1:
+        //buyItem();
+        break;
+    case 2:
+        //sellItem();
+        break;
+    case 3:
+        return;
     }
 
     printf("\n\n");
-
 }
 
 int main(int argc, char **argv)
 {
     initShop();
-
 }
