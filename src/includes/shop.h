@@ -11,10 +11,14 @@ typedef struct {
     int grade;
     int gold;
     char *type;
-} shopItems;
+} stuff;
 
 void printShopAnsiiWay();
 
-void printItemAnsiiWay();
+void printItemAnsiiWay(int x, int y);
+
+void printItems(stuff *itemsList, int itemCount);
+
+stuff *getStuffFromShop(int *itemCount);
 
 #endif
