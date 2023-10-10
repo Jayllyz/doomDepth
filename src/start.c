@@ -61,6 +61,7 @@ int createPlayer(char *name, int classId, Player *p)
     p->spell = (Spell **)malloc(MAX_PLAYER_SPELL * sizeof(Spell *));
     for (int i = 0; i < MAX_PLAYER_SPELL; i++) {
         p->spell[i] = (Spell *)malloc(sizeof(Spell));
+        p->spell[i]->id = -1;
     }
 
     switch (classId) {
@@ -84,7 +85,6 @@ int createPlayer(char *name, int classId, Player *p)
     p->mana = mana;
     p->gold = gold;
     p->classId = classId;
-    p->spell[1]->id = -1;
 
     sqlite3_free(sql);
     sqlite3_free(err_msg);

@@ -11,6 +11,7 @@
 #define WIN_FILE "ascii/win.txt"
 #define DEFEAT_FILE "ascii/defeat.txt"
 #define MAX_PLAYER_SPELL 2
+#define MAX_MONSTER_SPELL 1
 
 int randomMonster(int level)
 {
@@ -46,6 +47,7 @@ int randomMonster(int level)
 
 Monster *getMonsterInfo(int id)
 {
+    //TODO : clean function (big and unclear)
     sqlite3 *db;
     sqlite3_stmt *res;
     int rc = sqlite3_open(DB_FILE, &db);
@@ -79,9 +81,76 @@ Monster *getMonsterInfo(int id)
     m->life = sqlite3_column_int(res, 4);
     m->level = sqlite3_column_int(res, 5);
 
+    m->spell = (Spell **)malloc(MAX_MONSTER_SPELL * sizeof(Spell *));
+    for (int i = 0; i < MAX_MONSTER_SPELL; i++) {
+        m->spell[i] = (Spell *)malloc(sizeof(Spell));
+        m->spell[i]->id = -1;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT spell_id FROM MONSTER_SPELL WHERE monster_id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+
+        printf("Failed to select MONSTER_SPELL\n");
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_bind_int(res, 1, id);
+    rc = sqlite3_step(res);
+    int i = 0;
+    int spell_id;
+
+    while (rc == SQLITE_ROW) {
+        spell_id = sqlite3_column_int(res, i);
+        m->spell[i] = setMonsterSpell(spell_id);
+        i++;
+        rc = sqlite3_step(res);
+    }
+
     sqlite3_finalize(res);
     sqlite3_close(db);
     return m;
+}
+
+Spell *setMonsterSpell(int idSpell)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_stmt *select;
+    rc = sqlite3_prepare_v2(db, "SELECT id, name, description, attack, grade, mana, type FROM SPELL WHERE id = ?;", -1, &select, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_bind_int(select, 1, idSpell);
+    sqlite3_step(select);
+
+    Spell *s = (Spell *)malloc(sizeof(Spell));
+
+    s->id = sqlite3_column_int(select, 0);
+    s->name = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 1)) + 1));
+    strcpy(s->name, (const char *)sqlite3_column_text(select, 1));
+    s->description = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 2)) + 1));
+    strcpy(s->description, (const char *)sqlite3_column_text(select, 2));
+    s->attack = sqlite3_column_int(select, 3);
+    s->grade = sqlite3_column_int(select, 4);
+    s->mana = sqlite3_column_int(select, 5);
+    s->type = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 6)) + 1));
+    strcpy(s->type, (const char *)sqlite3_column_text(select, 6));
+
+    return s;
 }
 
 Monster *loadFightScene(Player *p)
@@ -89,7 +158,7 @@ Monster *loadFightScene(Player *p)
     //TODO : Print player
 
     clearScreen();
-    printf("%s \nNiveau %d \nattack : %d \ndefense : %d\n", p->name, p->level, p->attack, p->defense);
+    printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
     int monsterId = randomMonster(p->level);
 
     Monster *m = getMonsterInfo(monsterId);
@@ -134,8 +203,8 @@ void normalAttack(Player *p, Monster *m)
         m->life = 0;
     }
 
-    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au monstre\n", damage);
-    printf("Il lui reste \033[0;31m%02d\033[0m points de vie\n", m->life);
+    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
+    printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
 }
 
 void monsterAttack(Player *p, Monster *m)
@@ -161,8 +230,31 @@ void monsterAttack(Player *p, Monster *m)
         p->life = 0;
     }
 
-    printf("Le monstre vous a infligé \033[0;31m%d\033[0m dégats\n", damage);
+    printf("Le %s vous a infligé \033[0;31m%d\033[0m dégats\n", m->name, damage);
     printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
+}
+
+void monsterSpell(Player *p, Monster *m)
+{
+    int damage = m->spell[0]->attack;
+    if (damage <= 0)
+        damage = 1;
+
+    int randomCC = rand() % 100;
+    if (randomCC < 10) {
+        damage *= 2;
+        printf("Coup critique !\n");
+    }
+
+    p->life -= damage;
+
+    if (p->life < 0) {
+        p->life = 0;
+    }
+
+    printf("Le %s a utilisé le sort %s\n", m->name, m->spell[0]->name);
+    printf("Il vous a infligé \033[0;32m%d\033[0m dégats\n", damage);
+    printf("Il vous reste \033[0;31m%02d\033[0m points de vie\n", p->life);
 }
 
 void levelUp(Player *p)
@@ -198,6 +290,7 @@ void rewards(Player *p, Monster *m)
     printf("Progression exp : %d/%d\n", p->experience + xp, 50);
     printf("Vous avez gagné %d pièces d'or\n", gold);
     printf("Total or : %d\n", p->gold + gold);
+    printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
 
     p->experience += xp;
     p->gold += gold;
@@ -206,7 +299,7 @@ void rewards(Player *p, Monster *m)
     free(content);
 }
 
-void defeat()
+void defeat(Monster *m)
 {
     FILE *fp = fopen(DEFEAT_FILE, "r");
 
@@ -220,7 +313,7 @@ void defeat()
     printStringAtCoordinate(0, 0, content);
     changeTextColor("reset");
 
-    printf("Vous êtes mort\n");
+    printf("Vous êtes mort, il restait %d points de vie au %s\n", m->life, m->name);
 }
 
 void clearLinesFrom(int startLine)
@@ -258,8 +351,8 @@ void usePlayerSpell(Player *p, Monster *m, int spellId)
 
     p->mana -= p->spell[spellId]->mana;
     printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
-    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au monstre\n", damage);
-    printf("Il lui reste \033[0;31m%02d\033[0m points de vie\n", m->life);
+    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
+    printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
 }
 
 int showPlayerSpells(Player *p)
@@ -297,6 +390,7 @@ int fightMonster(Player *p, Monster *m)
 {
     int damageNormalAttack = p->attack - m->defense;
     int choice;
+    int random;
     int spellChoice;
     char *filePath = (char *)malloc(sizeof(char) * 50);
     sprintf(filePath, "ascii/monster/%d.txt", m->id);
@@ -326,7 +420,6 @@ int fightMonster(Player *p, Monster *m)
         switch (choice) {
         case 1:
             normalAttack(p, m);
-            monsterAttack(p, m);
             break;
         case 2:
             clearLinesFrom(lines + 4);
@@ -350,13 +443,19 @@ int fightMonster(Player *p, Monster *m)
             break;
         }
 
+        random = rand() % 10;
+        if (random % 2 == 0)
+            monsterAttack(p, m);
+        else
+            monsterSpell(p, m);
+
         choice = 0;
         spellChoice = 0;
     }
 
     if (p->life <= 0) {
         clearScreen();
-        defeat();
+        defeat(m);
         return 0;
     }
     else {

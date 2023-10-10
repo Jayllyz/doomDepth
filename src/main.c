@@ -9,8 +9,6 @@
 #include <string.h>
 #include <time.h>
 
-#define HEIGHT 50
-#define WIDTH 150
 #define MENU_FILE "ascii/menu.txt"
 #define DRAGON "ascii/monster/5.txt"
 
