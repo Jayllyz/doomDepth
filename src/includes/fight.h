@@ -9,18 +9,21 @@ typedef struct {
     int life;
     int attack;
     int defense;
+    Spell **spell;
 } Monster;
 
 int randomMonster(int level);
 Monster *loadFightScene(Player *p);
 int fightMonster(Player *p, Monster *m);
 void clearLinesFrom(int startLine);
-void defeat();
+void defeat(Monster *m);
 void rewards(Player *p, Monster *m);
 void levelUp(Player *p);
 void normalAttack(Player *p, Monster *m);
 void monsterAttack(Player *p, Monster *m);
 int showPlayerSpells(Player *p);
 void usePlayerSpell(Player *p, Monster *m, int spellId);
+void monsterSpell(Player *p, Monster *m);
+Spell *setMonsterSpell(int idSpell);
 
 #endif // FIGHT_H
