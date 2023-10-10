@@ -6,8 +6,8 @@ build:
 start: build
 	docker compose up -d
 
-exec: start
-	docker compose exec app bash -c "gcc -o EXEC main.c utils.c start.c ansii_print.c fight.c -lsqlite3 && ./EXEC"
+exec: 
+	docker compose exec doom-depth bash -c "gcc -o EXEC main.c utils.c start.c ansii_print.c fight.c -lsqlite3 && ./EXEC"
 
 stop:
 	docker compose down --remove-orphans --volumes --timeout 0
