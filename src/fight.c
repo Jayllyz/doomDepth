@@ -158,7 +158,7 @@ Monster *loadFightScene(Player *p)
     //TODO : Print player
 
     clearScreen();
-    printf("%s \nNiveau %d \nattack : %d \ndefense : %d\n", p->name, p->level, p->attack, p->defense);
+    printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
     int monsterId = randomMonster(p->level);
 
     Monster *m = getMonsterInfo(monsterId);
@@ -351,8 +351,8 @@ void usePlayerSpell(Player *p, Monster *m, int spellId)
 
     p->mana -= p->spell[spellId]->mana;
     printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
-    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au monstre\n", damage);
-    printf("Il lui reste \033[0;31m%02d\033[0m points de vie\n", m->life);
+    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
+    printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
 }
 
 int showPlayerSpells(Player *p)
