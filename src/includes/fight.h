@@ -13,11 +13,11 @@ typedef struct {
 } Monster;
 
 int randomMonster(int level);
-Monster *loadFightScene(Player *p);
-int fightMonster(Player *p, Monster *m);
+Monster **loadFightScene(Player *p, int *nbrMonster);
+int fightMonster(Player *p, Monster **m, int *nbrMonster);
 void clearLinesFrom(int startLine);
-void defeat(Monster *m);
-void rewards(Player *p, Monster *m);
+void defeat(Monster **m);
+void rewards(Player *p, Monster **m);
 void levelUp(Player *p);
 void normalAttack(Player *p, Monster *m);
 void monsterAttack(Player *p, Monster *m);

@@ -58,6 +58,7 @@ int main(int argc, char **argv)
 {
     clearScreen();
     srand(time(NULL));
+    int *nbr = (int *)malloc(sizeof(int));
     Player *p = (Player *)malloc((sizeof(Player)));
     int choice;
 
@@ -76,7 +77,7 @@ int main(int argc, char **argv)
         playerSetup(p);
         printf("Votre personnage a bien ete cree, vous etes niveau %d\n", p->level);
         while (p->life > 0)
-            fightMonster(p, loadFightScene(p));
+            fightMonster(p, loadFightScene(p, nbr), nbr);
         break;
     case 2:
         clearScreen();
@@ -85,10 +86,12 @@ int main(int argc, char **argv)
         break;
     case 3:
         printf("Quitter\n");
+        free(nbr);
         free(p);
         return EXIT_SUCCESS;
     }
 
+    free(nbr);
     free(p);
     return 0;
 }
