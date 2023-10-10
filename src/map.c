@@ -2,6 +2,7 @@
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
 #include "includes/utils.h"
+#include <string.h>
 
 void saveCursorPos()
 {
@@ -123,11 +124,57 @@ void printSignAtCoordinate(char *map, int x, int y, Map m)
     changeTextColor("reset");
 }
 
+
+void printMapInterface(int map_left, int map_top, char *map){
+    printMapAtCoordinate(map_left, map_top, map);
+
+    printf("\n\n");
+
+    printf("1 ... Up    2 ... Down\n3 ... Left    4 ... Right\n-1 ... Quit\n");
+    saveCursorPos();
+}
+
 void printPlayerAtCoordinate(int x, int y)
 {
     changeTextColor("blue");
     printCharAtCoordinate(x, y, 'x');
     changeTextColor("reset");
+}
+
+
+void updateMap(Map *m){
+    int clear = 1;
+    int isMonster = 0;
+    int i = 0;
+    // clear last player starting pos
+    while (clear){
+        if (m->map[i] == '9'){
+            m->map[i] = '0';
+            clear = 0;
+        }
+        i++;
+    }
+
+    i = 0;
+
+    while (i < strlen(m->map-1)){
+        if (m->map[i] == '2'){
+            isMonster = 1;
+            break;
+        }
+        i++;
+    }
+
+    if (!isMonster){
+        printf("\nNext map unlocked /!WIP!\\");
+    }
+
+
+    // update starting pos
+    printf("x:%d, y%d\n", (m->player_x-m->map_left)/2, m->player_y-m->map_top);
+    //printf ("%s", m->map);
+
+    m->map[(m->map_width/2 + 1) * (m->player_y-m->map_top) + (m->player_x-m->map_left)/2] = '9';
 }
 
 void eventHandler(char sign, Map m, Player *p)
@@ -141,7 +188,12 @@ void eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        fightMonster(p, loadFightScene(p));
+        if (fightMonster(p, loadFightScene(p))){
+            clearScreen();
+            updateMap(&m);
+            printMapInterface(m.map_left, m.map_top, m.map);
+            mov(&m, p);
+        }
         break;
     case '3':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
@@ -166,6 +218,7 @@ void movRight(int *x, int *y, char *map, Map m, Player *p)
         *x = m.map_left - 2 + m.map_width - 2; // -2 come from map border
     }
     printPlayerAtCoordinate(*x, *y);
+    m.player_x = *x;
     eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
@@ -181,7 +234,7 @@ void movLeft(int *x, int *y, char *map, Map m, Player *p)
         *x = m.map_left + 2;
     }
     printPlayerAtCoordinate(*x, *y);
-
+    m.player_x = *x;
     eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
@@ -198,6 +251,7 @@ void movUp(int *x, int *y, char *map, Map m, Player *p)
         *y = m.map_top + 1;
     }
     printPlayerAtCoordinate(*x, *y);
+    m.player_y = *y;
     eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
@@ -216,8 +270,38 @@ void movDown(int *x, int *y, char *map, Map m, Player *p)
         *y = m.map_top + m.map_height - 2;
     }
     printPlayerAtCoordinate(*x, *y);
+    m.player_y = *y;
     eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
+
+
+void mov(Map *m, Player *p){
+    int ans;
+    do {
+        restoreCursorPos();
+        clearLine();
+        ans = getInputInt();
+        clearBuffer();
+
+        switch (ans) {
+        case 1:
+            movUp(&m->player_x, &m->player_y, m->map, *m, p);
+            break;
+        case 2:
+            movDown(&m->player_x, &m->player_y, m->map, *m, p);
+            break;
+        case 3:
+            movLeft(&m->player_x, &m->player_y, m->map, *m, p);
+            break;
+        case 4:
+            movRight(&m->player_x, &m->player_y, m->map, *m, p);
+            break;
+        }
+
+    } while (ans != -1);
+}
+
+
 
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
 {
@@ -246,19 +330,24 @@ int map(const char *filename, const char *monster, int map_width, int map_height
         //x++;
     }
     int y = map_height / 2 + map_top;
+    m.player_x = x;
+    m.player_y = y;
 
     int ans = 0;
 
-    char *map;
-    map = readFileContent(fp);
+    m.map = readFileContent(fp);
 
-    printMapAtCoordinate(map_left, map_top, map);
+    printMapInterface(m.map_left, m.map_top, m.map);
+    /*
+    printMapAtCoordinate(m.map_left, m.map_top, m.map);
 
     printf("\n\n");
 
     printf("1 ... Up    2 ... Down\n3 ... Left    4 ... Right\n-1 ... Quit\n");
-    saveCursorPos();
+    saveCursorPos();*/
 
+    mov(&m, p);
+/*
     do {
         restoreCursorPos();
         clearLine();
@@ -267,22 +356,21 @@ int map(const char *filename, const char *monster, int map_width, int map_height
 
         switch (ans) {
         case 1:
-            movUp(&x, &y, map, m, p);
+            movUp(&m.player_x, &m.player_y, m.map, m, p);
             break;
         case 2:
-            movDown(&x, &y, map, m, p);
+            movDown(&m.player_x, &m.player_y, m.map, m, p);
             break;
         case 3:
-            movLeft(&x, &y, map, m, p);
+            movLeft(&m.player_x, &m.player_y, m.map, m, p);
             break;
         case 4:
-            movRight(&x, &y, map, m, p);
+            movRight(&m.player_x, &m.player_y, m.map, m, p);
             break;
         }
 
     } while (ans != -1);
-
+*/
     fclose(fp);
-
     return 0;
 }

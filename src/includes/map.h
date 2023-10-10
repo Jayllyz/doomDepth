@@ -5,7 +5,12 @@ typedef struct {
     int map_left;
     int map_width;
     int map_height;
+    char *map;
+    int player_x;
+    int player_y;
 } Map;
+
+
 
 void saveCursorPos();
 void restoreCursorPos();
@@ -23,4 +28,5 @@ void movRight(int *x, int *y, char *map, Map m, Player *p);
 void movLeft(int *x, int *y, char *map, Map m, Player *p);
 void movUp(int *x, int *y, char *map, Map m, Player *p);
 void movDown(int *x, int *y, char *map, Map m, Player *p);
+void mov(Map *m, Player *p);
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p);
