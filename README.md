@@ -1,4 +1,38 @@
 # doomDepth
 
 In development, check this [to do list](https://github.com/Jayllyz/doomDepth/issues/1) for more information.
-Then git clone the repo and don't forget to run the container
+
+## Run the project
+
+### Clone
+
+```bash
+git clone https://github.com/Jayllyz/doomDepth my-project
+cd my-project
+```
+
+### Build
+
+```bash
+make build
+```
+
+### Start
+
+```bash
+make start
+```
+
+> *Note: make start also run make build.*
+
+### Exec
+
+```bash
+make exec
+```
+
+### Stop
+
+```bash
+make stop
+```
