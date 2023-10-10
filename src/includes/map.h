@@ -10,8 +10,6 @@ typedef struct {
     int player_y;
 } Map;
 
-
-
 void saveCursorPos();
 void restoreCursorPos();
 void clearLine();

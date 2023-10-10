@@ -124,8 +124,8 @@ void printSignAtCoordinate(char *map, int x, int y, Map m)
     changeTextColor("reset");
 }
 
-
-void printMapInterface(int map_left, int map_top, char *map){
+void printMapInterface(int map_left, int map_top, char *map)
+{
     printMapAtCoordinate(map_left, map_top, map);
 
     printf("\n\n");
@@ -141,14 +141,14 @@ void printPlayerAtCoordinate(int x, int y)
     changeTextColor("reset");
 }
 
-
-void updateMap(Map *m){
+void updateMap(Map *m)
+{
     int clear = 1;
     int isMonster = 0;
     int i = 0;
     // clear last player starting pos
-    while (clear){
-        if (m->map[i] == '9'){
+    while (clear) {
+        if (m->map[i] == '9') {
             m->map[i] = '0';
             clear = 0;
         }
@@ -157,24 +157,23 @@ void updateMap(Map *m){
 
     i = 0;
 
-    while (i < strlen(m->map-1)){
-        if (m->map[i] == '2'){
+    while (i < strlen(m->map - 1)) {
+        if (m->map[i] == '2') {
             isMonster = 1;
             break;
         }
         i++;
     }
 
-    if (!isMonster){
+    if (!isMonster) {
         printf("\nNext map unlocked /!WIP!\\");
     }
 
-
     // update starting pos
-    printf("x:%d, y%d\n", (m->player_x-m->map_left)/2, m->player_y-m->map_top);
+    printf("x:%d, y%d\n", (m->player_x - m->map_left) / 2, m->player_y - m->map_top);
     //printf ("%s", m->map);
 
-    m->map[(m->map_width/2 + 1) * (m->player_y-m->map_top) + (m->player_x-m->map_left)/2] = '9';
+    m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
 }
 
 void eventHandler(char sign, Map m, Player *p)
@@ -188,7 +187,7 @@ void eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        if (fightMonster(p, loadFightScene(p))){
+        if (fightMonster(p, loadFightScene(p))) {
             clearScreen();
             updateMap(&m);
             printMapInterface(m.map_left, m.map_top, m.map);
@@ -274,8 +273,8 @@ void movDown(int *x, int *y, char *map, Map m, Player *p)
     eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
 }
 
-
-void mov(Map *m, Player *p){
+void mov(Map *m, Player *p)
+{
     int ans;
     do {
         restoreCursorPos();
@@ -300,8 +299,6 @@ void mov(Map *m, Player *p){
 
     } while (ans != -1);
 }
-
-
 
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
 {
@@ -347,7 +344,7 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     saveCursorPos();*/
 
     mov(&m, p);
-/*
+    /*
     do {
         restoreCursorPos();
         clearLine();
