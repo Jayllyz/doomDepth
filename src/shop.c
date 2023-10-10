@@ -544,7 +544,7 @@ void buyStuffInit()
 
     printf("%d", checkStuffIsInPlayerStuff());
 
-    if(!checkStuffIsInPlayerStuff()) {
+    if (!checkStuffIsInPlayerStuff()) {
         printf("Vous avez déjà ce stuff\n");
         return;
     }
@@ -588,7 +588,7 @@ void sellStuffInit()
         return;
     }
 
-/*     if(!checkStuffIsInPlayerStuff()) {
+    /*     if(!checkStuffIsInPlayerStuff()) {
         printf("Vous ne pouvez pas vendre ce stuff\n");
         return;
     } */
