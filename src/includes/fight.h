@@ -16,7 +16,7 @@ int randomMonster(int level);
 Monster **loadFightScene(Player *p, int *nbrMonster);
 void fightMonster(Player *p, Monster **m, int *nbrMonster);
 void clearLinesFrom(int startLine);
-void defeat(Monster **m);
+void defeat();
 void rewards(Player *p, Monster **m);
 void levelUp(Player *p);
 void normalAttack(Player *p, Monster *m);

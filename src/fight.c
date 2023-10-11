@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
@@ -183,8 +183,10 @@ Monster **loadFightScene(Player *p, int *nbrMonster)
         fclose(fp);
         y += 50;
     }
-
-    printf("\nVous êtes tombé sur %d monstres\n", randomMonsterNb);
+    if (randomMonsterNb == 1)
+        printf("\nVous êtes tombé sur %d monstre\n", randomMonsterNb);
+    else
+        printf("\nVous êtes tombé sur %d monstres\n", randomMonsterNb);
     *nbrMonster = randomMonsterNb;
 
     free(file);
@@ -310,7 +312,7 @@ void rewards(Player *p, Monster **m)
     free(m);
 }
 
-void defeat(Monster **m)
+void defeat()
 {
     FILE *fp = fopen(DEFEAT_FILE, "r");
 
@@ -323,9 +325,6 @@ void defeat(Monster **m)
     changeTextColor("red");
     printStringAtCoordinate(0, 0, content);
     changeTextColor("reset");
-
-    printf("Vous êtes mort, il restait %d points de vie au %s\n", m[0]->life, m[0]->name);
-    free(m);
 }
 
 void clearLinesFrom(int startLine)
@@ -571,6 +570,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
         getInputChar();
 
         clearScreen();
+        free(m);
         defeat(m);
     }
     else {
