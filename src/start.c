@@ -187,10 +187,10 @@ int playerSetup(Player *p)
     int choice;
     printf("Entrez votre nom de joueur : ");
     name = getInputString(30);
-    clearScreen();
-    printf("Bonjour %s\n\n", name);
 
     do {
+        clearScreen();
+        printf("Bonjour %s\n\n", name);
         printf("Choisissez votre classe :\n");
         printf("1. Guerrier   | +2 Attaque  | +2 Defense\n");
         printf("2. Mage       | +2 Attaque  | +2 Mana\n");
