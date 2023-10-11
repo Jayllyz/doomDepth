@@ -323,6 +323,7 @@ void defeat()
     changeTextColor("red");
     printStringAtCoordinate(0, 0, content);
     changeTextColor("reset");
+    exit(0);
 }
 
 void clearLinesFrom(int startLine)
