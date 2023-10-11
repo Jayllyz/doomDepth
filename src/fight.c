@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
@@ -157,17 +157,29 @@ Monster **loadFightScene(Player *p, int *nbrMonster)
 {
     //TODO : Print player
     char *file = (char *)malloc(sizeof(char) * 100);
-    FILE *fp;
+    FILE *fplayer;
     clearScreen();
     printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
 
     int randomMonsterNb = rand() % 3 + 1;
+
+    if (p->classId == 1)
+        fplayer = fopen("ascii/player/warrior.txt", "r");
+    else if (p->classId == 2)
+        fplayer = fopen("ascii/player/mage.txt", "r");
+    else
+        fplayer = fopen("ascii/player/archer.txt", "r");
+
+    char *contentPlayer = readFileContent(fplayer);
+    printStringAtCoordinate(1, 7, contentPlayer);
+    fclose(fplayer);
 
     int y = 50;
 
     Monster **monsters = (Monster **)malloc(sizeof(Monster *) * randomMonsterNb);
 
     for (int i = 0; i < randomMonsterNb; i++) {
+        FILE *fp;
         monsters[i] = (Monster *)malloc(sizeof(Monster));
         monsters[i]->id = randomMonster(p->level);
         monsters[i] = getMonsterInfo(monsters[i]->id);
@@ -178,17 +190,11 @@ Monster **loadFightScene(Player *p, int *nbrMonster)
             return NULL;
         }
         printStringAtCoordinate(y, 1, readFileContent(fp));
-        int lines = countLines(file);
-        movCursor(0, lines + 1);
         fclose(fp);
         y += 50;
     }
-    if (randomMonsterNb == 1)
-        printf("\nVous êtes tombé sur %d monstre\n", randomMonsterNb);
-    else
-        printf("\nVous êtes tombé sur %d monstres\n", randomMonsterNb);
-    *nbrMonster = randomMonsterNb;
 
+    *nbrMonster = randomMonsterNb;
     free(file);
     return monsters;
 }
@@ -203,10 +209,6 @@ void normalAttack(Player *p, Monster *m)
     if (randomCC < 15) {
         damage *= 2;
         printf("Coup critique !\n");
-    }
-
-    if (damage < 0) {
-        damage = 0;
     }
 
     m->life -= damage;
@@ -230,10 +232,6 @@ void monsterAttack(Player *p, Monster *m)
     if (randomCC < 15) {
         damage *= 2;
         printf("Coup critique !\n");
-    }
-
-    if (damage < 0) {
-        damage = 0;
     }
 
     p->life -= damage;
@@ -474,6 +472,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
         if (lines > maxLines)
             maxLines = lines;
     }
+    maxLines += 5;
     free(filePath);
 
     while (p->life > 0) {
