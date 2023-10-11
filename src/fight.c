@@ -571,7 +571,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
 
         clearScreen();
         free(m);
-        defeat(m);
+        defeat();
     }
     else {
         clearScreen();
