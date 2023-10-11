@@ -455,6 +455,83 @@ void printLifeBar(Player *p, Monster **m, int *nbrMonster, int mana)
     changeTextColor("reset");
 }
 
+void printCombatInterface(int nbrMonster, int damageNormalAttack){
+    printf("Choisissez une action :\n");
+    if (nbrMonster == 1)
+        printf("1 - Attaque normal (%d dégats)\n", damageNormalAttack);
+    else
+        printf("1 - Attaque normal\n");
+    printf("2 - Utiliser une compétence\n");
+    printf("3 - Utiliser un objet (coming soon)\n");
+    printf("4 - Abandonner\n");
+}
+
+void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player p) {
+    int target;
+
+    clearLinesFrom(maxLines + 4);
+    movCursor(0, maxLines + 7);
+
+    if (nbrMonster == 1)
+        target = 0;
+    else
+        target = chooseMonster(m, nbrMonster);
+
+    clearLinesFrom(maxLines + 4);
+    movCursor(0, maxLines + 21);
+    normalAttack(&p, m[target]);
+}
+
+int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player p) {
+    int target, spellChoice;
+
+    clearLinesFrom(maxLines + 4);
+    movCursor(0, maxLines + 7);
+
+    spellChoice = showPlayerSpells(&p);
+
+    if (spellChoice == -1) {
+        return 0;
+    }
+
+    clearLinesFrom(maxLines + 4);
+    movCursor(0, maxLines + 4);
+
+    if (nbrMonster == 1)
+        target = 0;
+    else
+        target = chooseMonster(m, nbrMonster);
+
+    clearLinesFrom(maxLines + 4);
+    movCursor(0, maxLines + 21);
+
+    usePlayerSpell(&p, m[target], spellChoice);
+
+    return 1;
+}
+
+int monsterAlive(int nbMonster, Monster **m){
+    int lifeTester = 0;
+    for (int i = 0; i < nbMonster; i++) {
+        if (m[i]->life <= 0)
+            lifeTester++;
+    }
+    return lifeTester;
+}
+
+void monsterTurn(int *nbrMonster, Monster *m[], Player *p) {
+    int randomMob = rand() % *nbrMonster;
+    int randomAttack = rand() % 10;
+
+    while (m[randomMob]->life <= 0)
+        randomMob = rand() % *nbrMonster;
+
+    if (randomAttack % 2 == 0)
+        monsterAttack(p, m[randomMob]);
+    else
+        monsterSpell(p, m[randomMob]);
+}
+
 void fightMonster(Player *p, Monster **m, int *nbrMonster)
 {
     int damageNormalAttack;
@@ -480,14 +557,9 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
         do {
             movCursor(0, maxLines + 4);
             printLifeBar(p, m, nbrMonster, 1);
-            printf("Choisissez une action :\n");
-            if (*nbrMonster == 1)
-                printf("1 - Attaque normal (%d dégats)\n", damageNormalAttack);
-            else
-                printf("1 - Attaque normal\n");
-            printf("2 - Utiliser une compétence\n");
-            printf("3 - Utiliser un objet (coming soon)\n");
-            printf("4 - Abandonner\n");
+
+            printCombatInterface(*nbrMonster, damageNormalAttack);
+
             printf("Votre choix : ");
             choice = getInputInt();
             clearBuffer();
@@ -498,7 +570,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
 
         switch (choice) {
         case 1:
-            clearLinesFrom(maxLines + 4);
+            /*clearLinesFrom(maxLines + 4);
             movCursor(0, maxLines + 7);
             if (*nbrMonster == 1)
                 target = 0;
@@ -506,10 +578,11 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
                 target = chooseMonster(m, *nbrMonster);
             clearLinesFrom(maxLines + 4);
             movCursor(0, maxLines + 21);
-            normalAttack(p, m[target]);
+            normalAttack(p, m[target]);*/
+            attackWithNormalAttack(maxLines, *nbrMonster, m, *p);
             break;
         case 2:
-            clearLinesFrom(maxLines + 4);
+            /*clearLinesFrom(maxLines + 4);
             movCursor(0, maxLines + 7);
 
             spellChoice = showPlayerSpells(p);
@@ -526,7 +599,8 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
 
             clearLinesFrom(maxLines + 4);
             movCursor(0, maxLines + 21);
-            usePlayerSpell(p, m[target], spellChoice);
+            usePlayerSpell(p, m[target], spellChoice);*/
+            attackWithSpell(maxLines, *nbrMonster, m, *p);
             break;
 
         case 4:
@@ -537,16 +611,17 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
             break;
         }
 
-        int lifeTester = 0;
+        /*int lifeTester = 0;
         for (int i = 0; i < *nbrMonster; i++) {
             if (m[i]->life <= 0)
                 lifeTester++;
-        }
+        }*/
+        int lifeTester = monsterAlive(*nbrMonster, m);
 
         if (lifeTester == *nbrMonster && p->life > 0)
             break;
 
-        randomMob = rand() % *nbrMonster;
+        /*randomMob = rand() % *nbrMonster;
         randomAttack = rand() % 10;
         while (m[randomMob]->life <= 0)
             randomMob = rand() % *nbrMonster;
@@ -554,7 +629,8 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
         if (randomAttack % 2 == 0)
             monsterAttack(p, m[randomMob]);
         else
-            monsterSpell(p, m[randomMob]);
+            monsterSpell(p, m[randomMob]);*/
+        monsterTurn(nbrMonster, m, p);
 
         choice = 0;
         spellChoice = 0;

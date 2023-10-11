@@ -23,7 +23,7 @@ int createPlayer(char *name, int classId, Player *p)
     int level = 1;
     int experience = 0;
     int life = 50;
-    int attack = 10;
+    int attack = 99;
     int defense = 10;
     int mana = 25;
     int gold = 0;
