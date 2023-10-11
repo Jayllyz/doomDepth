@@ -12,8 +12,7 @@ typedef struct {
 
 #define BUFSIZE 32
 
-typedef enum arrowKey_e
-{
+typedef enum arrowKey_e {
     ARROWKEY_UNKNOWN = 0,
     ARROWKEY_UP,
     ARROWKEY_DOWN,
@@ -21,7 +20,7 @@ typedef enum arrowKey_e
     ARROWKEY_RIGHT,
 } arrowKey_t;
 
-const char* arrowKeyGetName(arrowKey_t arrowKey);
+const char *arrowKeyGetName(arrowKey_t arrowKey);
 arrowKey_t readArrowKeyPress();
 void saveCursorPos();
 void restoreCursorPos();

@@ -4,13 +4,11 @@
 #include "includes/utils.h"
 #include <string.h>
 
-
-const char* arrowKeyGetName(arrowKey_t arrowKey)
+const char *arrowKeyGetName(arrowKey_t arrowKey)
 {
-    const char* arrowKeyName = "TBD";
+    const char *arrowKeyName = "TBD";
 
-    switch (arrowKey)
-    {
+    switch (arrowKey) {
     case ARROWKEY_UNKNOWN:
         arrowKeyName = "ARROWKEY_UNKNOWN";
         break;
@@ -34,48 +32,40 @@ arrowKey_t readArrowKeyPress()
 {
     arrowKey_t arrowKeyPressed = ARROWKEY_UNKNOWN;
 
-    const char* cmd = "bash -c 'read -s -t .1 -n3 c && printf \"%s\" \"$c\"'";
+    const char *cmd = "bash -c 'read -s -t .1 -n3 c && printf \"%s\" \"$c\"'";
     FILE *fp = popen(cmd, "r");
-    if (fp == NULL)
-    {
+    if (fp == NULL) {
         printf("\nError opening pipe!\n");
         return arrowKeyPressed;
     }
 
     char buf[BUFSIZE] = {0};
-    char* retval1 = fgets(buf, BUFSIZE, fp);
-    if (retval1 == NULL)
-    {
+    char *retval1 = fgets(buf, BUFSIZE, fp);
+    if (retval1 == NULL) {
         return arrowKeyPressed;
     }
 
     int retval2 = pclose(fp);
-    if (retval2 == -1)
-    {
+    if (retval2 == -1) {
         printf("\nError obtaining the cmd's exit status code.\n");
         return arrowKeyPressed;
     }
-    else if (retval2 != 0)
-    {
+    else if (retval2 != 0) {
         printf("\nCommand exited with exit status code %i.\n", retval2);
         return arrowKeyPressed;
     }
 
     // map the readings to arrow keys
-    if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65))
-    {
+    if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65)) {
         arrowKeyPressed = ARROWKEY_UP;
     }
-    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 66))
-    {
+    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 66)) {
         arrowKeyPressed = ARROWKEY_DOWN;
     }
-    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 67))
-    {
+    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 67)) {
         arrowKeyPressed = ARROWKEY_RIGHT;
     }
-    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 68))
-    {
+    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 68)) {
         arrowKeyPressed = ARROWKEY_LEFT;
     }
 
@@ -354,23 +344,21 @@ void mov(Map *m, Player *p)
     fflush(stdout);
 
     saveCursorPos();
-    while (1)
-    {
+    while (1) {
         arrowKey_t arrowKeyPressed = readArrowKeyPress();
-        if (arrowKeyPressed == ARROWKEY_UNKNOWN)
-        {
+        if (arrowKeyPressed == ARROWKEY_UNKNOWN) {
             continue;
         }
-        if (arrowKeyPressed == ARROWKEY_UP){
+        if (arrowKeyPressed == ARROWKEY_UP) {
             movUp(&m->player_x, &m->player_y, m->map, *m, p);
         }
-        else if (arrowKeyPressed == ARROWKEY_DOWN){
+        else if (arrowKeyPressed == ARROWKEY_DOWN) {
             movDown(&m->player_x, &m->player_y, m->map, *m, p);
         }
-        else if (arrowKeyPressed == ARROWKEY_LEFT){
+        else if (arrowKeyPressed == ARROWKEY_LEFT) {
             movLeft(&m->player_x, &m->player_y, m->map, *m, p);
         }
-        else if (arrowKeyPressed == ARROWKEY_RIGHT){
+        else if (arrowKeyPressed == ARROWKEY_RIGHT) {
             movRight(&m->player_x, &m->player_y, m->map, *m, p);
         }
 
