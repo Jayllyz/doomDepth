@@ -3,13 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char *colors[] = {"red", "green", "yellow", "blue", "reset"};
+const char *colors[] = {"red", "green", "yellow", "blue",  "orange", "reset"};
 
 const char *colorCodes[] = {
     "\033[31m", // Red
     "\033[32m", // Green
     "\033[33m", // Yellow
     "\033[34m", // Blue
+    "\033[38;5;208m", // Orange
     "\033[0m" // Reset
 };
 

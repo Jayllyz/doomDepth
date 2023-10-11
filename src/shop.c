@@ -247,6 +247,59 @@ stuff *getStuffFromShop(int *stuffCount)
 }
 
 /**
+ * @brief Get all stuff of the shop from the database of the player
+ * @param int *stuffCount The number of stuffs
+ * @return stuff * The list of stuffs
+*/
+stuff *getStuffOfPLayer(int *stuffCount)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT S.id, S.name, S.description, S.attack, S.defense, S.grade, S.gold, S.type FROM STUFF AS S INNER JOIN PLAYER_STUFF AS PS ON S.id = PS.stuff_id WHERE PS.player_id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_bind_int(res, 1, ID_USER);
+
+    stuff *stuffsList = NULL;
+    *stuffCount = 0;
+
+    while (sqlite3_step(res) == SQLITE_ROW) {
+        stuffsList = (stuff *)realloc(stuffsList, (*stuffCount + 1) * sizeof(stuff));
+        stuff *currentStuff = &stuffsList[*stuffCount];
+
+        currentStuff->id = sqlite3_column_int(res, 0);
+
+        currentStuff->name = strdup((const char *)sqlite3_column_text(res, 1));
+        currentStuff->description = strdup((const char *)sqlite3_column_text(res, 2));
+        currentStuff->attack = sqlite3_column_int(res, 3);
+        currentStuff->defense = sqlite3_column_int(res, 4);
+        currentStuff->grade = sqlite3_column_int(res, 5);
+        currentStuff->gold = sqlite3_column_int(res, NB_COL_ITEMS);
+        currentStuff->type = strdup((const char *)sqlite3_column_text(res, 7));
+
+        (*stuffCount)++;
+    }
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+
+    return stuffsList;
+}
+
+/**
  * @brief Get the price of a stuff from the database
  * @param int idStuff The id of the stuff
  * @return int The price of the stuff
@@ -319,9 +372,10 @@ int getplayerGold()
 
 /**
  * @brief Check if a stuff is in the player's stuff
+ * @param int idStuff The id of the stuff
  * @return int 0 if the stuff is not in the player's stuff, 1 otherwise
 */
-int checkStuffIsInPlayerStuff()
+int checkStuffIsInPlayerStuff(int idStuff)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -333,7 +387,7 @@ int checkStuffIsInPlayerStuff()
         return 0;
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT stuff_id FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT COUNT(stuff_id) FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data\n");
@@ -342,18 +396,18 @@ int checkStuffIsInPlayerStuff()
     }
 
     sqlite3_bind_int(res, 1, ID_USER);
-    sqlite3_bind_int(res, 2, 1);
+    sqlite3_bind_int(res, 2, idStuff);
 
-    int id = 0;
+    int count = 0;
 
     while (sqlite3_step(res) == SQLITE_ROW) {
-        id = sqlite3_column_int(res, 0);
+        count = sqlite3_column_int(res, 0);
     }
 
     sqlite3_finalize(res);
     sqlite3_close(db);
 
-    return id != 0;
+    return count;
 }
 
 /**
@@ -393,29 +447,22 @@ void addStuffToPlayerStuff(int idStuff)
 void removeStuffFromPlayerStuff(int idStuff)
 {
     sqlite3 *db;
-    sqlite3_stmt *res;
+    char *err_msg = 0;
     int rc = sqlite3_open(DB_FILE, &db);
 
     if (rc != SQLITE_OK) {
         printf("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return;
     }
 
-    rc = sqlite3_prepare_v2(db, "DELETE FROM PLAYER_STUFF WHERE id_player = ? AND id_stuff = ?;", -1, &res, NULL);
+    char *sql = sqlite3_mprintf("DELETE FROM PLAYER_STUFF WHERE player_id = %d AND stuff_id = %d;", ID_USER, idStuff);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select data\n");
-        sqlite3_close(db);
-        return;
+        printf("Failed to delete data\n");
     }
 
-    sqlite3_bind_int(res, 1, ID_USER);
-    sqlite3_bind_int(res, 2, idStuff);
-
-    sqlite3_step(res);
-
-    sqlite3_finalize(res);
     sqlite3_close(db);
 }
 
@@ -522,35 +569,49 @@ void buyStuffInit()
         printf("Aucun élément trouvé dans la base de données.\n");
     }
 
-    printf("Entrer le numéro du stuff que vous voulez acheter\n");
-    printf("Entrer 0 pour quitter\n");
+    int choice = -1;
 
-    int choice = getInputInt();
+    while(choice != 0){
 
-    while (choice < 0 || choice > stuffCount) {
-        printf("Veuillez entrer un choix valide\n");
+        printf("Entrer le numéro du stuff que vous voulez acheter\n");
+        printf("Entrer 0 pour quitter\n");
+
         choice = getInputInt();
+
+        while (choice < 0) {
+            printf("Veuillez entrer un choix valide\n");
+            choice = getInputInt();
+        }
+
+        if (choice == 0) {
+            return;
+        }
+
+        int price = getStuffprice(choice);
+
+        if(checkStuffIsInPlayerStuff(choice)) {
+            changeTextColor("orange");
+            printf("Vous avez déjà ce stuff\n\n");
+            changeTextColor("reset");
+            continue;
+        }
+
+        if (price > getplayerGold()) {
+            changeTextColor("red");
+            printf("Vous n'avez pas assez d'or pour acheter ce stuff\n");
+            changeTextColor("reset");
+            continue;
+        }
+
+        removeGoldToPlayer(price);
+        addStuffToPlayerStuff(choice);
+
+        changeTextColor("green");
+        printf("Vous avez acheté le stuff avec succès\n\n");
+        changeTextColor("reset");
     }
 
-    if (choice == 0) {
-        return;
-    }
-    int price = getStuffprice(choice);
-
-    if (price > getplayerGold()) {
-        printf("Vous n'avez pas assez d'or pour acheter ce stuff\n");
-        return;
-    }
-
-    printf("%d", checkStuffIsInPlayerStuff());
-
-    if(!checkStuffIsInPlayerStuff()) {
-        printf("Vous avez déjà ce stuff\n");
-        return;
-    }
-
-    removeGoldToPlayer(price);
-    addStuffToPlayerStuff(choice);
+    return;
 }
 
 /**
@@ -560,41 +621,54 @@ void buyStuffInit()
 void sellStuffInit()
 {
     clearScreen();
-    printDealerAnsiiWay();
-    printPlayerGold();
-    printf("\n\n");
-    printLine();
 
-    int stuffCount;
-    stuff *stuffsList = getStuffFromShop(&stuffCount);
-    if (stuffsList) {
-        printStuffs(stuffsList, stuffCount);
-        free(stuffsList);
+    int choice = -1;
+
+    while (choice != 0) {
+        printDealerAnsiiWay();
+        printPlayerGold();
+        printf("\n\n");
+        printLine();
+
+        int stuffCount;
+        stuff *stuffsList = getStuffOfPLayer(&stuffCount);
+        if (stuffsList) {
+            printStuffs(stuffsList, stuffCount);
+            free(stuffsList);
+        }
+        else {
+            changeTextColor("orange");
+            printf("Mince ! Vous n'avez rien à vendre \n");
+            changeTextColor("reset");
+        }
+
+        printf("Entrer le numéro du stuff que vous voulez vendre\n");
+        printf("Entrer 0 pour quitter\n");
+
+        choice = getInputInt();        
+
+        while (choice < 0) {
+            printf("Veuillez entrer un choix valide\n");
+            choice = getInputInt();
+        }
+
+        if (choice == 0) {
+            return;
+        }
+
+        if(!checkStuffIsInPlayerStuff(choice)) {
+            printf("Vous ne possédez pas ce stuff\n");
+            continue;
+        }
+
+        removeStuffFromPlayerStuff(choice);
+        addGoldToPlayer(getStuffprice(choice));
+        changeTextColor("green");
+        printf("Vous avez vendu le stuff avec succès\n\n");
+        changeTextColor("reset");
     }
-    else {
-        printf("Aucun élément trouvé dans la base de données.\n");
-    }
 
-    printf("Entrer le numéro du stuff que vous voulez vendre\n");
-
-    int choice = getInputInt();
-
-    while (choice < 0 || choice > stuffCount) {
-        printf("Veuillez entrer un choix valide\n");
-        choice = getInputInt();
-    }
-
-    if (choice == 0) {
-        return;
-    }
-
-/*     if(!checkStuffIsInPlayerStuff()) {
-        printf("Vous ne pouvez pas vendre ce stuff\n");
-        return;
-    } */
-
-    //removeStuffFromPlayerStuff(choice);
-    addGoldToPlayer(getStuffprice(choice));
+    return;
 }
 
 /**
@@ -634,7 +708,7 @@ void initShop()
         return;
     }
 
-    //initShop();
+    initShop();
 
     printf("\n\n");
 }
