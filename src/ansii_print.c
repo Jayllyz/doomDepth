@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-const char *colors[] = {"red", "green", "yellow", "blue",  "orange", "reset"};
+const char *colors[] = {"red", "green", "yellow", "blue", "orange", "reset"};
 
 const char *colorCodes[] = {
     "\033[31m", // Red

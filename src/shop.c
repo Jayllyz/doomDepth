@@ -263,7 +263,10 @@ stuff *getStuffOfPLayer(int *stuffCount)
         return NULL;
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT S.id, S.name, S.description, S.attack, S.defense, S.grade, S.gold, S.type FROM STUFF AS S INNER JOIN PLAYER_STUFF AS PS ON S.id = PS.stuff_id WHERE PS.player_id = ?;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db,
+        "SELECT S.id, S.name, S.description, S.attack, S.defense, S.grade, S.gold, S.type FROM STUFF AS S INNER JOIN PLAYER_STUFF AS PS ON S.id = PS.stuff_id WHERE "
+        "PS.player_id = ?;",
+        -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data\n");
@@ -571,7 +574,7 @@ void buyStuffInit()
 
     int choice = -1;
 
-    while(choice != 0){
+    while (choice != 0) {
 
         printf("Entrer le numéro du stuff que vous voulez acheter\n");
         printf("Entrer 0 pour quitter\n");
@@ -589,7 +592,7 @@ void buyStuffInit()
 
         int price = getStuffprice(choice);
 
-        if(checkStuffIsInPlayerStuff(choice)) {
+        if (checkStuffIsInPlayerStuff(choice)) {
             changeTextColor("orange");
             printf("Vous avez déjà ce stuff\n\n");
             changeTextColor("reset");
@@ -645,7 +648,7 @@ void sellStuffInit()
         printf("Entrer le numéro du stuff que vous voulez vendre\n");
         printf("Entrer 0 pour quitter\n");
 
-        choice = getInputInt();        
+        choice = getInputInt();
 
         while (choice < 0) {
             printf("Veuillez entrer un choix valide\n");
@@ -656,7 +659,7 @@ void sellStuffInit()
             return;
         }
 
-        if(!checkStuffIsInPlayerStuff(choice)) {
+        if (!checkStuffIsInPlayerStuff(choice)) {
             printf("Vous ne possédez pas ce stuff\n");
             continue;
         }
@@ -669,7 +672,6 @@ void sellStuffInit()
     }
 
     return;
-
 }
 
 /**
