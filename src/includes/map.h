@@ -1,10 +1,27 @@
+#include "start.h"
+
 typedef struct {
     int map_top;
     int map_left;
     int map_width;
     int map_height;
+    char *map;
+    int player_x;
+    int player_y;
 } Map;
 
+#define BUFSIZE 32
+
+typedef enum arrowKey_e {
+    ARROWKEY_UNKNOWN = 0,
+    ARROWKEY_UP,
+    ARROWKEY_DOWN,
+    ARROWKEY_LEFT,
+    ARROWKEY_RIGHT,
+} arrowKey_t;
+
+const char *arrowKeyGetName(arrowKey_t arrowKey);
+arrowKey_t readArrowKeyPress();
 void saveCursorPos();
 void restoreCursorPos();
 void clearLine();
@@ -16,9 +33,10 @@ void printMapAtCoordinate(int x, int y, char *m);
 void movCursor(int x, int y);
 void printSignAtCoordinate(char *map, int x, int y, Map m);
 void printPlayerAtCoordinate(int x, int y);
-void eventHandler(char sign, Map m);
-void movRight(int *x, int *y, char *map, Map m);
-void movLeft(int *x, int *y, char *map, Map m);
-void movUp(int *x, int *y, char *map, Map m);
-void movDown(int *x, int *y, char *map, Map m);
-int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top);
+void eventHandler(char sign, Map m, Player *p);
+void movRight(int *x, int *y, char *map, Map m, Player *p);
+void movLeft(int *x, int *y, char *map, Map m, Player *p);
+void movUp(int *x, int *y, char *map, Map m, Player *p);
+void movDown(int *x, int *y, char *map, Map m, Player *p);
+void mov(Map *m, Player *p);
+int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p);

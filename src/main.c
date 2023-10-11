@@ -57,6 +57,8 @@ void printDragonAnsiiWay()
 int main(int argc, char **argv)
 {
     clearScreen();
+    int isMap;
+
     srand(time(NULL));
     int *nbr = (int *)malloc(sizeof(int));
     Player *p = (Player *)malloc((sizeof(Player)));
@@ -75,9 +77,13 @@ int main(int argc, char **argv)
         clearScreen();
         printf("Nouvelle partie\n");
         playerSetup(p);
-        printf("Votre personnage a bien ete cree, vous etes niveau %d\n", p->level);
-        while (p->life > 0)
-            fightMonster(p, loadFightScene(p, nbr), nbr);
+        clearScreen();
+        printf("Votre personnage a bien ete cree, \nvous etes niveau %d\n", p->level);
+        isMap = map("ascii/map.txt", DRAGON, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
+        if (isMap == 1) {
+            printf("Error in map function");
+            return 1;
+        }
         break;
     case 2:
         clearScreen();
