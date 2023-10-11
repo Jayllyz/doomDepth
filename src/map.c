@@ -1,6 +1,6 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/map.h"
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -262,7 +262,7 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        int idToFight[3] = {5, 5, 5};
+        int idToFight[3] = {1, 1, 1};
         *nbrMonster = 2;
         fightMonster(p, loadFightScene(p, nbrMonster, idToFight), nbrMonster);
         clearScreen();
@@ -412,13 +412,12 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Could not open file %s\n", filename);
-        fclose(fp);
         return 1;
     }
     FILE *fp2 = fopen(monster, "r");
     if (fp2 == NULL) {
         printf("Could not open file %s\n", monster);
-        fclose(fp2);
+        fclose(fp);
         return 1;
     }
 

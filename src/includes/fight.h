@@ -13,7 +13,7 @@ typedef struct {
 } Monster;
 
 int randomMonster(int level);
-Monster **loadFightScene(Player *p, int *nbrMonster, int idToFight[]);
+Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[]);
 void fightMonster(Player *p, Monster **m, int *nbrMonster);
 void clearLinesFrom(int startLine);
 void defeat();
@@ -25,11 +25,12 @@ int showPlayerSpells(Player *p);
 void usePlayerSpell(Player *p, Monster *m, int spellId);
 void monsterSpell(Player *p, Monster *m);
 Spell *setMonsterSpell(int idSpell);
-void printLifeBar(Player *p, Monster **m, int *nbrMonster, int mana);
-void monsterTurn(int *nbrMonster, Monster *m[], Player *p);
+void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana);
+void clearLifeBar(int nbrMonster);
+void monsterTurn(const int *nbrMonster, Monster **m, Player *p);
 int monsterAlive(int nbMonster, Monster **m);
-int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player p);
-void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player p);
+int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p);
+void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p);
 void printCombatInterface(int nbrMonster, int damageNormalAttack);
 
 #endif // FIGHT_H

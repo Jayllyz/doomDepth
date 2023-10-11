@@ -59,16 +59,14 @@ int main(int argc, char **argv)
     printf("Press enter to continue\n");
     fgetc(stdin);
     clearScreen();
-    int isMap;
-
     srand(time(NULL));
-    int *nbr = (int *)malloc(sizeof(int));
     Player *p = (Player *)malloc((sizeof(Player)));
     int choice;
     char monster[25];
     char filename[25];
 
     do {
+        clearScreen();
         printGameMenu();
         printDragonAnsiiWay();
         printf("Votre choix : ");
@@ -89,7 +87,7 @@ int main(int argc, char **argv)
             fgetc(stdin);
             sprintf(filename, "ascii/map%d.txt", i);
             sprintf(monster, "ascii/monster/%d.txt", i);
-            isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
+            int isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
             if (isMap == 1) {
                 printf("File %s or %s not found\n", filename, monster);
                 return 1;
@@ -105,12 +103,10 @@ int main(int argc, char **argv)
         break;
     case 3:
         printf("Quitter\n");
-        free(nbr);
         free(p);
         return EXIT_SUCCESS;
     }
 
-    free(nbr);
     free(p);
     return 0;
 }
