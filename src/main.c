@@ -60,6 +60,7 @@ int main(int argc, char **argv)
     int isMap;
 
     srand(time(NULL));
+    int *nbr = (int *)malloc(sizeof(int));
     Player *p = (Player *)malloc((sizeof(Player)));
     int choice;
 
@@ -83,9 +84,7 @@ int main(int argc, char **argv)
             printf("Error in map function");
             return 1;
         }
-        //while (p->life > 0)
-        //    fightMonster(p, loadFightScene(p));
-        //break;
+        break;
     case 2:
         clearScreen();
         printf("Charger une partie\n");
@@ -93,10 +92,12 @@ int main(int argc, char **argv)
         break;
     case 3:
         printf("Quitter\n");
+        free(nbr);
         free(p);
         return EXIT_SUCCESS;
     }
 
+    free(nbr);
     free(p);
     return 0;
 }
