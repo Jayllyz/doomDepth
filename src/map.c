@@ -301,7 +301,6 @@ int movRight(int *x, int *y, char *map, Map m, Player *p)
         return MAP_FINISHED;
     }
     return 0;
-
 }
 
 int movLeft(int *x, int *y, char *map, Map m, Player *p)

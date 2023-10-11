@@ -84,7 +84,7 @@ int main(int argc, char **argv)
         clearScreen();
         printf("Votre personnage a bien ete cree, \nvous etes niveau %d\n", p->level);
 
-        for (int i = 1; i < 4; i++){
+        for (int i = 1; i < 4; i++) {
             printf("loading map %d\n", i);
             fgetc(stdin);
             sprintf(filename, "ascii/map%d.txt", i);
