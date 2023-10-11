@@ -463,7 +463,8 @@ void printLifeBar(Player *p, Monster **m, int *nbrMonster, int mana)
     changeTextColor("reset");
 }
 
-void printCombatInterface(int nbrMonster, int damageNormalAttack){
+void printCombatInterface(int nbrMonster, int damageNormalAttack)
+{
     printf("Choisissez une action :\n");
     if (nbrMonster == 1)
         printf("1 - Attaque normal (%d dégats)\n", damageNormalAttack);
@@ -474,7 +475,8 @@ void printCombatInterface(int nbrMonster, int damageNormalAttack){
     printf("4 - Abandonner\n");
 }
 
-void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player p) {
+void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player p)
+{
     int target;
 
     clearLinesFrom(maxLines + 4);
@@ -490,7 +492,8 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player p)
     normalAttack(&p, m[target]);
 }
 
-int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player p) {
+int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player p)
+{
     int target, spellChoice;
 
     clearLinesFrom(maxLines + 4);
@@ -518,7 +521,8 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player p) {
     return 1;
 }
 
-int monsterAlive(int nbMonster, Monster **m){
+int monsterAlive(int nbMonster, Monster **m)
+{
     int lifeTester = 0;
     for (int i = 0; i < nbMonster; i++) {
         if (m[i]->life <= 0)
@@ -527,7 +531,8 @@ int monsterAlive(int nbMonster, Monster **m){
     return lifeTester;
 }
 
-void monsterTurn(int *nbrMonster, Monster *m[], Player *p) {
+void monsterTurn(int *nbrMonster, Monster *m[], Player *p)
+{
     int randomMob = rand() % *nbrMonster;
     int randomAttack = rand() % 10;
 
