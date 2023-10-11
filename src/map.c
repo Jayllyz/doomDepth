@@ -4,6 +4,84 @@
 #include "includes/utils.h"
 #include <string.h>
 
+
+const char* arrowKeyGetName(arrowKey_t arrowKey)
+{
+    const char* arrowKeyName = "TBD";
+
+    switch (arrowKey)
+    {
+    case ARROWKEY_UNKNOWN:
+        arrowKeyName = "ARROWKEY_UNKNOWN";
+        break;
+    case ARROWKEY_UP:
+        arrowKeyName = "ARROWKEY_UP";
+        break;
+    case ARROWKEY_DOWN:
+        arrowKeyName = "ARROWKEY_DOWN";
+        break;
+    case ARROWKEY_LEFT:
+        arrowKeyName = "ARROWKEY_LEFT";
+        break;
+    case ARROWKEY_RIGHT:
+        arrowKeyName = "ARROWKEY_RIGHT";
+        break;
+    }
+    return arrowKeyName;
+}
+
+arrowKey_t readArrowKeyPress()
+{
+    arrowKey_t arrowKeyPressed = ARROWKEY_UNKNOWN;
+
+    const char* cmd = "bash -c 'read -s -t .1 -n3 c && printf \"%s\" \"$c\"'";
+    FILE *fp = popen(cmd, "r");
+    if (fp == NULL)
+    {
+        printf("\nError opening pipe!\n");
+        return arrowKeyPressed;
+    }
+
+    char buf[BUFSIZE] = {0};
+    char* retval1 = fgets(buf, BUFSIZE, fp);
+    if (retval1 == NULL)
+    {
+        return arrowKeyPressed;
+    }
+
+    int retval2 = pclose(fp);
+    if (retval2 == -1)
+    {
+        printf("\nError obtaining the cmd's exit status code.\n");
+        return arrowKeyPressed;
+    }
+    else if (retval2 != 0)
+    {
+        printf("\nCommand exited with exit status code %i.\n", retval2);
+        return arrowKeyPressed;
+    }
+
+    // map the readings to arrow keys
+    if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65))
+    {
+        arrowKeyPressed = ARROWKEY_UP;
+    }
+    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 66))
+    {
+        arrowKeyPressed = ARROWKEY_DOWN;
+    }
+    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 67))
+    {
+        arrowKeyPressed = ARROWKEY_RIGHT;
+    }
+    else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 68))
+    {
+        arrowKeyPressed = ARROWKEY_LEFT;
+    }
+
+    return arrowKeyPressed;
+}
+
 void saveCursorPos()
 {
     printf("\033[s");
@@ -127,10 +205,7 @@ void printSignAtCoordinate(char *map, int x, int y, Map m)
 void printMapInterface(int map_left, int map_top, char *map)
 {
     printMapAtCoordinate(map_left, map_top, map);
-
     printf("\n\n");
-
-    printf("1 ... Up    2 ... Down\n3 ... Left    4 ... Right\n-1 ... Quit\n");
     saveCursorPos();
 }
 
@@ -275,29 +350,36 @@ void movDown(int *x, int *y, char *map, Map m, Player *p)
 
 void mov(Map *m, Player *p)
 {
-    int ans;
-    do {
-        restoreCursorPos();
-        clearLine();
-        ans = getInputInt();
-        clearBuffer();
+    printf("Press any arrow key. Press Ctrl + C to quit.\n");
+    fflush(stdout);
 
-        switch (ans) {
-        case 1:
+    saveCursorPos();
+    while (1)
+    {
+        arrowKey_t arrowKeyPressed = readArrowKeyPress();
+        if (arrowKeyPressed == ARROWKEY_UNKNOWN)
+        {
+            continue;
+        }
+        if (arrowKeyPressed == ARROWKEY_UP){
             movUp(&m->player_x, &m->player_y, m->map, *m, p);
-            break;
-        case 2:
+        }
+        else if (arrowKeyPressed == ARROWKEY_DOWN){
             movDown(&m->player_x, &m->player_y, m->map, *m, p);
-            break;
-        case 3:
+        }
+        else if (arrowKeyPressed == ARROWKEY_LEFT){
             movLeft(&m->player_x, &m->player_y, m->map, *m, p);
-            break;
-        case 4:
+        }
+        else if (arrowKeyPressed == ARROWKEY_RIGHT){
             movRight(&m->player_x, &m->player_y, m->map, *m, p);
-            break;
         }
 
-    } while (ans != -1);
+        restoreCursorPos();
+        printf(("                               \n"));
+        restoreCursorPos();
+        printf("Key pressed = %d\n", arrowKeyPressed);
+    }
+    return;
 }
 
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
@@ -335,39 +417,9 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     m.map = readFileContent(fp);
 
     printMapInterface(m.map_left, m.map_top, m.map);
-    /*
-    printMapAtCoordinate(m.map_left, m.map_top, m.map);
-
-    printf("\n\n");
-
-    printf("1 ... Up    2 ... Down\n3 ... Left    4 ... Right\n-1 ... Quit\n");
-    saveCursorPos();*/
 
     mov(&m, p);
-    /*
-    do {
-        restoreCursorPos();
-        clearLine();
-        ans = getInputInt();
-        clearBuffer();
 
-        switch (ans) {
-        case 1:
-            movUp(&m.player_x, &m.player_y, m.map, m, p);
-            break;
-        case 2:
-            movDown(&m.player_x, &m.player_y, m.map, m, p);
-            break;
-        case 3:
-            movLeft(&m.player_x, &m.player_y, m.map, m, p);
-            break;
-        case 4:
-            movRight(&m.player_x, &m.player_y, m.map, m, p);
-            break;
-        }
-
-    } while (ans != -1);
-*/
     fclose(fp);
     return 0;
 }
