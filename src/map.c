@@ -4,6 +4,7 @@
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
+#define MAP_FINISHED 2
 
 const char *arrowKeyGetName(arrowKey_t arrowKey)
 {
@@ -207,7 +208,7 @@ void printPlayerAtCoordinate(int x, int y)
     changeTextColor("reset");
 }
 
-void updateMap(Map *m)
+int updateMap(Map *m)
 {
     int clear = 1;
     int isMonster = 0;
@@ -220,10 +221,14 @@ void updateMap(Map *m)
         }
         i++;
     }
+    m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
 
     i = 0;
+    //printf("strlen:%lu\n", strlen(m->map) - 1);
 
-    while (i < strlen(m->map - 1)) {
+    while (i < 98) {
+        //printf("->%c<-", m->map[i]);
+
         if (m->map[i] == '2') {
             isMonster = 1;
             break;
@@ -231,18 +236,21 @@ void updateMap(Map *m)
         i++;
     }
 
+    //printf("%s", m->map);
+
     if (!isMonster) {
-        printf("\nNext map unlocked /!WIP!\\");
+        return MAP_FINISHED;
     }
 
     // update starting pos
     printf("x:%d, y%d\n", (m->player_x - m->map_left) / 2, m->player_y - m->map_top);
     //printf ("%s", m->map);
 
-    m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
+    //m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
+    return 0;
 }
 
-void eventHandler(char sign, Map m, Player *p)
+int eventHandler(char sign, Map m, Player *p)
 {
     int *nbrMonster = (int *)malloc(sizeof(int));
     switch (sign) {
@@ -256,7 +264,9 @@ void eventHandler(char sign, Map m, Player *p)
         printf("Fight begins!");
         fightMonster(p, loadFightScene(p, nbrMonster), nbrMonster);
         clearScreen();
-        updateMap(&m);
+        if (updateMap(&m) == MAP_FINISHED) {
+            return MAP_FINISHED;
+        }
         printMapInterface(m.map_left, m.map_top, m.map);
         mov(&m, p);
 
@@ -270,14 +280,16 @@ void eventHandler(char sign, Map m, Player *p)
         printf("Welcome to the Smith!");
         break;
     }
+
+    return 0;
 }
 
-void movRight(int *x, int *y, char *map, Map m, Player *p)
+int movRight(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
     if (signAtCoordinate(map, *x + 2, *y, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
-        return;
+        return 0;
     }
     *x = *x + 2;
     if (*x > m.map_left + m.map_width - 4) {
@@ -285,15 +297,18 @@ void movRight(int *x, int *y, char *map, Map m, Player *p)
     }
     printPlayerAtCoordinate(*x, *y);
     m.player_x = *x;
-    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
+    if (eventHandler(signAtCoordinate(map, *x, *y, m), m, p) == MAP_FINISHED) {
+        return MAP_FINISHED;
+    }
+    return 0;
 }
 
-void movLeft(int *x, int *y, char *map, Map m, Player *p)
+int movLeft(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
     if (signAtCoordinate(map, *x - 2, *y, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
-        return;
+        return 0;
     }
     *x = *x - 2;
     if (*x < m.map_left + 2) {
@@ -301,16 +316,19 @@ void movLeft(int *x, int *y, char *map, Map m, Player *p)
     }
     printPlayerAtCoordinate(*x, *y);
     m.player_x = *x;
-    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
+    if (eventHandler(signAtCoordinate(map, *x, *y, m), m, p) == MAP_FINISHED) {
+        return MAP_FINISHED;
+    }
+    return 0;
 }
 
-void movUp(int *x, int *y, char *map, Map m, Player *p)
+int movUp(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
 
     if (signAtCoordinate(map, *x, *y - 1, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
-        return;
+        return 0;
     }
     *y = *y - 1;
     if (*y < m.map_top + 1) {
@@ -318,16 +336,19 @@ void movUp(int *x, int *y, char *map, Map m, Player *p)
     }
     printPlayerAtCoordinate(*x, *y);
     m.player_y = *y;
-    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
+    if (eventHandler(signAtCoordinate(map, *x, *y, m), m, p) == MAP_FINISHED) {
+        return MAP_FINISHED;
+    }
+    return 0;
 }
 
-void movDown(int *x, int *y, char *map, Map m, Player *p)
+int movDown(int *x, int *y, char *map, Map m, Player *p)
 {
     printSignAtCoordinate(map, *x, *y, m);
 
     if (signAtCoordinate(map, *x, *y + 1, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
-        return;
+        return 0;
     }
 
     *y = *y + 1;
@@ -337,10 +358,13 @@ void movDown(int *x, int *y, char *map, Map m, Player *p)
     }
     printPlayerAtCoordinate(*x, *y);
     m.player_y = *y;
-    eventHandler(signAtCoordinate(map, *x, *y, m), m, p);
+    if (eventHandler(signAtCoordinate(map, *x, *y, m), m, p) == MAP_FINISHED) {
+        return MAP_FINISHED;
+    }
+    return 0;
 }
 
-void mov(Map *m, Player *p)
+int mov(Map *m, Player *p)
 {
     printf("Press any arrow key. Press Ctrl + C to quit.\n");
     fflush(stdout);
@@ -352,16 +376,24 @@ void mov(Map *m, Player *p)
             continue;
         }
         if (arrowKeyPressed == ARROWKEY_UP) {
-            movUp(&m->player_x, &m->player_y, m->map, *m, p);
+            if (movUp(&m->player_x, &m->player_y, m->map, *m, p) == MAP_FINISHED) {
+                return MAP_FINISHED;
+            }
         }
         else if (arrowKeyPressed == ARROWKEY_DOWN) {
-            movDown(&m->player_x, &m->player_y, m->map, *m, p);
+            if (movDown(&m->player_x, &m->player_y, m->map, *m, p) == MAP_FINISHED) {
+                return MAP_FINISHED;
+            }
         }
         else if (arrowKeyPressed == ARROWKEY_LEFT) {
-            movLeft(&m->player_x, &m->player_y, m->map, *m, p);
+            if (movLeft(&m->player_x, &m->player_y, m->map, *m, p) == MAP_FINISHED) {
+                return MAP_FINISHED;
+            }
         }
         else if (arrowKeyPressed == ARROWKEY_RIGHT) {
-            movRight(&m->player_x, &m->player_y, m->map, *m, p);
+            if (movRight(&m->player_x, &m->player_y, m->map, *m, p) == MAP_FINISHED) {
+                return MAP_FINISHED;
+            }
         }
 
         restoreCursorPos();
@@ -369,7 +401,6 @@ void mov(Map *m, Player *p)
         restoreCursorPos();
         printf("Key pressed = %d\n", arrowKeyPressed);
     }
-    return;
 }
 
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
@@ -379,12 +410,13 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Could not open file %s\n", filename);
+        fclose(fp);
         return 1;
     }
     FILE *fp2 = fopen(monster, "r");
     if (fp2 == NULL) {
         printf("Could not open file %s\n", monster);
-        fclose(fp);
+        fclose(fp2);
         return 1;
     }
 
@@ -402,14 +434,15 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     m.player_x = x;
     m.player_y = y;
 
-    int ans = 0;
-
     m.map = readFileContent(fp);
 
     printMapInterface(m.map_left, m.map_top, m.map);
 
     mov(&m, p);
 
+    free(dragon);
+    free(m.map);
+    fclose(fp2);
     fclose(fp);
     return 0;
 }
