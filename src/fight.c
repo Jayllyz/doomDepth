@@ -153,7 +153,7 @@ Spell *setMonsterSpell(int idSpell)
     return s;
 }
 
-Monster **loadFightScene(Player *p, int *nbrMonster)
+Monster **loadFightScene(Player *p, int *nbrMonster, int idToFight[])
 {
     //TODO : Print player
     char *file = (char *)malloc(sizeof(char) * 100);
@@ -161,7 +161,12 @@ Monster **loadFightScene(Player *p, int *nbrMonster)
     clearScreen();
     printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
 
-    int randomMonsterNb = rand() % 3 + 1;
+    int nbMonster;
+
+    if (idToFight[0] == -1)
+        nbMonster = rand() % 3 + 1;
+    else
+        nbMonster = *nbrMonster;
 
     if (p->classId == 1)
         fplayer = fopen("ascii/player/warrior.txt", "r");
@@ -176,12 +181,15 @@ Monster **loadFightScene(Player *p, int *nbrMonster)
 
     int y = 50;
 
-    Monster **monsters = (Monster **)malloc(sizeof(Monster *) * randomMonsterNb);
+    Monster **monsters = (Monster **)malloc(sizeof(Monster *) * nbMonster);
 
-    for (int i = 0; i < randomMonsterNb; i++) {
+    for (int i = 0; i < nbMonster; i++) {
         FILE *fp;
         monsters[i] = (Monster *)malloc(sizeof(Monster));
-        monsters[i]->id = randomMonster(p->level);
+        if (idToFight[0] == -1)
+            monsters[i]->id = randomMonster(p->level);
+        else
+            monsters[i]->id = idToFight[i];
         monsters[i] = getMonsterInfo(monsters[i]->id);
         sprintf(file, "ascii/monster/%d.txt", monsters[i]->id);
         fp = fopen(file, "r");
@@ -194,7 +202,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster)
         y += 50;
     }
 
-    *nbrMonster = randomMonsterNb;
+    *nbrMonster = nbMonster;
     free(file);
     return monsters;
 }

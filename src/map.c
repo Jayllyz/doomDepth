@@ -262,7 +262,9 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        fightMonster(p, loadFightScene(p, nbrMonster), nbrMonster);
+        int idToFight[3] = {5, 5, 5};
+        *nbrMonster = 2;
+        fightMonster(p, loadFightScene(p, nbrMonster, idToFight), nbrMonster);
         clearScreen();
         if (updateMap(&m) == MAP_FINISHED) {
             return MAP_FINISHED;
