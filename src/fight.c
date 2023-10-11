@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
