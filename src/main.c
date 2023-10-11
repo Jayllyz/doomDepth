@@ -56,6 +56,8 @@ void printDragonAnsiiWay()
 
 int main(int argc, char **argv)
 {
+    printf("Press enter to continue\n");
+    fgetc(stdin);
     clearScreen();
     int isMap;
 
@@ -63,6 +65,8 @@ int main(int argc, char **argv)
     int *nbr = (int *)malloc(sizeof(int));
     Player *p = (Player *)malloc((sizeof(Player)));
     int choice;
+    char monster[25];
+    char filename[25];
 
     do {
         printGameMenu();
@@ -79,11 +83,20 @@ int main(int argc, char **argv)
         playerSetup(p);
         clearScreen();
         printf("Votre personnage a bien ete cree, \nvous etes niveau %d\n", p->level);
-        isMap = map("ascii/map.txt", DRAGON, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
-        if (isMap == 1) {
-            printf("Error in map function");
-            return 1;
+
+        for (int i = 1; i < 4; i++){
+            printf("loading map %d\n", i);
+            fgetc(stdin);
+            sprintf(filename, "ascii/map%d.txt", i);
+            sprintf(monster, "ascii/monster/%d.txt", i);
+            isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
+            if (isMap == 1) {
+                printf("File %s or %s not found\n", filename, monster);
+                return 1;
+            }
         }
+        printf("Vous avez fini le jeu, bravo !\n");
+
         break;
     case 2:
         clearScreen();
