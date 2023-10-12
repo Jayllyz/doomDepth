@@ -156,6 +156,11 @@ void printSignWithColor(char sign)
         printf("= ");
         changeTextColor("reset");
         break;
+    case '?':
+        changeTextColor("yellow");
+        printf("? ");
+        changeTextColor("reset");
+        break;
     case '9':
         changeTextColor("blue");
         printf("x ");
@@ -280,7 +285,12 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Welcome to the Smith!");
         break;
+    case '?':
+        movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
+        printf("Here is a random event!");
+        break;
     }
+
 
     return 0;
 }
