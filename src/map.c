@@ -412,7 +412,7 @@ int mov(Map *m, Player *p)
         restoreCursorPos();
         printf(("                               \n"));
         restoreCursorPos();
-        printf("Key pressed = %d\n", arrowKeyPressed);
+        //printf("Key pressed = %d\n", arrowKeyPressed);
     }
 }
 

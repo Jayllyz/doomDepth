@@ -7,5 +7,13 @@
 
 
 void event(){
-    printf("Im an event");
+    clearScreen();
+    FILE * fp = fopen("ascii/event.txt", "r");
+    char * line = readFileContent(fp);
+    changeTextColor("yellow");
+    printf("%s", line);
+    changeTextColor("reset");
+    printf("\n");
+    printf("Press any key to continue...\n");
+    fgetc(stdin);
 }
