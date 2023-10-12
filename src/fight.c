@@ -149,6 +149,46 @@ Spell *setMonsterSpell(int idSpell)
     return s;
 }
 
+void printLifeBarAtCoordinate(int life, int x, int y)
+{
+    changeTextColor("red");
+    for (int i = 0; i < life; i++) {
+        printCharAtCoordinate(x, y, '#');
+        x++;
+    }
+    changeTextColor("reset");
+}
+
+void removeHP(int lastHP_x, int y, int life_to_remove)
+{
+    saveCursorPos();
+    int i;
+    for (i = 0; i < life_to_remove; i++) {
+        printCharAtCoordinate(lastHP_x - i, y, 'X');
+    }
+    movCursor(100, 0);
+    printf("lastHP_x: %d", lastHP_x);
+    restoreCursorPos();
+}
+
+int getMonsterWidth(int id)
+{
+    char *file = (char *)malloc(sizeof(char) * 50);
+    sprintf(file, "ascii/monster/%d.txt", id);
+    FILE *fp = fopen(file, "r");
+    if (fp == NULL) {
+        printf("Fichier introuvable\n");
+        return -1;
+    }
+    char *content = readFileContent(fp);
+    int line_width = 0;
+    while (content[line_width] != '\n')
+        line_width++;
+    free(file);
+    free(content);
+    return line_width;
+}
+
 Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 {
     FILE *fplayer;
@@ -170,7 +210,9 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
         fplayer = fopen("ascii/player/archer.txt", "r");
 
     char *contentPlayer = readFileContent(fplayer);
+    changeTextColor("blue");
     printStringAtCoordinate(1, 7, contentPlayer);
+    changeTextColor("reset");
     fclose(fplayer);
 
     int y = 50;
@@ -198,8 +240,18 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
             printf("Fichier introuvable\n");
             return NULL;
         }
-        printStringAtCoordinate(y, 1, readFileContent(fp));
+
+        //
+        int line_width = getMonsterWidth(monsters[i]->id);
+
+        //printf("->%d<-", getMonsterWidth(monsters[i]->id));
+        changeTextColor("red");
+        printStringAtCoordinate(y + line_width / 2 - (strlen(monsters[i]->name) / 2), 7, monsters[i]->name);
+        printLifeBarAtCoordinate(monsters[i]->life, y, 8);
+        printStringAtCoordinate(y, 10, readFileContent(fp));
         fclose(fp);
+        //removeHP(y+c/2 + monsters[i]->life/2, 8, 5);
+        //
         y += 50;
     }
 
@@ -213,7 +265,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
         return monsters;
 }
 
-void normalAttack(Player *p, Monster *m)
+int normalAttack(Player *p, Monster *m)
 {
     int damage = p->attack - m->defense;
     if (damage <= 0)
@@ -233,6 +285,8 @@ void normalAttack(Player *p, Monster *m)
 
     printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
     printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
+
+    return damage;
 }
 
 void monsterAttack(Player *p, Monster *m)
@@ -290,10 +344,10 @@ void levelUp(Player *p)
     p->experience = 0;
 }
 
-void rewards(Player *p, Monster **m)
+void rewards(Player *p, Monster **m, int nbrMonster)
 {
-    int xp = m[0]->level * 10;
-    int gold = m[0]->level * 5;
+    int xp = (m[0]->level * 10) * nbrMonster;
+    int gold = (m[0]->level * 5) * nbrMonster;
 
     if (p->experience + xp >= 50)
         levelUp(p);
@@ -346,11 +400,11 @@ void clearLinesFrom(int startLine)
     printf("\033[J");
 }
 
-void usePlayerSpell(Player *p, Monster *m, int spellId)
+int usePlayerSpell(Player *p, Monster *m, int spellId)
 {
     if (p->mana < p->spell[spellId]->mana) {
         printf("Vous n'avez pas assez de mana pour utiliser ce sort\n");
-        return;
+        return 0;
     }
 
     int damage = p->spell[spellId]->attack - m->defense;
@@ -377,6 +431,7 @@ void usePlayerSpell(Player *p, Monster *m, int spellId)
     printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
     printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
     printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
+    return damage;
 }
 
 int showPlayerSpells(Player *p)
@@ -491,7 +546,7 @@ void printCombatInterface(int nbrMonster, int damageNormalAttack)
     printf("4 - Abandonner\n");
 }
 
-void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p)
+void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife)
 {
     int target;
 
@@ -505,7 +560,11 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
 
     clearLinesFrom(maxLines + 4);
     movCursor(0, maxLines + 21);
-    normalAttack(p, m[target]);
+
+    int damage = normalAttack(p, m[target]);
+    int max_hp = maxLife[target];
+    removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
+
     saveCursorPos();
     movCursor(0, maxLines + 4);
     clearLifeBar(nbrMonster);
@@ -515,7 +574,7 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
     restoreCursorPos();
 }
 
-int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p)
+int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife)
 {
     int target, spellChoice;
 
@@ -539,7 +598,9 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p)
     clearLinesFrom(maxLines + 4);
     movCursor(0, maxLines + 21);
 
-    usePlayerSpell(p, m[target], spellChoice);
+    int damage = usePlayerSpell(p, m[target], spellChoice);
+    int max_hp = maxLife[target];
+    removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
 
     saveCursorPos();
     movCursor(0, maxLines + 4);
@@ -578,6 +639,10 @@ void monsterTurn(const int *nbrMonster, Monster **m, Player *p)
 
 void fightMonster(Player *p, Monster **m, int *nbrMonster)
 {
+    int *maxLife = (int *)malloc(sizeof(int) * *nbrMonster);
+    for (int i = 0; i < *nbrMonster; i++) {
+        maxLife[i] = m[i]->life;
+    }
     int damageNormalAttack = p->attack - m[0]->defense;
     int choice;
     int maxLines = 0;
@@ -617,10 +682,10 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
 
         switch (choice) {
         case 1:
-            attackWithNormalAttack(maxLines, *nbrMonster, m, p);
+            attackWithNormalAttack(maxLines, *nbrMonster, m, p, maxLife);
             break;
         case 2:
-            if (attackWithSpell(maxLines, *nbrMonster, m, p) == 0)
+            if (attackWithSpell(maxLines, *nbrMonster, m, p, maxLife) == 0)
                 validInput = 0;
 
             break;
@@ -656,10 +721,12 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
 
         clearScreen();
         free(m);
+        free(maxLife);
         defeat();
     }
     else {
         clearScreen();
-        rewards(p, m);
+        rewards(p, m, *nbrMonster);
+        free(maxLife);
     }
 }

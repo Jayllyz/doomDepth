@@ -252,7 +252,7 @@ int updateMap(Map *m)
 
 int eventHandler(char sign, Map m, Player *p)
 {
-    int idToFight[3] = {1, 1, 1};
+    int idToFight[1] = {-1};
     int *nbrMonster = (int *)malloc(sizeof(int));
     switch (sign) {
     case '0':
@@ -263,7 +263,7 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        *nbrMonster = 2;
+        //        *nbrMonster = 2;
         fightMonster(p, loadFightScene(p, nbrMonster, idToFight), nbrMonster);
         clearScreen();
         if (updateMap(&m) == MAP_FINISHED) {
