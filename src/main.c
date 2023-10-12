@@ -93,6 +93,17 @@ int main(int argc, char **argv)
                 return 1;
             }
         }
+
+        clearScreen();
+        changeTextColor("red");
+        printf("HERE IS THE FINAL BOSS\n");
+        fgetc(stdin);
+        changeTextColor("reset");
+        int *idToFight = (int *)malloc(sizeof(int));
+        idToFight[0] = 5;
+        int *nbMonster = (int *)malloc(sizeof(int));
+        *nbMonster = 1;
+        fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
         printf("Vous avez fini le jeu, bravo !\n");
 
         break;
