@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -344,10 +344,10 @@ void levelUp(Player *p)
     p->experience = 0;
 }
 
-void rewards(Player *p, Monster **m)
+void rewards(Player *p, Monster **m, int nbrMonster)
 {
-    int xp = m[0]->level * 10;
-    int gold = m[0]->level * 5;
+    int xp = (m[0]->level * 10) * nbrMonster;
+    int gold = (m[0]->level * 5) * nbrMonster;
 
     if (p->experience + xp >= 50)
         levelUp(p);
@@ -400,11 +400,11 @@ void clearLinesFrom(int startLine)
     printf("\033[J");
 }
 
-void usePlayerSpell(Player *p, Monster *m, int spellId)
+int usePlayerSpell(Player *p, Monster *m, int spellId)
 {
     if (p->mana < p->spell[spellId]->mana) {
         printf("Vous n'avez pas assez de mana pour utiliser ce sort\n");
-        return;
+        return 0;
     }
 
     int damage = p->spell[spellId]->attack - m->defense;
@@ -431,6 +431,7 @@ void usePlayerSpell(Player *p, Monster *m, int spellId)
     printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
     printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
     printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
+    return damage;
 }
 
 int showPlayerSpells(Player *p)
@@ -545,7 +546,7 @@ void printCombatInterface(int nbrMonster, int damageNormalAttack)
     printf("4 - Abandonner\n");
 }
 
-void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p)
+void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife)
 {
     int target;
 
@@ -560,17 +561,8 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
     clearLinesFrom(maxLines + 4);
     movCursor(0, maxLines + 21);
 
-    //         //removeHP(y+line_width/2 + monsters[i]->life/2, 8, 5);
     int damage = normalAttack(p, m[target]);
-    int line_width = getMonsterWidth(m[target]->id);
-    int max_hp = 20; // @TODO: replace with TRUE max HP
-    saveCursorPos();
-    movCursor(50, 0);
-    printf("HP: %d /", m[target]->life);
-    printf("Damge: %d /", damage);
-    printf("Damage Dealt: %d /", damage > m[target]->life ? m[target]->life : damage);
-    printf("line_width: %d /", line_width);
-    restoreCursorPos();
+    int max_hp = maxLife[target];
     removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
 
     saveCursorPos();
@@ -582,7 +574,7 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
     restoreCursorPos();
 }
 
-int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p)
+int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife)
 {
     int target, spellChoice;
 
@@ -606,7 +598,9 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p)
     clearLinesFrom(maxLines + 4);
     movCursor(0, maxLines + 21);
 
-    usePlayerSpell(p, m[target], spellChoice);
+    int damage = usePlayerSpell(p, m[target], spellChoice);
+    int max_hp = maxLife[target];
+    removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
 
     saveCursorPos();
     movCursor(0, maxLines + 4);
@@ -645,6 +639,10 @@ void monsterTurn(const int *nbrMonster, Monster **m, Player *p)
 
 void fightMonster(Player *p, Monster **m, int *nbrMonster)
 {
+    int *maxLife = (int *)malloc(sizeof(int) * *nbrMonster);
+    for (int i = 0; i < *nbrMonster; i++) {
+        maxLife[i] = m[i]->life;
+    }
     int damageNormalAttack = p->attack - m[0]->defense;
     int choice;
     int maxLines = 0;
@@ -681,10 +679,10 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
 
         switch (choice) {
         case 1:
-            attackWithNormalAttack(maxLines, *nbrMonster, m, p);
+            attackWithNormalAttack(maxLines, *nbrMonster, m, p, maxLife);
             break;
         case 2:
-            if (attackWithSpell(maxLines, *nbrMonster, m, p) == 0)
+            if (attackWithSpell(maxLines, *nbrMonster, m, p, maxLife) == 0)
                 validInput = 0;
 
             break;
@@ -720,10 +718,12 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
 
         clearScreen();
         free(m);
+        free(maxLife);
         defeat();
     }
     else {
         clearScreen();
-        rewards(p, m);
+        rewards(p, m, *nbrMonster);
+        free(maxLife);
     }
 }
