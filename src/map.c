@@ -1,6 +1,6 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/map.h"
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -287,7 +287,7 @@ int eventHandler(char sign, Map m, Player *p)
 
 int movRight(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
     if (signAtCoordinate(map, *x + 2, *y, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
         return 0;
@@ -306,7 +306,7 @@ int movRight(int *x, int *y, char *map, Map m, Player *p)
 
 int movLeft(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
     if (signAtCoordinate(map, *x - 2, *y, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
         return 0;
@@ -325,7 +325,7 @@ int movLeft(int *x, int *y, char *map, Map m, Player *p)
 
 int movUp(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
 
     if (signAtCoordinate(map, *x, *y - 1, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
@@ -345,7 +345,7 @@ int movUp(int *x, int *y, char *map, Map m, Player *p)
 
 int movDown(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
 
     if (signAtCoordinate(map, *x, *y + 1, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
