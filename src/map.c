@@ -1,6 +1,6 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/map.h"
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -187,10 +187,10 @@ void printMapAtCoordinate(int x, int y, char *m)
     }
 }
 
-void printSignAtCoordinate(char *map, int x, int y, Map m)
+void printSignAtCoordinate(char *map, int x, int y, Map *m)
 {
-    setSignColor((signAtCoordinate(map, x, y, m)));
-    printCharAtCoordinate(x, y, convertSigntoChar(signAtCoordinate(map, x, y, m)));
+    setSignColor((signAtCoordinate(map, x, y, *m)));
+    printCharAtCoordinate(x, y, convertSigntoChar(signAtCoordinate(map, x, y, *m)));
     changeTextColor("reset");
 }
 
@@ -252,6 +252,7 @@ int updateMap(Map *m)
 
 int eventHandler(char sign, Map m, Player *p)
 {
+    int idToFight[3] = {1, 1, 1};
     int *nbrMonster = (int *)malloc(sizeof(int));
     switch (sign) {
     case '0':
@@ -262,7 +263,6 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        int idToFight[3] = {1, 1, 1};
         *nbrMonster = 2;
         fightMonster(p, loadFightScene(p, nbrMonster, idToFight), nbrMonster);
         clearScreen();
@@ -271,7 +271,6 @@ int eventHandler(char sign, Map m, Player *p)
         }
         printMapInterface(m.map_left, m.map_top, m.map);
         mov(&m, p);
-
         break;
     case '3':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
@@ -407,7 +406,7 @@ int mov(Map *m, Player *p)
 
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
 {
-    Map m = {map_top, map_left, map_width, map_height};
+    Map m = {map_top, map_left, map_width, map_height, NULL, 0, 0};
 
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {

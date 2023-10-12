@@ -31,7 +31,7 @@ void setSignColor(char sign);
 void printSignWithColor(char sign);
 void printMapAtCoordinate(int x, int y, char *m);
 void movCursor(int x, int y);
-void printSignAtCoordinate(char *map, int x, int y, Map m);
+void printSignAtCoordinate(char *map, int x, int y, Map *m);
 void printPlayerAtCoordinate(int x, int y);
 int eventHandler(char sign, Map m, Player *p);
 int movRight(int *x, int *y, char *map, Map m, Player *p);

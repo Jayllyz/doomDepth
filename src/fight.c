@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -206,7 +206,11 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
     *nbrMonster = nbMonster;
     free(file);
     free(contentPlayer);
-    return monsters;
+
+    if (monsters == NULL)
+        return NULL;
+    else
+        return monsters;
 }
 
 void normalAttack(Player *p, Monster *m)
