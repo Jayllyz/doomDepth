@@ -655,7 +655,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
         if (lines > maxLines)
             maxLines = lines;
     }
-    maxLines += 5;
+    maxLines += 10;
     int startPrint = maxLines + 4;
     int combatLog = maxLines + 21;
     free(filePath);
