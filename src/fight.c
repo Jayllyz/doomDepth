@@ -175,7 +175,9 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
         fplayer = fopen("ascii/player/archer.txt", "r");
 
     char *contentPlayer = readFileContent(fplayer);
+    changeTextColor("blue");
     printStringAtCoordinate(1, 7, contentPlayer);
+    changeTextColor("reset");
     fclose(fplayer);
 
     int y = 50;
@@ -198,7 +200,9 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
             printf("Fichier introuvable\n");
             return NULL;
         }
+        changeTextColor("red");
         printStringAtCoordinate(y, 1, readFileContent(fp));
+        changeTextColor("reset");
         fclose(fp);
         y += 50;
     }
