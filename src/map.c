@@ -1,8 +1,8 @@
 #include "includes/map.h"
 #include "includes/ansii_print.h"
+#include "includes/event.h"
 #include "includes/fight.h"
 #include "includes/utils.h"
-#include "includes/event.h"
 #include <stdlib.h>
 #include <string.h>
 #define MAP_FINISHED 2
@@ -292,7 +292,6 @@ int eventHandler(char sign, Map m, Player *p)
         event();
         break;
     }
-
 
     return 0;
 }
