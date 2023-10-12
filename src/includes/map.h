@@ -1,3 +1,5 @@
+#ifndef MAP_H
+#define MAP_H
 #include "start.h"
 
 typedef struct {
@@ -40,3 +42,5 @@ int movUp(int *x, int *y, char *map, Map m, Player *p);
 int movDown(int *x, int *y, char *map, Map m, Player *p);
 int mov(Map *m, Player *p);
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p);
+
+#endif

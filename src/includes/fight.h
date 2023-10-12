@@ -1,6 +1,6 @@
-#include "start.h"
 #ifndef FIGHT_H
 #define FIGHT_H
+#include "start.h"
 
 typedef struct {
     int id;
