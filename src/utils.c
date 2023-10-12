@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 50
 
 int getInputInt()
 {
@@ -15,13 +15,15 @@ int getInputInt()
 
 char getInputChar()
 {
-    char line[BUFFER_SIZE];
+    char *line = (char *)malloc(sizeof(char) * BUFFER_SIZE);
     char c;
     if (fgets(line, sizeof(line), stdin)) {
         if (1 == sscanf(line, "%c", &c)) {
+            free(line);
             return c;
         }
     }
+    free(line);
     return '\0';
 }
 

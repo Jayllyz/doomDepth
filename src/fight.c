@@ -76,8 +76,7 @@ Monster *getMonsterInfo(int id)
     Monster *m = (Monster *)malloc(sizeof(Monster));
     m->id = sqlite3_column_int(res, 0);
 
-    m->name = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(res, 1)) + 1));
-    strcpy(m->name, (const char *)sqlite3_column_text(res, 1));
+    m->name = strdup((const char *)sqlite3_column_text(res, 1));
     m->attack = sqlite3_column_int(res, 2);
     m->defense = sqlite3_column_int(res, 3);
     m->life = sqlite3_column_int(res, 4);
@@ -140,22 +139,18 @@ Spell *setMonsterSpell(int idSpell)
     Spell *s = (Spell *)malloc(sizeof(Spell));
 
     s->id = sqlite3_column_int(select, 0);
-    s->name = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 1)) + 1));
-    strcpy(s->name, (const char *)sqlite3_column_text(select, 1));
-    s->description = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 2)) + 1));
-    strcpy(s->description, (const char *)sqlite3_column_text(select, 2));
+    s->name = strdup((const char *)sqlite3_column_text(select, 1));
+    s->description = strdup((const char *)sqlite3_column_text(select, 2));
     s->attack = sqlite3_column_int(select, 3);
     s->grade = sqlite3_column_int(select, 4);
     s->mana = sqlite3_column_int(select, 5);
-    s->type = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 6)) + 1));
-    strcpy(s->type, (const char *)sqlite3_column_text(select, 6));
+    s->type = strdup((const char *)sqlite3_column_text(select, 6));
 
     return s;
 }
 
 Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 {
-    char *file = (char *)malloc(sizeof(char) * 50);
     FILE *fplayer;
     clearScreen();
     printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
@@ -182,6 +177,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 
     Monster **monsters = (Monster **)malloc(sizeof(Monster *) * nbMonster);
 
+    char *file = (char *)malloc(sizeof(char) * 25);
     for (int i = 0; i < nbMonster; i++) {
         FILE *fp;
         monsters[i] = (Monster *)malloc(sizeof(Monster));
@@ -192,7 +188,11 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 
         monsters[i] = getMonsterInfo(monsters[i]->id);
 
-        sprintf(file, "ascii/monster/%d.txt", monsters[i]->id);
+        if (snprintf(file, 25, "ascii/monster/%d.txt", monsters[i]->id) == -1) {
+            printf("Erreur lors de l'allocation de la mémoire\n");
+            return NULL;
+        }
+
         fp = fopen(file, "r");
         if (fp == NULL) {
             printf("Fichier introuvable\n");
@@ -204,8 +204,8 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
     }
 
     *nbrMonster = nbMonster;
-    free(file);
     free(contentPlayer);
+    free(file);
 
     if (monsters == NULL)
         return NULL;
@@ -581,17 +581,20 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
     int damageNormalAttack = p->attack - m[0]->defense;
     int choice;
     int maxLines = 0;
-    char *filePath = (char *)malloc(sizeof(char) * 50);
+    char *filePath = (char *)malloc(sizeof(char) * 25);
     for (int i = 0; i < *nbrMonster; i++) {
-        sprintf(filePath, "ascii/monster/%d.txt", m[i]->id);
+        if (snprintf(filePath, 25, "ascii/monster/%d.txt", m[i]->id) == -1) {
+            printf("Erreur lors de l'allocation de la mémoire\n");
+            return;
+        }
         int lines = countLines(filePath);
         if (lines > maxLines)
             maxLines = lines;
     }
+    free(filePath);
     maxLines += 5;
     int startPrint = maxLines + 4;
     int combatLog = maxLines + 21;
-    free(filePath);
 
     while (p->life > 0) {
         do {
