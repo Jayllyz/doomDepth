@@ -163,32 +163,34 @@ void printLifeBarAtCoordinate(int life, int x, int y)
     changeTextColor("reset");
 }
 
-void removeHP(int lastHP_x, int y, int life_to_remove){
+void removeHP(int lastHP_x, int y, int life_to_remove)
+{
     saveCursorPos();
     int i;
     for (i = 0; i < life_to_remove; i++) {
-        printCharAtCoordinate(lastHP_x-i, y, 'X');
+        printCharAtCoordinate(lastHP_x - i, y, 'X');
     }
     movCursor(100, 0);
     printf("lastHP_x: %d", lastHP_x);
     restoreCursorPos();
 }
 
-int getMonsterWidth(int id){
-        char *file = (char *)malloc(sizeof(char) * 50);
-        sprintf(file, "ascii/monster/%d.txt", id);
-        FILE *fp = fopen(file, "r");
-        if (fp == NULL) {
-                printf("Fichier introuvable\n");
-                return -1;
-        }
-        char*content = readFileContent(fp);
-        int line_width = 0;
-        while (content[line_width] != '\n')
-                line_width++;
-        free(file);
-        free(content);
-        return line_width;
+int getMonsterWidth(int id)
+{
+    char *file = (char *)malloc(sizeof(char) * 50);
+    sprintf(file, "ascii/monster/%d.txt", id);
+    FILE *fp = fopen(file, "r");
+    if (fp == NULL) {
+        printf("Fichier introuvable\n");
+        return -1;
+    }
+    char *content = readFileContent(fp);
+    int line_width = 0;
+    while (content[line_width] != '\n')
+        line_width++;
+    free(file);
+    free(content);
+    return line_width;
 }
 
 Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
@@ -244,7 +246,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 
         //printf("->%d<-", getMonsterWidth(monsters[i]->id));
         changeTextColor("red");
-        printStringAtCoordinate(y+line_width/2 - (strlen(monsters[i]->name)/2), 7, monsters[i]->name);
+        printStringAtCoordinate(y + line_width / 2 - (strlen(monsters[i]->name) / 2), 7, monsters[i]->name);
         printLifeBarAtCoordinate(monsters[i]->life, y, 8);
         printStringAtCoordinate(y, 10, readFileContent(fp));
         fclose(fp);
@@ -566,10 +568,10 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
     movCursor(50, 0);
     printf("HP: %d /", m[target]->life);
     printf("Damge: %d /", damage);
-    printf("Damage Dealt: %d /", damage>m[target]->life?m[target]->life:damage);
+    printf("Damage Dealt: %d /", damage > m[target]->life ? m[target]->life : damage);
     printf("line_width: %d /", line_width);
     restoreCursorPos();
-    removeHP(target*50 + 50 + m[target]->life + damage, 8, damage>max_hp?max_hp:damage);
+    removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
 
     saveCursorPos();
     movCursor(0, maxLines + 4);
