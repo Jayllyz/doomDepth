@@ -200,8 +200,15 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
             printf("Fichier introuvable\n");
             return NULL;
         }
+
+        char*content = readFileContent(fp);
+        int c = 0;
+        while (content[c] != '\n')
+            c++;
+
         changeTextColor("red");
-        printStringAtCoordinate(y, 1, readFileContent(fp));
+        printStringAtCoordinate(y+c/2 - (strlen(monsters[i]->name)/2), 8, monsters[i]->name);
+        printStringAtCoordinate(y, 10, readFileContent(fp));
         changeTextColor("reset");
         fclose(fp);
         y += 50;
