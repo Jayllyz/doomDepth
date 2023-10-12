@@ -187,10 +187,10 @@ void printMapAtCoordinate(int x, int y, char *m)
     }
 }
 
-void printSignAtCoordinate(char *map, int x, int y, Map m)
+void printSignAtCoordinate(char *map, int x, int y, Map *m)
 {
-    setSignColor((signAtCoordinate(map, x, y, m)));
-    printCharAtCoordinate(x, y, convertSigntoChar(signAtCoordinate(map, x, y, m)));
+    setSignColor((signAtCoordinate(map, x, y, *m)));
+    printCharAtCoordinate(x, y, convertSigntoChar(signAtCoordinate(map, x, y, *m)));
     changeTextColor("reset");
 }
 
@@ -252,6 +252,7 @@ int updateMap(Map *m)
 
 int eventHandler(char sign, Map m, Player *p)
 {
+    int idToFight[3] = {1, 1, 1};
     int *nbrMonster = (int *)malloc(sizeof(int));
     switch (sign) {
     case '0':
@@ -262,14 +263,14 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        fightMonster(p, loadFightScene(p, nbrMonster), nbrMonster);
+        *nbrMonster = 2;
+        fightMonster(p, loadFightScene(p, nbrMonster, idToFight), nbrMonster);
         clearScreen();
         if (updateMap(&m) == MAP_FINISHED) {
             return MAP_FINISHED;
         }
         printMapInterface(m.map_left, m.map_top, m.map);
         mov(&m, p);
-
         break;
     case '3':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
@@ -286,7 +287,7 @@ int eventHandler(char sign, Map m, Player *p)
 
 int movRight(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
     if (signAtCoordinate(map, *x + 2, *y, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
         return 0;
@@ -305,7 +306,7 @@ int movRight(int *x, int *y, char *map, Map m, Player *p)
 
 int movLeft(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
     if (signAtCoordinate(map, *x - 2, *y, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
         return 0;
@@ -324,7 +325,7 @@ int movLeft(int *x, int *y, char *map, Map m, Player *p)
 
 int movUp(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
 
     if (signAtCoordinate(map, *x, *y - 1, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
@@ -344,7 +345,7 @@ int movUp(int *x, int *y, char *map, Map m, Player *p)
 
 int movDown(int *x, int *y, char *map, Map m, Player *p)
 {
-    printSignAtCoordinate(map, *x, *y, m);
+    printSignAtCoordinate(map, *x, *y, &m);
 
     if (signAtCoordinate(map, *x, *y + 1, m) == '1') {
         printPlayerAtCoordinate(*x, *y);
@@ -405,18 +406,17 @@ int mov(Map *m, Player *p)
 
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
 {
-    Map m = {map_top, map_left, map_width, map_height};
+    Map m = {map_top, map_left, map_width, map_height, NULL, 0, 0};
 
     FILE *fp = fopen(filename, "r");
     if (fp == NULL) {
         printf("Could not open file %s\n", filename);
-        fclose(fp);
         return 1;
     }
     FILE *fp2 = fopen(monster, "r");
     if (fp2 == NULL) {
         printf("Could not open file %s\n", monster);
-        fclose(fp2);
+        fclose(fp);
         return 1;
     }
 
