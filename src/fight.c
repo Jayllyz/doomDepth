@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -255,7 +255,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 
         //printf("->%d<-", getMonsterWidth(monsters[i]->id));
         changeTextColor("red");
-        printStringAtCoordinate(y + line_width / 2 - (strlen(monsters[i]->name) / 2), 7, monsters[i]->name);
+        printStringAtCoordinate((int)(y + line_width / 2 - (strlen(monsters[i]->name) / 2)), 7, monsters[i]->name);
         printLifeBarAtCoordinate(monsters[i]->life, y, 8);
         printStringAtCoordinate(y, 10, readFileContent(fp));
         fclose(fp);

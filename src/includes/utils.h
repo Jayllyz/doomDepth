@@ -3,7 +3,7 @@
 
 int getInputInt();
 char getInputChar();
-char *getInputString(unsigned size);
+char *getInputString(int size);
 void clearBuffer();
 void clearScreen();
 

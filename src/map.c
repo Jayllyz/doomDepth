@@ -1,6 +1,6 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/map.h"
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -424,7 +424,7 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     char *dragon = readFileContent(fp2);
 
     changeTextColor("red");
-    printStringAtCoordinate((map_left + map_width) * 1.5, 0, dragon);
+    printStringAtCoordinate((int)((map_left + map_width) * 1.5), 0, dragon);
     changeTextColor("reset");
 
     int x = map_width / 2 + map_left;

@@ -29,7 +29,7 @@ char getInputChar()
     return '\0';
 }
 
-char *getInputString(unsigned size)
+char *getInputString(int size)
 {
     char *line = (char *)malloc(sizeof(char) * size + 1);
     if (!line)
