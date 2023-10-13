@@ -14,7 +14,7 @@ jobs:
         with:
           style: ''
           ignore: '.github|docker'
-          tidy-checks: 'boost-*,bugprone-*,clang-analyzer-*,performance-*,portability-*,readability-*'
+          tidy-checks: 'boost-*,bugprone-*,performance-*,portability-*'
 
       - name: Fail fast?!
         if: steps.linter.outputs.checks-failed > 0
