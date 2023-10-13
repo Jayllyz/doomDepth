@@ -1,6 +1,6 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/map.h"
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -282,6 +282,7 @@ int eventHandler(char sign, Map m, Player *p)
         break;
     }
 
+    free(nbrMonster);
     return 0;
 }
 

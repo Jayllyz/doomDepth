@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -174,10 +174,15 @@ void removeHP(int lastHP_x, int y, int life_to_remove)
 int getMonsterWidth(int id)
 {
     char *file = (char *)malloc(sizeof(char) * 50);
-    sprintf(file, "ascii/monster/%d.txt", id);
+    if (snprintf(file, 50, "ascii/monster/%d.txt", id) < 0) {
+        printf("Fichier introuvable\n");
+        free(file);
+        return -1;
+    }
     FILE *fp = fopen(file, "r");
     if (fp == NULL) {
         printf("Fichier introuvable\n");
+        free(file);
         return -1;
     }
     char *content = readFileContent(fp);
@@ -230,14 +235,18 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 
         monsters[i] = getMonsterInfo(monsters[i]->id);
 
-        if (snprintf(file, 25, "ascii/monster/%d.txt", monsters[i]->id) == -1) {
-            printf("Erreur lors de l'allocation de la mémoire\n");
+        if (snprintf(file, 25, "ascii/monster/%d.txt", monsters[i]->id) < 0) {
+            printf("Error during memory allocation\n");
+            free(monsters);
+            free(file);
             return NULL;
         }
 
         fp = fopen(file, "r");
         if (fp == NULL) {
             printf("Fichier introuvable\n");
+            free(monsters);
+            free(file);
             return NULL;
         }
 
@@ -648,8 +657,10 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
     int maxLines = 0;
     char *filePath = (char *)malloc(sizeof(char) * 25);
     for (int i = 0; i < *nbrMonster; i++) {
-        if (snprintf(filePath, 25, "ascii/monster/%d.txt", m[i]->id) == -1) {
+        if (snprintf(filePath, 25, "ascii/monster/%d.txt", m[i]->id) < 0) {
             printf("Erreur lors de l'allocation de la mémoire\n");
+            free(maxLife);
+            free(filePath);
             return;
         }
         int lines = countLines(filePath);
@@ -706,8 +717,6 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
             monsterTurn(nbrMonster, m, p);
         else
             clearLinesFrom(startPrint);
-
-        choice = 0;
     }
 
     if (p->life <= 0) {

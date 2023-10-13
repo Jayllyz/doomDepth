@@ -8,7 +8,7 @@
 int getInputInt()
 {
     int value;
-    if (scanf("%d", &value) == 1)
+    if (1 == scanf("%d", &value))
         return value;
     return -1;
 }
@@ -17,12 +17,14 @@ char getInputChar()
 {
     char *line = (char *)malloc(sizeof(char) * BUFFER_SIZE);
     char c;
-    if (fgets(line, sizeof(line), stdin)) {
+
+    if (fgets(line, BUFFER_SIZE, stdin)) {
         if (1 == sscanf(line, "%c", &c)) {
             free(line);
             return c;
         }
     }
+
     free(line);
     return '\0';
 }
