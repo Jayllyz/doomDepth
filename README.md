@@ -1,5 +1,7 @@
 # doomDepth
 
+[![cpp-linter](https://github.com/cpp-linter/cpp-linter-action/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/cpp-linter/cpp-linter-action/actions/workflows/cpp-linter.yml)
+
 In development, check this [to do list](https://github.com/Jayllyz/doomDepth/issues/1) for more information.
 
 ## Run the project
