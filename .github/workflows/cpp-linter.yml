@@ -13,6 +13,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           style: ''
+          ignore: '.github|docker'
+          tidy-checks: 'boost-*,bugprone-*,clang-analyzer-*,performance-*,portability-*,readability-*'
 
       - name: Fail fast?!
         if: steps.linter.outputs.checks-failed > 0
