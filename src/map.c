@@ -282,6 +282,7 @@ int eventHandler(char sign, Map m, Player *p)
         break;
     }
 
+    free(nbrMonster);
     return 0;
 }
 
@@ -368,7 +369,6 @@ int movDown(int *x, int *y, char *map, Map m, Player *p)
 int mov(Map *m, Player *p)
 {
     printf("Press any arrow key. Press Ctrl + C to quit.\n");
-    fflush(stdout);
 
     saveCursorPos();
     while (1) {
@@ -423,7 +423,7 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     char *dragon = readFileContent(fp2);
 
     changeTextColor("red");
-    printStringAtCoordinate((map_left + map_width) * 1.5, 0, dragon);
+    printStringAtCoordinate((int)((map_left + map_width) * 1.5), 0, dragon);
     changeTextColor("reset");
 
     int x = map_width / 2 + map_left;

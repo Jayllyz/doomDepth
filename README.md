@@ -1,5 +1,7 @@
 # doomDepth
 
+[![clang-format Code Formatter](https://github.com/Jayllyz/doomDepth/actions/workflows/formatter.yml/badge.svg)](https://github.com/Jayllyz/doomDepth/actions/workflows/formatter.yml)
+
 In development, check this [to do list](https://github.com/Jayllyz/doomDepth/issues/1) for more information.
 
 ## Run the project
