@@ -1,6 +1,6 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/map.h"
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -369,7 +369,6 @@ int movDown(int *x, int *y, char *map, Map m, Player *p)
 int mov(Map *m, Player *p)
 {
     printf("Press any arrow key. Press Ctrl + C to quit.\n");
-    fflush(stdout);
 
     saveCursorPos();
     while (1) {

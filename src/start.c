@@ -56,7 +56,7 @@ int createPlayer(char *name, int classId, Player *p)
         return 1;
     }
 
-    int id = sqlite3_last_insert_rowid(db);
+    int id = (int)sqlite3_last_insert_rowid(db);
 
     p->spell = (Spell **)malloc(MAX_PLAYER_SPELL * sizeof(Spell *));
     for (int i = 0; i < MAX_PLAYER_SPELL; i++) {

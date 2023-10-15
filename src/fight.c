@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -91,9 +91,9 @@ Monster *getMonsterInfo(int id)
     rc = sqlite3_prepare_v2(db, "SELECT spell_id FROM MONSTER_SPELL WHERE monster_id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
-
         printf("Failed to select MONSTER_SPELL\n");
         sqlite3_close(db);
+        free(m);
         return NULL;
     }
 
@@ -173,8 +173,8 @@ void removeHP(int lastHP_x, int y, int life_to_remove)
 
 int getMonsterWidth(int id)
 {
-    char *file = (char *)malloc(sizeof(char) * 50);
-    if (snprintf(file, 50, "ascii/monster/%d.txt", id) < 0) {
+    char *file = (char *)malloc(sizeof(char) * 25);
+    if (snprintf(file, 25, "ascii/monster/%d.txt", id) < 0) {
         printf("Fichier introuvable\n");
         free(file);
         return -1;
