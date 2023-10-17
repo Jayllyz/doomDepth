@@ -22,8 +22,8 @@ int createPlayer(char *name, int classId, Player *p)
 
     int level = 1;
     int experience = 0;
-    int life = 50;
-    int attack = 10;
+    int life = 99;
+    int attack = 20;
     int defense = 10;
     int mana = 25;
     int gold = 0;
@@ -56,7 +56,7 @@ int createPlayer(char *name, int classId, Player *p)
         return 1;
     }
 
-    int id = sqlite3_last_insert_rowid(db);
+    int id = (int)sqlite3_last_insert_rowid(db);
 
     p->spell = (Spell **)malloc(MAX_PLAYER_SPELL * sizeof(Spell *));
     for (int i = 0; i < MAX_PLAYER_SPELL; i++) {
@@ -132,15 +132,12 @@ Spell *affectSpellToPlayer(int playerId, int spellId)
     Spell *s = (Spell *)malloc(sizeof(Spell));
 
     s->id = sqlite3_column_int(select, 0);
-    s->name = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 1)) + 1));
-    strcpy(s->name, (const char *)sqlite3_column_text(select, 1));
-    s->description = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 2)) + 1));
-    strcpy(s->description, (const char *)sqlite3_column_text(select, 2));
+    s->name = strdup((const char *)sqlite3_column_text(select, 1));
+    s->description = strdup((const char *)sqlite3_column_text(select, 2));
     s->attack = sqlite3_column_int(select, 3);
     s->grade = sqlite3_column_int(select, 4);
     s->mana = sqlite3_column_int(select, 5);
-    s->type = (char *)malloc(sizeof(char) * (strlen((const char *)sqlite3_column_text(select, 6)) + 1));
-    strcpy(s->type, (const char *)sqlite3_column_text(select, 6));
+    s->type = strdup((const char *)sqlite3_column_text(select, 6));
 
     sqlite3_finalize(select);
     sqlite3_free(err_msg);

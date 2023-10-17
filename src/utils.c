@@ -3,29 +3,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 50
 
 int getInputInt()
 {
     int value;
-    if (scanf("%d", &value) == 1)
+    if (1 == scanf("%d", &value))
         return value;
     return -1;
 }
 
 char getInputChar()
 {
-    char line[BUFFER_SIZE];
+    char *line = (char *)malloc(sizeof(char) * BUFFER_SIZE);
     char c;
-    if (fgets(line, sizeof(line), stdin)) {
+
+    if (fgets(line, BUFFER_SIZE, stdin)) {
         if (1 == sscanf(line, "%c", &c)) {
+            free(line);
             return c;
         }
     }
+
+    free(line);
     return '\0';
 }
 
-char *getInputString(unsigned size)
+char *getInputString(int size)
 {
     char *line = (char *)malloc(sizeof(char) * size + 1);
     if (!line)

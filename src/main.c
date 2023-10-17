@@ -59,16 +59,14 @@ int main(int argc, char **argv)
     printf("Press enter to continue\n");
     fgetc(stdin);
     clearScreen();
-    int isMap;
-
     srand(time(NULL));
-    int *nbr = (int *)malloc(sizeof(int));
     Player *p = (Player *)malloc((sizeof(Player)));
     int choice;
     char monster[25];
     char filename[25];
 
     do {
+        clearScreen();
         printGameMenu();
         printDragonAnsiiWay();
         printf("Votre choix : ");
@@ -87,16 +85,38 @@ int main(int argc, char **argv)
         for (int i = 1; i < 4; i++) {
             printf("loading map %d\n", i);
             fgetc(stdin);
-            sprintf(filename, "ascii/map%d.txt", i);
-            sprintf(monster, "ascii/monster/%d.txt", i);
-            isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
+
+            if (snprintf(filename, 25, "ascii/map%d.txt", i) < 0) {
+                printf("Error while loading map %d\n", i);
+                free(p);
+                return 0;
+            }
+            if (snprintf(monster, 25, "ascii/monster/%d.txt", i) < 0) {
+                printf("Error while loading monster %d\n", i);
+                free(p);
+                return 0;
+            }
+
+            int isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
             if (isMap == 1) {
                 printf("File %s or %s not found\n", filename, monster);
                 return 1;
             }
         }
-        printf("Vous avez fini le jeu, bravo !\n");
 
+        clearScreen();
+        changeTextColor("red");
+        printf("HERE IS THE FINAL BOSS\n");
+        fgetc(stdin);
+        changeTextColor("reset");
+        int *idToFight = (int *)malloc(sizeof(int));
+        idToFight[0] = 5;
+        int *nbMonster = (int *)malloc(sizeof(int));
+        *nbMonster = 1;
+        fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
+        printf("Vous avez fini le jeu, bravo !\n");
+        free(idToFight);
+        free(nbMonster);
         break;
     case 2:
         clearScreen();
@@ -105,12 +125,10 @@ int main(int argc, char **argv)
         break;
     case 3:
         printf("Quitter\n");
-        free(nbr);
         free(p);
         return EXIT_SUCCESS;
     }
 
-    free(nbr);
     free(p);
     return 0;
 }
