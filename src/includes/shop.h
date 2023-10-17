@@ -13,12 +13,41 @@ typedef struct {
     char *type;
 } stuff;
 
+void printLine();
+
+void printShopDealerAnsiiWay();
+
 void printShopAnsiiWay();
 
-void printItemAnsiiWay(int x, int y);
+void printDealerAnsiiWay();
 
-void printItems(stuff *itemsList, int itemCount);
+void printStuffAnsiiWay(int x, int y);
 
-stuff *getStuffFromShop(int *itemCount);
+void printStuffs(stuff *stuffsList, int stuffCount);
 
+stuff *getStuffFromShop(int *stuffCount);
+
+stuff *getStuffOfPLayer(int *stuffCount);
+
+int getStuffprice(int idStuff);
+
+int getplayerGold();
+
+int checkStuffIsInPlayerStuff(int idStuff);
+
+void addStuffToPlayerStuff(int idStuff);
+
+void removeStuffFromPlayerStuff(int idStuff);
+
+void removeGoldToPlayer(int gold);
+
+void addGoldToPlayer(int gold);
+
+void printPlayerGold();
+
+void buyStuffInit();
+
+void sellStuffInit();
+
+void initShop();
 #endif

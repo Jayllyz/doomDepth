@@ -1,6 +1,5 @@
 #include "includes/shop.h"
 #include "includes/ansii_print.h"
-#include "includes/fight.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -25,8 +24,6 @@
  * @brief print a simple line
  * @return void
 */
-#include <stdio.h>
-
 void printLine()
 {
     int i;
@@ -714,9 +711,4 @@ void initShop()
     initShop();
 
     printf("\n\n");
-}
-
-int main(int argc, char **argv)
-{
-    initShop();
 }
