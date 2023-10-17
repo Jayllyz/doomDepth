@@ -1,8 +1,8 @@
 #include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
-#include "includes/utils.h"
 #include "includes/shop.h"
+#include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
 #define MAP_FINISHED 2
@@ -276,7 +276,7 @@ int eventHandler(char sign, Map m, Player *p)
     case '3':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Happy shopping!");
-        
+
         initShop();
 
         clearScreen();
