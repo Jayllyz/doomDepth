@@ -82,7 +82,8 @@ arrowKey_t readArrowKeyPress()
     }
     else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 68)) {
         arrowKeyPressed = ARROWKEY_LEFT;
-    } else if (buf[0] == 105) {
+    }
+    else if (buf[0] == 105) {
         // must hold i key to open the inventory
         printf("Open the inventory\n");
     }
