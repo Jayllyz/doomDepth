@@ -35,6 +35,16 @@ arrowKey_t readArrowKeyPress()
 {
     arrowKey_t arrowKeyPressed = ARROWKEY_UNKNOWN;
 
+    /* Detailed explanation :
+    This command bash -c 'read -s -t .1 -n3 c && printf "%s" "$c"' will read a single character from the keyboard and print it to stdout.
+        The -s option will make the read command silent, so the character pressed will not be echoed to the terminal.
+        The -t option will make the read command timeout after .1 seconds.
+        The -n3 option will make the read command return after reading 3 characters.
+        The printf "%s" "$c" will print the character read to stdout.
+        The command will return immediately if no character is pressed, or after .1 seconds if a character is pressed.
+        The command will return with a non-zero exit status if the read command times out.
+     */
+
     const char *cmd = "bash -c 'read -s -t .1 -n3 c && printf \"%s\" \"$c\"'";
     FILE *fp = popen(cmd, "r");
     if (fp == NULL) {
@@ -58,7 +68,9 @@ arrowKey_t readArrowKeyPress()
         return arrowKeyPressed;
     }
 
-    // map the readings to arrow keys
+    printf(("\n%d %d %d"), buf[0], buf[1], buf[2]);
+    // map the readings to arrow keys if the char 'i' is pressed, print the inventory
+    // look for the i key press
     if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65)) {
         arrowKeyPressed = ARROWKEY_UP;
     }
@@ -70,6 +82,9 @@ arrowKey_t readArrowKeyPress()
     }
     else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 68)) {
         arrowKeyPressed = ARROWKEY_LEFT;
+    } else if (buf[0] == 105) {
+        // must hold i key to open the inventory
+        printf("Open the inventory\n");
     }
 
     return arrowKeyPressed;
