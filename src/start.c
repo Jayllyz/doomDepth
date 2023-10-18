@@ -43,9 +43,9 @@ int createPlayer(char *name, int classId, Player *p)
         break;
     }
 
-    char *sql
-        = sqlite3_mprintf("INSERT INTO PLAYER (id, name, level, experience, life, attack, defense, mana, gold, class_id) VALUES ('%d', '%s', %d, %d, %d, %d, %d, %d, %d, %d);",
-            1, name, level, experience, life, attack, defense, mana, gold, classId);
+    char *sql = sqlite3_mprintf(
+        "INSERT INTO PLAYER (id, name, level, experience, life, attack, defense, mana, gold, class_id) VALUES ('%d', '%s', %d, %d, %d, %d, %d, %d, %d, %d);", 1, name,
+        level, experience, life, attack, defense, mana, gold, classId);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
