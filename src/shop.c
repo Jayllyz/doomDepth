@@ -356,7 +356,6 @@ int getplayerGold()
 
     rc = sqlite3_prepare_v2(db, "SELECT gold FROM PLAYER WHERE id = ?;", -1, &res, NULL);
 
-
     sqlite3_bind_int(res, 1, 1);
     sqlite3_step(res);
 
