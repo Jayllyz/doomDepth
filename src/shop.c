@@ -1,5 +1,5 @@
-#include "includes/shop.h"
 #include "includes/ansii_print.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -218,10 +218,16 @@ stuff *getStuffFromShop(int *stuffCount)
     }
 
     stuff *stuffsList = NULL;
+    stuff *safe = NULL;
     *stuffCount = 0;
 
     while (sqlite3_step(res) == SQLITE_ROW) {
-        stuffsList = (stuff *)realloc(stuffsList, (*stuffCount + 1) * sizeof(stuff));
+        safe = (stuff *)realloc(stuffsList, (*stuffCount + 1) * sizeof(stuff));
+        if (safe == NULL) {
+            printf("Erreur d'allocation mémoire\n");
+            return NULL;
+        }
+        stuffsList = safe;
         stuff *currentStuff = &stuffsList[*stuffCount];
 
         currentStuff->id = sqlite3_column_int(res, 0);
@@ -274,10 +280,16 @@ stuff *getStuffOfPLayer(int *stuffCount)
     sqlite3_bind_int(res, 1, ID_USER);
 
     stuff *stuffsList = NULL;
+    stuff *safe = NULL;
     *stuffCount = 0;
 
     while (sqlite3_step(res) == SQLITE_ROW) {
-        stuffsList = (stuff *)realloc(stuffsList, (*stuffCount + 1) * sizeof(stuff));
+        safe = (stuff *)realloc(stuffsList, (*stuffCount + 1) * sizeof(stuff));
+        if (safe == NULL) {
+            printf("Erreur d'allocation mémoire\n");
+            return NULL;
+        }
+        stuffsList = safe;
         stuff *currentStuff = &stuffsList[*stuffCount];
 
         currentStuff->id = sqlite3_column_int(res, 0);
@@ -355,6 +367,12 @@ int getplayerGold()
     }
 
     rc = sqlite3_prepare_v2(db, "SELECT gold FROM PLAYER WHERE id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return -1;
+    }
 
     sqlite3_bind_int(res, 1, 1);
     sqlite3_step(res);
@@ -434,6 +452,8 @@ void addStuffToPlayerStuff(int idStuff)
     }
 
     sqlite3_free(sql);
+
+    addStatsStuff(idStuff);
 }
 
 /**
@@ -453,6 +473,56 @@ void removeStuffFromPlayerStuff(int idStuff)
     }
 
     char *sql = sqlite3_mprintf("DELETE FROM PLAYER_STUFF WHERE player_id = %d AND stuff_id = %d;", ID_USER, idStuff);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to delete data\n");
+    }
+
+    sqlite3_close(db);
+
+    removeStatsStuff(idStuff);
+}
+
+void removeStatsStuff(int idSuff)
+{
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+    }
+
+    char *sql = sqlite3_mprintf(
+        "UPDATE PLAYER SET attack = attack - (SELECT attack FROM STUFF WHERE id = %d), defense = defense - (SELECT defense FROM STUFF WHERE id = %d) WHERE id = %d;",
+        idSuff, idSuff, ID_USER);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to delete data\n");
+    }
+
+    sqlite3_close(db);
+}
+
+void addStatsStuff(int idSuff)
+{
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+    }
+
+    char *sql = sqlite3_mprintf(
+        "UPDATE PLAYER SET attack = attack + (SELECT attack FROM STUFF WHERE id = %d), defense = defense + (SELECT defense FROM STUFF WHERE id = %d) WHERE id = %d;",
+        idSuff, idSuff, ID_USER);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 

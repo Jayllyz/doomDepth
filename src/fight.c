@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -194,10 +194,74 @@ int getMonsterWidth(int id)
     return line_width;
 }
 
+void selectPlayerInfo(Player *p)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT level, attack, defense, experience, life, mana, gold FROM PLAYER WHERE id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_bind_int(res, 1, 1);
+    sqlite3_step(res);
+
+    p->level = sqlite3_column_int(res, 0);
+    p->attack = sqlite3_column_int(res, 1);
+    p->defense = sqlite3_column_int(res, 2);
+    p->experience = sqlite3_column_int(res, 3);
+    p->life = sqlite3_column_int(res, 4);
+    p->mana = sqlite3_column_int(res, 5);
+    p->gold = sqlite3_column_int(res, 6);
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+}
+
+void updatePlayerInfo(Player *p)
+{
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    char *sql = sqlite3_mprintf("UPDATE PLAYER SET level = %d, attack = %d, defense = %d, experience = %d, life = %d, mana = %d, gold = %d WHERE id = 1;", p->level,
+        p->attack, p->defense, p->experience, p->life, p->mana, p->gold);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to update data\n");
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_free(sql);
+    sqlite3_close(db);
+}
+
 Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 {
     FILE *fplayer;
     clearScreen();
+    selectPlayerInfo(p);
     printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
 
     int nbMonster;
@@ -668,7 +732,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
             maxLines = lines;
     }
     free(filePath);
-    maxLines += 5;
+    maxLines += 10;
     int startPrint = maxLines + 4;
     int combatLog = maxLines + 21;
 
@@ -717,6 +781,8 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
             monsterTurn(nbrMonster, m, p);
         else
             clearLinesFrom(startPrint);
+
+        updatePlayerInfo(p);
     }
 
     if (p->life <= 0) {
