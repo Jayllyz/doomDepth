@@ -57,3 +57,9 @@ void clearScreen()
     printf("\033[2J\033[1;1H");
 #endif
 }
+
+void clearLinesFrom(int startLine)
+{
+    printf("\033[%d;1H", startLine);
+    printf("\033[J");
+}

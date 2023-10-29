@@ -6,5 +6,6 @@ char getInputChar();
 char *getInputString(int size);
 void clearBuffer();
 void clearScreen();
+void clearLinesFrom(int startLine);
 
 #endif /* UTILS_H */

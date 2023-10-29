@@ -39,6 +39,10 @@ void addStuffToPlayerStuff(int idStuff);
 
 void removeStuffFromPlayerStuff(int idStuff);
 
+void removeStatsStuff(int idSuff);
+
+void addStatsStuff(int idSuff);
+
 void removeGoldToPlayer(int gold);
 
 void addGoldToPlayer(int gold);
