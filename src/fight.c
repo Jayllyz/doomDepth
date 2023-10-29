@@ -30,7 +30,7 @@ int randomMonster(int level)
     rc = sqlite3_prepare_v2(db, "SELECT id FROM MONSTER WHERE level = ? ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select data\n");
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
 
         return -1;
@@ -64,7 +64,7 @@ Monster *getMonsterInfo(int id)
 
     if (rc != SQLITE_OK) {
 
-        printf("Failed to select data\n");
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
 
         return NULL;
@@ -91,7 +91,7 @@ Monster *getMonsterInfo(int id)
     rc = sqlite3_prepare_v2(db, "SELECT spell_id FROM MONSTER_SPELL WHERE monster_id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select MONSTER_SPELL\n");
+        printf("Failed to select MONSTER_SPELL: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         free(m);
         return NULL;
@@ -128,7 +128,7 @@ Spell *setMonsterSpell(int idSpell)
     rc = sqlite3_prepare_v2(db, "SELECT id, name, description, attack, grade, mana, type FROM SPELL WHERE id = ?;", -1, &select, NULL);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select data\n");
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         return NULL;
     }
@@ -209,7 +209,7 @@ void selectPlayerInfo(Player *p)
     rc = sqlite3_prepare_v2(db, "SELECT level, attack, defense, experience, life, mana, gold FROM PLAYER WHERE id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select data\n");
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         return;
     }
@@ -247,7 +247,7 @@ void updatePlayerInfo(Player *p)
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to update data\n");
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
         sqlite3_free(err_msg);
         sqlite3_close(db);
         return;
@@ -314,17 +314,14 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
             return NULL;
         }
 
-        //
         int line_width = getMonsterWidth(monsters[i]->id);
 
-        //printf("->%d<-", getMonsterWidth(monsters[i]->id));
         changeTextColor("red");
         printStringAtCoordinate((int)(y + line_width / 2 - (strlen(monsters[i]->name) / 2)), 7, monsters[i]->name);
         printLifeBarAtCoordinate(monsters[i]->life, y, 8);
         printStringAtCoordinate(y, 10, readFileContent(fp));
         fclose(fp);
-        //removeHP(y+c/2 + monsters[i]->life/2, 8, 5);
-        //
+
         y += 50;
     }
 
@@ -352,9 +349,8 @@ int normalAttack(Player *p, Monster *m)
 
     m->life -= damage;
 
-    if (m->life < 0) {
+    if (m->life < 0)
         m->life = 0;
-    }
 
     printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
     printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
@@ -399,9 +395,8 @@ void monsterSpell(Player *p, Monster *m)
 
     p->life -= damage;
 
-    if (p->life < 0) {
+    if (p->life < 0)
         p->life = 0;
-    }
 
     printf("Le %s a utilisé le sort %s\n", m->name, m->spell[0]->name);
     printf("Il vous a infligé \033[0;32m%d\033[0m dégats\n", damage);
@@ -467,12 +462,6 @@ void defeat()
     exit(0);
 }
 
-void clearLinesFrom(int startLine)
-{
-    printf("\033[%d;1H", startLine);
-    printf("\033[J");
-}
-
 int usePlayerSpell(Player *p, Monster *m, int spellId)
 {
     if (p->mana < p->spell[spellId]->mana) {
@@ -490,15 +479,10 @@ int usePlayerSpell(Player *p, Monster *m, int spellId)
         printf("Coup critique !\n");
     }
 
-    if (damage < 0) {
-        damage = 0;
-    }
-
     m->life -= damage;
 
-    if (m->life < 0) {
+    if (m->life < 0)
         m->life = 0;
-    }
 
     p->mana -= p->spell[spellId]->mana;
     printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
@@ -656,9 +640,8 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const 
 
     spellChoice = showPlayerSpells(p);
 
-    if (spellChoice == -1) {
+    if (spellChoice == -1)
         return 0;
-    }
 
     clearLinesFrom(maxLines + 4);
     movCursor(0, maxLines + 4);
