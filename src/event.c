@@ -1,8 +1,8 @@
+#include "includes/event.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
-#include "includes/event.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -27,13 +27,11 @@
  *
  */
 
-
-
 void event()
 {
     clearScreen();
-    FILE* fp = fopen("ascii/event.txt", "r");
-    char* line = readFileContent(fp);
+    FILE *fp = fopen("ascii/event.txt", "r");
+    char *line = readFileContent(fp);
 
     changeTextColor("yellow");
     printf("%s", line);
@@ -44,7 +42,6 @@ void event()
     fgetc(stdin);
 
     // @TODO Quest system RPG like
-
 
     TreeChoice *blue_pill0_1 = malloc(sizeof(TreeChoice));
     blue_pill0_1->id = 1;
@@ -128,91 +125,88 @@ void event()
     scenario_forest->choice = start_point_forest;
 
     Village *village = malloc(sizeof(Village));
-        village->id = 0;
-        village->name = "Village";
-        village->description = "The village is a small village with a few houses";
-        village->scenario = scenario_village;
-        village->next_place = NULL;
+    village->id = 0;
+    village->name = "Village";
+    village->description = "The village is a small village with a few houses";
+    village->scenario = scenario_village;
+    village->next_place = NULL;
 
-        Place *bar = malloc(sizeof(Place));
-        bar->id = 1;
-        bar->name = "Bar";
-        bar->description = "The bar stinks of alcohol and cigarettes";
-        bar->scenario = scenario_bar;
-        bar->next = NULL;
+    Place *bar = malloc(sizeof(Place));
+    bar->id = 1;
+    bar->name = "Bar";
+    bar->description = "The bar stinks of alcohol and cigarettes";
+    bar->scenario = scenario_bar;
+    bar->next = NULL;
 
-        Place *forest = malloc(sizeof(Place));
-        forest->id = 2;
-        forest->name = "Forest";
-        forest->description = "The forest is a dark and dangerous place";
-        forest->scenario = scenario_forest;
-        forest->next = NULL;
+    Place *forest = malloc(sizeof(Place));
+    forest->id = 2;
+    forest->name = "Forest";
+    forest->description = "The forest is a dark and dangerous place";
+    forest->scenario = scenario_forest;
+    forest->next = NULL;
 
-        village->next_place = bar;
-        bar->next = forest;
-        forest->next = bar;
+    village->next_place = bar;
+    bar->next = forest;
+    forest->next = bar;
 
-        Protagonist *protagonist = malloc(sizeof(Protagonist));
-        protagonist->village = NULL;
-        protagonist->place = NULL;
+    Protagonist *protagonist = malloc(sizeof(Protagonist));
+    protagonist->village = NULL;
+    protagonist->place = NULL;
 
-        // Starting point is defined randomly
-        int random = rand() % 2;
-        if (random == 0){
-            protagonist->village = village;
-            protagonist->scenario = scenario_village;
-            protagonist->choice = scenario_village->choice;
-        }
-        else if (random == 1){
-            protagonist->place = bar;
-            protagonist->scenario = scenario_bar;
-            protagonist->choice = scenario_bar->choice;
-        }
-        else if (random == 2){
-            protagonist->place = forest;
-            protagonist->scenario = scenario_forest;
-            protagonist->choice = scenario_forest->choice;
-        }
+    // Starting point is defined randomly
+    int random = rand() % 2;
+    if (random == 0) {
+        protagonist->village = village;
+        protagonist->scenario = scenario_village;
+        protagonist->choice = scenario_village->choice;
+    }
+    else if (random == 1) {
+        protagonist->place = bar;
+        protagonist->scenario = scenario_bar;
+        protagonist->choice = scenario_bar->choice;
+    }
+    else if (random == 2) {
+        protagonist->place = forest;
+        protagonist->scenario = scenario_forest;
+        protagonist->choice = scenario_forest->choice;
+    }
 
-
-
-        int choice = 0;
-        while (protagonist->choice->blue_pill != NULL && protagonist->choice->red_pill != NULL){
-                printf("%s\n", protagonist->choice->context);
-                printf("%s\n", protagonist->choice->situation);
-                printf("1 - %s\n", protagonist->choice->blue_pill->context);
-                printf("2 - %s\n", protagonist->choice->red_pill->context);
-                printf("Your choice : \n");
-                scanf("%d", &choice);
-
-                if (choice == 1)
-                    protagonist->choice = protagonist->choice->blue_pill;
-                else if (choice == 2)
-                    protagonist->choice = protagonist->choice->red_pill;
-        }
-
+    int choice = 0;
+    while (protagonist->choice->blue_pill != NULL && protagonist->choice->red_pill != NULL) {
         printf("%s\n", protagonist->choice->context);
         printf("%s\n", protagonist->choice->situation);
-
-        switch (protagonist->choice->event) {
-            case DEATH:
-                changeTextColor("red");
-                printf("You died !\n");
-                break;
-            case BONUS:
-                changeTextColor("green");
-                printf("You got a bonus !\n");
-                break;
-            case FIGHT:
-                changeTextColor("yellow");
-                printf("You got a fight !\n");
-                break;
-            default:
-                changeTextColor("blue");
-                printf("End of side quest.\n");
-                break;
-        }
-        changeTextColor("reset");
+        printf("1 - %s\n", protagonist->choice->blue_pill->context);
+        printf("2 - %s\n", protagonist->choice->red_pill->context);
+        printf("Your choice : \n");
         scanf("%d", &choice);
-}
 
+        if (choice == 1)
+            protagonist->choice = protagonist->choice->blue_pill;
+        else if (choice == 2)
+            protagonist->choice = protagonist->choice->red_pill;
+    }
+
+    printf("%s\n", protagonist->choice->context);
+    printf("%s\n", protagonist->choice->situation);
+
+    switch (protagonist->choice->event) {
+    case DEATH:
+        changeTextColor("red");
+        printf("You died !\n");
+        break;
+    case BONUS:
+        changeTextColor("green");
+        printf("You got a bonus !\n");
+        break;
+    case FIGHT:
+        changeTextColor("yellow");
+        printf("You got a fight !\n");
+        break;
+    default:
+        changeTextColor("blue");
+        printf("End of side quest.\n");
+        break;
+    }
+    changeTextColor("reset");
+    scanf("%d", &choice);
+}

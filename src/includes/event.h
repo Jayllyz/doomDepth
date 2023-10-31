@@ -14,32 +14,30 @@ enum {
 
 struct TreeChoice {
     int id;
-    char *context;
-    char *situation;
+    char* context;
+    char* situation;
     int event;
     TreeChoice* blue_pill;
     TreeChoice* red_pill;
 };
 
-
 typedef struct {
     int id;
-    TreeChoice *choice;
-}Scenario;
-
+    TreeChoice* choice;
+} Scenario;
 
 struct Place {
     int id;
-    char *name;
-    char * description;
+    char* name;
+    char* description;
     Scenario* scenario;
     Place* next;
 };
 
-struct Village{
+struct Village {
     int id;
-    char *name;
-    char *description;
+    char* name;
+    char* description;
     Scenario* scenario;
     Place* next_place;
     Village* next_village;
@@ -50,7 +48,7 @@ typedef struct {
     Place* place;
     Scenario* scenario;
     TreeChoice* choice;
-}Protagonist;
+} Protagonist;
 
 void event();
 
