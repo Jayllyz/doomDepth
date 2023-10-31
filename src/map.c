@@ -290,6 +290,12 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Here is a random event!");
         event();
+        clearScreen();
+        if (updateMap(&m) == MAP_FINISHED) {
+            return MAP_FINISHED;
+        }
+        printMapInterface(m.map_left, m.map_top, m.map);
+        mov(&m, p);
         break;
     }
 
