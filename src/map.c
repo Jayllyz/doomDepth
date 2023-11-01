@@ -1,5 +1,6 @@
 #include "includes/map.h"
 #include "includes/ansii_print.h"
+#include "includes/event.h"
 #include "includes/fight.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
@@ -173,6 +174,11 @@ void printSignWithColor(char sign)
         printf("= ");
         changeTextColor("reset");
         break;
+    case '?':
+        changeTextColor("yellow");
+        printf("? ");
+        changeTextColor("reset");
+        break;
     case '9':
         changeTextColor("blue");
         printf("x ");
@@ -307,6 +313,17 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Welcome to the Smith!");
         break;
+    case '?':
+        movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
+        printf("Here is a random event!");
+        event();
+        clearScreen();
+        if (updateMap(&m) == MAP_FINISHED) {
+            return MAP_FINISHED;
+        }
+        printMapInterface(m.map_left, m.map_top, m.map);
+        mov(&m, p);
+        break;
     }
 
     free(nbrMonster);
@@ -427,7 +444,7 @@ int mov(Map *m, Player *p)
         restoreCursorPos();
         printf(("                               \n"));
         restoreCursorPos();
-        printf("Key pressed = %d\n", arrowKeyPressed);
+        //printf("Key pressed = %d\n", arrowKeyPressed);
     }
 }
 
