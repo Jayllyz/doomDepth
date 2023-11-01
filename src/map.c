@@ -2,6 +2,7 @@
 #include "includes/ansii_print.h"
 #include "includes/event.h"
 #include "includes/fight.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
@@ -35,6 +36,16 @@ arrowKey_t readArrowKeyPress()
 {
     arrowKey_t arrowKeyPressed = ARROWKEY_UNKNOWN;
 
+    /* Detailed explanation :
+    This command bash -c 'read -s -t .1 -n3 c && printf "%s" "$c"' will read a single character from the keyboard and print it to stdout.
+        The -s option will make the read command silent, so the character pressed will not be echoed to the terminal.
+        The -t option will make the read command timeout after .1 seconds.
+        The -n3 option will make the read command return after reading 3 characters.
+        The printf "%s" "$c" will print the character read to stdout.
+        The command will return immediately if no character is pressed, or after .1 seconds if a character is pressed.
+        The command will return with a non-zero exit status if the read command times out.
+     */
+
     const char *cmd = "bash -c 'read -s -t .1 -n3 c && printf \"%s\" \"$c\"'";
     FILE *fp = popen(cmd, "r");
     if (fp == NULL) {
@@ -58,7 +69,9 @@ arrowKey_t readArrowKeyPress()
         return arrowKeyPressed;
     }
 
-    // map the readings to arrow keys
+    printf(("\n%d %d %d"), buf[0], buf[1], buf[2]);
+    // map the readings to arrow keys if the char 'i' is pressed, print the inventory
+    // look for the i key press
     if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65)) {
         arrowKeyPressed = ARROWKEY_UP;
     }
@@ -70,6 +83,10 @@ arrowKey_t readArrowKeyPress()
     }
     else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 68)) {
         arrowKeyPressed = ARROWKEY_LEFT;
+    }
+    else if (buf[0] == 105) {
+        // must hold i key to open the inventory
+        printf("Open the inventory\n");
     }
 
     return arrowKeyPressed;
@@ -281,6 +298,16 @@ int eventHandler(char sign, Map m, Player *p)
     case '3':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Happy shopping!");
+
+        initShop();
+
+        clearScreen();
+        if (updateMap(&m) == MAP_FINISHED) {
+            return MAP_FINISHED;
+        }
+        printMapInterface(m.map_left, m.map_top, m.map);
+        mov(&m, p);
+
         break;
     case '4':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
@@ -299,6 +326,7 @@ int eventHandler(char sign, Map m, Player *p)
         break;
     }
 
+    free(nbrMonster);
     return 0;
 }
 
@@ -385,7 +413,6 @@ int movDown(int *x, int *y, char *map, Map m, Player *p)
 int mov(Map *m, Player *p)
 {
     printf("Press any arrow key. Press Ctrl + C to quit.\n");
-    fflush(stdout);
 
     saveCursorPos();
     while (1) {
@@ -440,7 +467,7 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     char *dragon = readFileContent(fp2);
 
     changeTextColor("red");
-    printStringAtCoordinate((map_left + map_width) * 1.5, 0, dragon);
+    printStringAtCoordinate((int)((map_left + map_width) * 1.5), 0, dragon);
     changeTextColor("reset");
 
     int x = map_width / 2 + map_left;

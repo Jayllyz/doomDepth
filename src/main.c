@@ -85,8 +85,18 @@ int main(int argc, char **argv)
         for (int i = 1; i < 4; i++) {
             printf("loading map %d\n", i);
             fgetc(stdin);
-            sprintf(filename, "ascii/map%d.txt", i);
-            sprintf(monster, "ascii/monster/%d.txt", i);
+
+            if (snprintf(filename, 25, "ascii/map%d.txt", i) < 0) {
+                printf("Error while loading map %d\n", i);
+                free(p);
+                return 0;
+            }
+            if (snprintf(monster, 25, "ascii/monster/%d.txt", i) < 0) {
+                printf("Error while loading monster %d\n", i);
+                free(p);
+                return 0;
+            }
+
             int isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
             if (isMap == 1) {
                 printf("File %s or %s not found\n", filename, monster);
@@ -105,7 +115,8 @@ int main(int argc, char **argv)
         *nbMonster = 1;
         fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
         printf("Vous avez fini le jeu, bravo !\n");
-
+        free(idToFight);
+        free(nbMonster);
         break;
     case 2:
         clearScreen();

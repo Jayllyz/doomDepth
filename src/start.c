@@ -26,7 +26,7 @@ int createPlayer(char *name, int classId, Player *p)
     int attack = 20;
     int defense = 10;
     int mana = 25;
-    int gold = 0;
+    int gold = 100;
 
     switch (classId) {
     case 1: // Guerrier
@@ -43,9 +43,9 @@ int createPlayer(char *name, int classId, Player *p)
         break;
     }
 
-    char *sql
-        = sqlite3_mprintf("INSERT INTO PLAYER (name, level, experience, life, attack, defense, mana, gold, class_id) VALUES ('%s', %d, %d, %d, %d, %d, %d, %d, %d);",
-            name, level, experience, life, attack, defense, mana, gold, classId);
+    char *sql = sqlite3_mprintf(
+        "INSERT INTO PLAYER (id, name, level, experience, life, attack, defense, mana, gold, class_id) VALUES ('%d', '%s', %d, %d, %d, %d, %d, %d, %d, %d);", 1, name,
+        level, experience, life, attack, defense, mana, gold, classId);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -56,7 +56,7 @@ int createPlayer(char *name, int classId, Player *p)
         return 1;
     }
 
-    int id = sqlite3_last_insert_rowid(db);
+    int id = (int)sqlite3_last_insert_rowid(db);
 
     p->spell = (Spell **)malloc(MAX_PLAYER_SPELL * sizeof(Spell *));
     for (int i = 0; i < MAX_PLAYER_SPELL; i++) {
@@ -76,6 +76,7 @@ int createPlayer(char *name, int classId, Player *p)
         break;
     }
 
+    //p->id = 1;
     p->name = name;
     p->level = level;
     p->experience = experience;

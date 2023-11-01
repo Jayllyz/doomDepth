@@ -3,8 +3,9 @@
 
 int getInputInt();
 char getInputChar();
-char *getInputString(unsigned size);
+char *getInputString(int size);
 void clearBuffer();
 void clearScreen();
+void clearLinesFrom(int startLine);
 
 #endif /* UTILS_H */
