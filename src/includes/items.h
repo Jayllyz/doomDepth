@@ -1,7 +1,7 @@
 #ifndef ITEMS_H
 #define ITEMS_H
-#include "shop.h"
 #include "fight.h"
+#include "shop.h"
 
 stuff *getStuffInfo(int id);
 int countSuffUsable(int idPlayer);
