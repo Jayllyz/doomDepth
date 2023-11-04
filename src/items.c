@@ -132,6 +132,8 @@ enum stuffEffect { NOTHING = 0, DAMAGE = 1, BONUS = 2, MALUS = 3 };
 
 int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
 {
+    clearLinesFrom(maxLines + 4);
+    movCursor(0, maxLines + 7);
     int choice;
     int count = countSuffUsable(p->id);
     if (count <= 0)
@@ -168,7 +170,6 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
             if (target == -1)
                 return -1;
             m[target]->life -= stuffs[choice]->attack;
-
             printItemsLogs(p, stuffs[choice], target, m, maxLines);
             break;
         case BONUS:

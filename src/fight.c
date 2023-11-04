@@ -756,9 +756,11 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
             switch (showPlayerInventory(p, m, *nbrMonster, maxLines)) {
             case -1:
                 printf("Une erreur est survenue\n");
+                sleep(1);
                 break;
             case -2:
                 printf("Vous n'avez pas d'objet utilisable\n");
+                sleep(1);
                 validInput = 0;
                 break;
             default:
