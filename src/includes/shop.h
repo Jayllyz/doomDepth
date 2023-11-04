@@ -8,9 +8,12 @@ typedef struct {
     char *description;
     int attack;
     int defense;
+    int life;
+    int mana;
     int grade;
     int gold;
     char *type;
+    int effect;
 } stuff;
 
 void printLine();

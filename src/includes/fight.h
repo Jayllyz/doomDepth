@@ -30,7 +30,9 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana);
 void clearLifeBar(int nbrMonster);
 void monsterTurn(const int *nbrMonster, Monster **m, Player *p);
 int monsterAlive(int nbMonster, Monster **m);
+int chooseMonster(Monster **m, int nbrMonster);
 int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife);
+void updateMainLifeBars(int maxLines, int nbrMonster, Monster **m, Player *p);
 void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife);
 void printCombatInterface(int nbrMonster, int damageNormalAttack);
 

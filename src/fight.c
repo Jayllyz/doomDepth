@@ -1,6 +1,8 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
+#include "includes/items.h"
 #include "includes/map.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
 #include <stdio.h>
@@ -407,6 +409,7 @@ void levelUp(Player *p)
 {
     p->level++;
     p->life += 10;
+    p->maxLife += 10;
     p->attack += 5;
     p->defense += 5;
     p->experience = 0;
@@ -603,6 +606,17 @@ void printCombatInterface(int nbrMonster, int damageNormalAttack)
     printf("4 - Abandonner\n");
 }
 
+void updateMainLifeBars(int maxLines, int nbrMonster, Monster **m, Player *p)
+{
+    saveCursorPos();
+    movCursor(0, maxLines + 4);
+    clearLifeBar(nbrMonster);
+    movCursor(0, maxLines + 4);
+    printLifeBar(p, m, nbrMonster, 1);
+    sleep(2);
+    restoreCursorPos();
+}
+
 void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife)
 {
     int target;
@@ -622,13 +636,7 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
     int max_hp = maxLife[target];
     removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
 
-    saveCursorPos();
-    movCursor(0, maxLines + 4);
-    clearLifeBar(nbrMonster);
-    movCursor(0, maxLines + 4);
-    printLifeBar(p, m, nbrMonster, 1);
-    sleep(2);
-    restoreCursorPos();
+    updateMainLifeBars(maxLines, nbrMonster, m, p);
 }
 
 int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife)
@@ -658,13 +666,7 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const 
     int max_hp = maxLife[target];
     removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
 
-    saveCursorPos();
-    movCursor(0, maxLines + 4);
-    clearLifeBar(nbrMonster);
-    movCursor(0, maxLines + 4);
-    printLifeBar(p, m, nbrMonster, 1);
-    sleep(2);
-    restoreCursorPos();
+    updateMainLifeBars(maxLines, nbrMonster, m, p);
 
     return 1;
 }
@@ -745,7 +747,19 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
         case 2:
             if (attackWithSpell(maxLines, *nbrMonster, m, p, maxLife) == 0)
                 validInput = 0;
-
+            break;
+        case 3:
+            switch (showPlayerInventory(p, m, *nbrMonster, maxLines)) {
+            case -1:
+                printf("Une erreur est survenue\n");
+                break;
+            case -2:
+                printf("Vous n'avez pas d'objet utilisable\n");
+                validInput = 0;
+                break;
+            default:
+                break;
+            }
             break;
         case 4:
             p->life = 0;
