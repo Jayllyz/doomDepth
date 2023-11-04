@@ -1,5 +1,5 @@
-#include "includes/ansii_print.h"
 #include "includes/shop.h"
+#include "includes/ansii_print.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
