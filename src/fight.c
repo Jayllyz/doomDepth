@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
@@ -148,6 +148,9 @@ Spell *setMonsterSpell(int idSpell)
     s->mana = sqlite3_column_int(select, 5);
     s->type = strdup((const char *)sqlite3_column_text(select, 6));
 
+    sqlite3_finalize(select);
+    sqlite3_close(db);
+
     return s;
 }
 
@@ -256,6 +259,7 @@ void updatePlayerInfo(Player *p)
     }
 
     sqlite3_free(sql);
+    sqlite3_free(err_msg);
     sqlite3_close(db);
 }
 
@@ -602,7 +606,7 @@ void printCombatInterface(int nbrMonster, int damageNormalAttack)
     else
         printf("1 - Attaque normal\n");
     printf("2 - Utiliser une compétence\n");
-    printf("3 - Utiliser un objet (coming soon)\n");
+    printf("3 - Utiliser un objet\n");
     printf("4 - Abandonner\n");
 }
 

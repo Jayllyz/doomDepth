@@ -1,6 +1,6 @@
-#include "includes/items.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/items.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #define DB_FILE "db/doomdepth.sqlite"
+#define ID_USER 1
 
 stuff *getStuffInfo(int id)
 {
@@ -58,10 +59,12 @@ int countSuffUsable(int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
+    sqlite3_close_v2(db);
     int rc = sqlite3_open(DB_FILE, &db);
 
     if (rc != SQLITE_OK) {
         printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
         sqlite3_close(db);
         return -1;
     }
@@ -72,6 +75,7 @@ int countSuffUsable(int idPlayer)
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
         sqlite3_close(db);
         return -1;
     }
@@ -257,6 +261,4 @@ void printItemsLogs(Player *p, stuff *s, int nbrMonster, Monster **m, int maxLin
             printf("Vous avez perdu %d points de mana\n", s->mana);
     }
     updateMainLifeBars(maxLines, nbrMonster, m, p);
-    printf("\n");
-    sleep(2);
 }
