@@ -452,6 +452,8 @@ void addStuffToPlayerStuff(int idStuff)
     }
 
     sqlite3_free(sql);
+    sqlite3_free(err_msg);
+    sqlite3_close(db);
 
     addStatsStuff(idStuff);
 }
@@ -469,7 +471,9 @@ void removeStuffFromPlayerStuff(int idStuff)
 
     if (rc != SQLITE_OK) {
         printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(err_msg);
         sqlite3_close(db);
+        exit(0);
     }
 
     char *sql = sqlite3_mprintf("DELETE FROM PLAYER_STUFF WHERE player_id = %d AND stuff_id = %d;", ID_USER, idStuff);
@@ -477,9 +481,14 @@ void removeStuffFromPlayerStuff(int idStuff)
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to delete data\n");
+        printf("Failed to delete data %s\n", err_msg);
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        exit(0);
     }
 
+    sqlite3_free(sql);
+    sqlite3_free(err_msg);
     sqlite3_close(db);
 
     removeStatsStuff(idStuff);
@@ -506,6 +515,8 @@ void removeStatsStuff(int idSuff)
         printf("Failed to delete data\n");
     }
 
+    sqlite3_free(sql);
+    sqlite3_free(err_msg);
     sqlite3_close(db);
 }
 
@@ -530,6 +541,8 @@ void addStatsStuff(int idSuff)
         printf("Failed to delete data\n");
     }
 
+    sqlite3_free(sql);
+    sqlite3_free(err_msg);
     sqlite3_close(db);
 }
 

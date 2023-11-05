@@ -76,11 +76,12 @@ int createPlayer(char *name, int classId, Player *p)
         break;
     }
 
-    //p->id = 1;
+    p->id = 1;
     p->name = name;
     p->level = level;
     p->experience = experience;
     p->life = life;
+    p->maxLife = life;
     p->attack = attack;
     p->defense = defense;
     p->mana = mana;

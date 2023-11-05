@@ -17,6 +17,7 @@ typedef struct {
     int level;
     int experience;
     int life;
+    int maxLife;
     int attack;
     int defense;
     int mana;
