@@ -209,7 +209,7 @@ stuff *getStuffFromShop(int *stuffCount)
         return NULL;
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT id, name, description, attack, defense, grade, gold, type FROM STUFF;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT id, name, description, attack, defense, grade, gold, type FROM STUFF ORDER BY RANDOM() LIMIT 6;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data\n");
@@ -252,9 +252,10 @@ stuff *getStuffFromShop(int *stuffCount)
 /**
  * @brief Get all stuff of the shop from the database of the player
  * @param int *stuffCount The number of stuffs
+ * @param int idPlayer The id of the player
  * @return stuff * The list of stuffs
 */
-stuff *getStuffOfPLayer(int *stuffCount)
+stuff *getStuffOfPLayer(int *stuffCount, int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -277,7 +278,7 @@ stuff *getStuffOfPLayer(int *stuffCount)
         return NULL;
     }
 
-    sqlite3_bind_int(res, 1, ID_USER);
+    sqlite3_bind_int(res, 1, idPlayer);
 
     stuff *stuffsList = NULL;
     stuff *safe = NULL;
@@ -352,9 +353,10 @@ int getStuffprice(int idStuff)
 
 /**
  * @brief Get the gold of the player from the database
+ * @param int idPlayer The id of the player
  * @return int The gold of the player
 */
-int getplayerGold()
+int getplayerGold(int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -374,7 +376,7 @@ int getplayerGold()
         return -1;
     }
 
-    sqlite3_bind_int(res, 1, 1);
+    sqlite3_bind_int(res, 1, idPlayer);
     sqlite3_step(res);
 
     int gold = sqlite3_column_int(res, 0);
@@ -388,9 +390,10 @@ int getplayerGold()
 /**
  * @brief Check if a stuff is in the player's stuff
  * @param int idStuff The id of the stuff
+ * @param int idPlayer The id of the player
  * @return int 0 if the stuff is not in the player's stuff, 1 otherwise
 */
-int checkStuffIsInPlayerStuff(int idStuff)
+int checkStuffIsInPlayerStuff(int idStuff, int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -410,7 +413,7 @@ int checkStuffIsInPlayerStuff(int idStuff)
         return 0;
     }
 
-    sqlite3_bind_int(res, 1, ID_USER);
+    sqlite3_bind_int(res, 1, idPlayer);
     sqlite3_bind_int(res, 2, idStuff);
 
     int count = 0;
@@ -428,9 +431,10 @@ int checkStuffIsInPlayerStuff(int idStuff)
 /**
  * @brief Add a stuff to the player's stuff
  * @param int idStuff The id of the stuff
+ * @param int idPlayer The id of the player
  * @return void
 */
-void addStuffToPlayerStuff(int idStuff)
+void addStuffToPlayerStuff(int idStuff, int idPlayer)
 {
     sqlite3 *db;
     char *err_msg = 0;
@@ -441,7 +445,7 @@ void addStuffToPlayerStuff(int idStuff)
         sqlite3_close(db);
     }
 
-    char *sql = sqlite3_mprintf("INSERT INTO PLAYER_STUFF (player_id, stuff_id) VALUES (%d, %d);", ID_USER, idStuff);
+    char *sql = sqlite3_mprintf("INSERT INTO PLAYER_STUFF (player_id, stuff_id) VALUES (%d, %d);", idPlayer, idStuff);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -455,15 +459,16 @@ void addStuffToPlayerStuff(int idStuff)
     sqlite3_free(err_msg);
     sqlite3_close(db);
 
-    addStatsStuff(idStuff);
+    addStatsStuff(idStuff, idPlayer);
 }
 
 /**
  * @brief Remove a stuff to the player's stuff
  * @param int idStuff The id of the stuff
+ * @param int idPlayer The id of the player
  * @return void
 */
-void removeStuffFromPlayerStuff(int idStuff)
+void removeStuffFromPlayerStuff(int idStuff, int idPlayer)
 {
     sqlite3 *db;
     char *err_msg = 0;
@@ -476,7 +481,7 @@ void removeStuffFromPlayerStuff(int idStuff)
         exit(0);
     }
 
-    char *sql = sqlite3_mprintf("DELETE FROM PLAYER_STUFF WHERE player_id = %d AND stuff_id = %d;", ID_USER, idStuff);
+    char *sql = sqlite3_mprintf("DELETE FROM PLAYER_STUFF WHERE player_id = %d AND stuff_id = %d;", idPlayer, idStuff);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -491,10 +496,15 @@ void removeStuffFromPlayerStuff(int idStuff)
     sqlite3_free(err_msg);
     sqlite3_close(db);
 
-    removeStatsStuff(idStuff);
+    removeStatsStuff(idStuff, idPlayer);
 }
 
-void removeStatsStuff(int idSuff)
+/**
+ * @brief Remove the stats of a stuff to the player
+ * @param int idSuff The id of the stuff
+ * @param int idPlayer The id of the player
+ */
+void removeStatsStuff(int idSuff, int idPlayer)
 {
     sqlite3 *db;
     char *err_msg = 0;
@@ -507,7 +517,7 @@ void removeStatsStuff(int idSuff)
 
     char *sql = sqlite3_mprintf(
         "UPDATE PLAYER SET attack = attack - (SELECT attack FROM STUFF WHERE id = %d), defense = defense - (SELECT defense FROM STUFF WHERE id = %d) WHERE id = %d;",
-        idSuff, idSuff, ID_USER);
+        idSuff, idSuff, idPlayer);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -520,7 +530,12 @@ void removeStatsStuff(int idSuff)
     sqlite3_close(db);
 }
 
-void addStatsStuff(int idSuff)
+/**
+ * @brief Add the stats of a stuff to the player
+ * @param int idSuff The id of the stuff
+ * @param int idPlayer The id of the player
+ */
+void addStatsStuff(int idSuff, int idPlayer)
 {
     sqlite3 *db;
     char *err_msg = 0;
@@ -533,7 +548,7 @@ void addStatsStuff(int idSuff)
 
     char *sql = sqlite3_mprintf(
         "UPDATE PLAYER SET attack = attack + (SELECT attack FROM STUFF WHERE id = %d), defense = defense + (SELECT defense FROM STUFF WHERE id = %d) WHERE id = %d;",
-        idSuff, idSuff, ID_USER);
+        idSuff, idSuff, idPlayer);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -549,9 +564,10 @@ void addStatsStuff(int idSuff)
 /**
  * @brief remove gold to the player
  * @param int gold The gold to remove
+ * @param int idPlayer The id of the player
  * @return void
 */
-void removeGoldToPlayer(int gold)
+void removeGoldToPlayer(int gold, int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -572,7 +588,7 @@ void removeGoldToPlayer(int gold)
     }
 
     sqlite3_bind_int(res, 1, gold);
-    sqlite3_bind_int(res, 2, ID_USER);
+    sqlite3_bind_int(res, 2, idPlayer);
 
     sqlite3_step(res);
 
@@ -583,9 +599,10 @@ void removeGoldToPlayer(int gold)
 /**
  * @brief Add gold to the player
  * @param int gold The gold to add
+ * @param int idPlayer The id of the player
  * @return void
 */
-void addGoldToPlayer(int gold)
+void addGoldToPlayer(int gold, int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -606,7 +623,7 @@ void addGoldToPlayer(int gold)
     }
 
     sqlite3_bind_int(res, 1, gold);
-    sqlite3_bind_int(res, 2, ID_USER);
+    sqlite3_bind_int(res, 2, idPlayer);
 
     sqlite3_step(res);
 
@@ -616,26 +633,28 @@ void addGoldToPlayer(int gold)
 
 /**
  * @brief Print the gold of the player
+ * @param int idPlayer The id of the player
  * @return void
 */
-void printPlayerGold()
+void printPlayerGold(int idPlayer)
 {
     movCursor(65, 8);
 
     changeTextColor("yellow");
-    printf("Gold: %d", getplayerGold());
+    printf("Gold: %d", getplayerGold(idPlayer));
     changeTextColor("reset");
 }
 
 /**
  * @brief Display the buy stuff menu and handle the choice of the user
+ * @param int idPlayer The id of the player
  * @return void
 */
-void buyStuffInit()
+void buyStuffInit(int idPlayer)
 {
     clearScreen();
     printShopAnsiiWay();
-    printPlayerGold();
+    printPlayerGold(idPlayer);
     printf("\n\n");
     printLine();
 
@@ -669,22 +688,22 @@ void buyStuffInit()
 
         int price = getStuffprice(choice);
 
-        if (checkStuffIsInPlayerStuff(choice)) {
+        if (checkStuffIsInPlayerStuff(choice, idPlayer)) {
             changeTextColor("orange");
             printf("Vous avez déjà ce stuff\n\n");
             changeTextColor("reset");
             continue;
         }
 
-        if (price > getplayerGold()) {
+        if (price > getplayerGold(idPlayer)) {
             changeTextColor("red");
             printf("Vous n'avez pas assez d'or pour acheter ce stuff\n");
             changeTextColor("reset");
             continue;
         }
 
-        removeGoldToPlayer(price);
-        addStuffToPlayerStuff(choice);
+        removeGoldToPlayer(price, idPlayer);
+        addStuffToPlayerStuff(choice, idPlayer);
 
         changeTextColor("green");
         printf("Vous avez acheté le stuff avec succès\n\n");
@@ -696,9 +715,10 @@ void buyStuffInit()
 
 /**
  * @brief Sell a stuff of the player to the shop
+ * @param int idPlayer The id of the player
  * @return void
 */
-void sellStuffInit()
+void sellStuffInit(int idPlayer)
 {
     clearScreen();
 
@@ -706,12 +726,12 @@ void sellStuffInit()
 
     while (choice != 0) {
         printDealerAnsiiWay();
-        printPlayerGold();
+        printPlayerGold(idPlayer);
         printf("\n\n");
         printLine();
 
         int stuffCount;
-        stuff *stuffsList = getStuffOfPLayer(&stuffCount);
+        stuff *stuffsList = getStuffOfPLayer(&stuffCount, idPlayer);
         if (stuffsList) {
             printStuffs(stuffsList, stuffCount);
             free(stuffsList);
@@ -736,13 +756,13 @@ void sellStuffInit()
             return;
         }
 
-        if (!checkStuffIsInPlayerStuff(choice)) {
+        if (!checkStuffIsInPlayerStuff(choice, idPlayer)) {
             printf("Vous ne possédez pas ce stuff\n");
             continue;
         }
 
-        removeStuffFromPlayerStuff(choice);
-        addGoldToPlayer(getStuffprice(choice));
+        removeStuffFromPlayerStuff(choice, idPlayer);
+        addGoldToPlayer(getStuffprice(choice), idPlayer);
         changeTextColor("green");
         printf("Vous avez vendu le stuff avec succès\n\n");
         changeTextColor("reset");
@@ -753,14 +773,15 @@ void sellStuffInit()
 
 /**
  * @brief Init the shop 
+ * @param int idPlayer The id of the player
  * @return void
 */
-void initShop()
+void initShop(int idPlayer)
 {
     clearScreen();
 
     printShopDealerAnsiiWay();
-    printPlayerGold();
+    printPlayerGold(idPlayer);
     printf("\n\n");
     printLine();
     printf("\n\n");
@@ -779,16 +800,16 @@ void initShop()
 
     switch (choice) {
     case 1:
-        buyStuffInit();
+        buyStuffInit(idPlayer);
         break;
     case 2:
-        sellStuffInit();
+        sellStuffInit(idPlayer);
         break;
     case 3:
         return;
     }
 
-    initShop();
+    initShop(idPlayer);
 
     printf("\n\n");
 }

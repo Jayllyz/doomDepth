@@ -30,31 +30,31 @@ void printStuffs(stuff *stuffsList, int stuffCount);
 
 stuff *getStuffFromShop(int *stuffCount);
 
-stuff *getStuffOfPLayer(int *stuffCount);
+stuff *getStuffOfPLayer(int *stuffCount, int idPlayer);
 
 int getStuffprice(int idStuff);
 
-int getplayerGold();
+int getplayerGold(int idPlayer);
 
-int checkStuffIsInPlayerStuff(int idStuff);
+int checkStuffIsInPlayerStuff(int idStuff, int idPlayer);
 
-void addStuffToPlayerStuff(int idStuff);
+void addStuffToPlayerStuff(int idStuff, int idPlayer);
 
-void removeStuffFromPlayerStuff(int idStuff);
+void removeStuffFromPlayerStuff(int idStuff, int idPlayer);
 
-void removeStatsStuff(int idSuff);
+void removeStatsStuff(int idSuff, int idPlayer);
 
-void addStatsStuff(int idSuff);
+void addStatsStuff(int idSuff, int idPlayer);
 
-void removeGoldToPlayer(int gold);
+void removeGoldToPlayer(int gold, int idPlayer);
 
-void addGoldToPlayer(int gold);
+void addGoldToPlayer(int gold, int idPlayer);
 
-void printPlayerGold();
+void printPlayerGold(int idPlayer);
 
 void buyStuffInit();
 
 void sellStuffInit();
 
-void initShop();
+void initShop(int idPlayer);
 #endif
