@@ -16,7 +16,7 @@
 
 #define NB_ITEMS_EACH_ROW 2 //number of stuffs on each row
 #define NB_COL_ITEMS 6 //number of columns for the ascii stuff element
-#define NB_ROW_ITEMS 10 //number of rows for a stuff in the shop
+#define NB_COl_TEXT 90 //number of columns for the text of the stuff
 
 #define ID_USER 1 //DEV PURPOSE
 
@@ -118,7 +118,7 @@ void printStuffAnsiiWay(int x, int y)
     FILE *fp = fopen(ITEMS, "r");
 
     if (fp == NULL) {
-        printf("Fichier de l'stuff introuvable\n");
+        printf("Fichier de stuff introuvable\n");
         return;
     }
 
@@ -141,53 +141,45 @@ void printStuffAnsiiWay(int x, int y)
 */
 void printStuffs(stuff *stuffsList, int stuffCount)
 {
-    int length = 0;
-    int stuffsOnCurrentLine = 0; // Compteur d'articles sur la ligne actuelle
     int ligne = 0;
-
+    int col = 0;
     for (int i = 0; i < stuffCount; i++) {
 
-        if (i == 0) {
-            length = 0;
-        }
-        else if (stuffsOnCurrentLine % NB_ITEMS_EACH_ROW == 0) {
-            length = 0;
-        }
-        else {
-            length += strlen(stuffsList[i].description) + 30;
-        }
 
-        if (stuffsOnCurrentLine % NB_ITEMS_EACH_ROW == 0 && i != 0) {
+        if (col % NB_ITEMS_EACH_ROW == 0 && i != 0) {
             ligne += 10;
+            col = 0;
         }
 
-        printStuffAnsiiWay(NB_COL_ITEMS * i + length, 11 + ligne);
+        printf("%d", col);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 11 + ligne);
+        printStuffAnsiiWay(NB_COl_TEXT * col, 11 + ligne);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 11 + ligne);
         printf("Identifiant: %d", stuffsList[i].id);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 12 + ligne);
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 12 + ligne);
         printf("Nom: %s", stuffsList[i].name);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 13 + ligne);
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 13 + ligne);
         printf("Description: %s", stuffsList[i].description);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 14 + ligne);
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 14 + ligne);
         printf("Attaque: %d", stuffsList[i].attack);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 15 + ligne);
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 15 + ligne);
         printf("Défense: %d", stuffsList[i].defense);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 16 + ligne);
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 16 + ligne);
         printf("Grade: %d", stuffsList[i].grade);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 17 + ligne);
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 17 + ligne);
         printf("Type: %s", stuffsList[i].type);
 
-        movCursor((NB_COL_ITEMS * i) + NB_COL_ITEMS + length, 18 + ligne);
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 18 + ligne);
         printf("Prix: %d", stuffsList[i].gold);
 
-        stuffsOnCurrentLine++;
+        col++;
     }
     printf("\n\n");
 }

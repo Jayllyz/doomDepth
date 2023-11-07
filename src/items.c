@@ -226,7 +226,7 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
             break;
         }
 
-        removeStuffFromPlayerStuff(stuffs[choice]->id);
+        removeStuffFromPlayerStuff(stuffs[choice]->id, p->id);
     }
     else {
         return -2;
