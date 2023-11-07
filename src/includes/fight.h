@@ -19,6 +19,7 @@ void updatePlayerInfo(Player *p);
 Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[]);
 void fightMonster(Player *p, Monster **m, int *nbrMonster);
 void defeat();
+void rewardStuff(Player *p);
 void rewards(Player *p, Monster **m, int nbrMonster);
 void levelUp(Player *p);
 int normalAttack(Player *p, Monster *m);

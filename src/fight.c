@@ -428,20 +428,23 @@ void rewardStuff(Player *p)
     if (rc != SQLITE_OK) {
         printf("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return 1;
+        return;
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT id FROM STUFF WHERE grade = 3 ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT id, name FROM STUFF WHERE grade = 3 ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return 1;
+        return;
     }
 
     sqlite3_step(res);
 
     int id = sqlite3_column_int(res, 0);
+    char *name = strdup((const char *)sqlite3_column_text(res, 1));
+
+    printf("Vous avez reçu un l\'objet légendaire : %s\n", name);
 
     addStuffToPlayerStuff(id, 1);
 
