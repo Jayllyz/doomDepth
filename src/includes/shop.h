@@ -42,6 +42,8 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer);
 
 void removeStuffFromPlayerStuff(int idStuff, int idPlayer);
 
+char *getStuffType(int idStuff);
+
 void removeStatsStuff(int idSuff, int idPlayer);
 
 void addStatsStuff(int idSuff, int idPlayer);

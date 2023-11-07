@@ -9,6 +9,7 @@ typedef struct {
     int life;
     int attack;
     int defense;
+    int isBoss;
     Spell **spell;
 } Monster;
 

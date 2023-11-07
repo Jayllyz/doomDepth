@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
@@ -51,7 +51,6 @@ int randomMonster(int level)
 
 Monster *getMonsterInfo(int id)
 {
-    //TODO : clean function (big and unclear)
     sqlite3 *db;
     sqlite3_stmt *res;
     int rc = sqlite3_open(DB_FILE, &db);
@@ -62,7 +61,7 @@ Monster *getMonsterInfo(int id)
         return NULL;
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT id, name, attack, defense, life, level FROM MONSTER WHERE id = ?;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT id, name, attack, defense, life, level, isBoss FROM MONSTER WHERE id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
 
@@ -83,6 +82,7 @@ Monster *getMonsterInfo(int id)
     m->defense = sqlite3_column_int(res, 3);
     m->life = sqlite3_column_int(res, 4);
     m->level = sqlite3_column_int(res, 5);
+    m->isBoss = sqlite3_column_int(res, 6);
 
     m->spell = (Spell **)malloc(MAX_MONSTER_SPELL * sizeof(Spell *));
     for (int i = 0; i < MAX_MONSTER_SPELL; i++) {
@@ -419,10 +419,53 @@ void levelUp(Player *p)
     p->experience = 0;
 }
 
+void rewardStuff(Player *p)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return 1;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT id FROM STUFF WHERE grade = 3 ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return 1;
+    }
+
+    sqlite3_step(res);
+
+    int id = sqlite3_column_int(res, 0);
+
+    addStuffToPlayerStuff(id, 1);
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+}
+
 void rewards(Player *p, Monster **m, int nbrMonster)
 {
+    int boss = 0;
+    for (int i = 0; i < nbrMonster; i++) {
+        if (m[i]->isBoss == 1) {
+            boss = 1;
+            break;
+        }
+    }
+
     int xp = (m[0]->level * 10) * nbrMonster;
     int gold = (m[0]->level * 5) * nbrMonster;
+
+    if (boss == 1) {
+        xp *= 2;
+        gold *= 2;
+    }
 
     if (p->experience + xp >= 50)
         levelUp(p);
@@ -444,7 +487,10 @@ void rewards(Player *p, Monster **m, int nbrMonster)
     printf("Vous avez gagné %d pièces d'or\n", gold);
     printf("Total or : %d\n", p->gold + gold);
     printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
-
+    if (boss == 1) {
+        printf("Vous avez vaincu un boss ! \n Vous recevez un objet légendaire !\n");
+        rewardStuff(p);
+    }
     p->experience += xp;
     p->gold += gold;
     printf("Appuyez sur entrée pour continuer\n");
@@ -702,8 +748,11 @@ void monsterTurn(const int *nbrMonster, Monster **m, Player *p)
 void fightMonster(Player *p, Monster **m, int *nbrMonster)
 {
     int *maxLife = (int *)malloc(sizeof(int) * *nbrMonster);
+    int boss = 0;
     for (int i = 0; i < *nbrMonster; i++) {
         maxLife[i] = m[i]->life;
+        if (m[i]->isBoss == 1)
+            boss = 1;
     }
     int damageNormalAttack = p->attack - m[0]->defense;
     int choice;

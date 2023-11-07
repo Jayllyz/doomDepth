@@ -1,5 +1,5 @@
-#include "includes/shop.h"
 #include "includes/ansii_print.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -450,7 +450,8 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
     sqlite3_free(err_msg);
     sqlite3_close(db);
 
-    addStatsStuff(idStuff, idPlayer);
+    if (strcmp(getStuffType(idStuff), "Consumable") != 0)
+        addStatsStuff(idStuff, idPlayer);
 }
 
 /**
@@ -487,7 +488,42 @@ void removeStuffFromPlayerStuff(int idStuff, int idPlayer)
     sqlite3_free(err_msg);
     sqlite3_close(db);
 
-    removeStatsStuff(idStuff, idPlayer);
+    if (strcmp(getStuffType(idStuff), "Consumable") != 0)
+        removeStatsStuff(idStuff, idPlayer);
+}
+
+char *getStuffType(int idStuff)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    char *type = NULL;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT type FROM STUFF WHERE id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_bind_int(res, 1, idStuff);
+
+    while (sqlite3_step(res) == SQLITE_ROW) {
+        type = strdup((const char *)sqlite3_column_text(res, 0));
+    }
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+
+    return type;
 }
 
 /**
