@@ -145,7 +145,6 @@ void printStuffs(stuff *stuffsList, int stuffCount)
     int col = 0;
     for (int i = 0; i < stuffCount; i++) {
 
-
         if (col % NB_ITEMS_EACH_ROW == 0 && i != 0) {
             ligne += 10;
             col = 0;
