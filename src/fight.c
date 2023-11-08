@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
@@ -445,7 +445,6 @@ void rewardStuff(Player *p)
     char *name = strdup((const char *)sqlite3_column_text(res, 1));
 
     printf("Vous avez reçu un l\'objet légendaire : %s\n", name);
-
     addStuffToPlayerStuff(id, 1);
 
     sqlite3_finalize(res);

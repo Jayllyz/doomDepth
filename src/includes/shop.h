@@ -59,4 +59,8 @@ void buyStuffInit();
 void sellStuffInit();
 
 void initShop(int idPlayer);
+
+void equipStuff(int idPlayer, int stuffId);
+
+void unequipStuff(int idPlayer, int stuffId);
 #endif
