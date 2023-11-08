@@ -42,6 +42,8 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer);
 
 void removeStuffFromPlayerStuff(int idStuff, int idPlayer);
 
+char *getStuffType(int idStuff);
+
 void removeStatsStuff(int idSuff, int idPlayer);
 
 void addStatsStuff(int idSuff, int idPlayer);
@@ -57,4 +59,8 @@ void buyStuffInit();
 void sellStuffInit();
 
 void initShop(int idPlayer);
+
+void equipStuff(int idPlayer, int stuffId);
+
+void unequipStuff(int idPlayer, int stuffId);
 #endif

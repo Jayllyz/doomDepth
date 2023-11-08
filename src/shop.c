@@ -450,7 +450,38 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
     sqlite3_free(err_msg);
     sqlite3_close(db);
 
-    addStatsStuff(idStuff, idPlayer);
+    char *type = getStuffType(idStuff);
+
+    if (strcmp(type, "Consumable") != 0) {
+        sqlite3_stmt *res;
+        rc = sqlite3_open(DB_FILE, &db);
+
+        if (rc != SQLITE_OK) {
+            printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+        }
+
+        sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id IN (SELECT id FROM STUFF WHERE type = ?);", -1, &res, NULL);
+
+        if (rc != SQLITE_OK) {
+            printf("Failed to insert data: %s\n", sqlite3_errmsg(db));
+            sqlite3_close(db);
+        }
+
+        sqlite3_bind_int(res, 1, idPlayer);
+
+        int count = 0;
+
+        if (sqlite3_step(res) == SQLITE_ROW) {
+            count = sqlite3_column_int(res, 0);
+        }
+
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+
+        if (count == 0)
+            equipStuff(idPlayer, idStuff);
+    }
 }
 
 /**
@@ -463,6 +494,7 @@ void removeStuffFromPlayerStuff(int idStuff, int idPlayer)
 {
     sqlite3 *db;
     char *err_msg = 0;
+    sqlite3_stmt *res;
     int rc = sqlite3_open(DB_FILE, &db);
 
     if (rc != SQLITE_OK) {
@@ -471,6 +503,27 @@ void removeStuffFromPlayerStuff(int idStuff, int idPlayer)
         sqlite3_close(db);
         exit(0);
     }
+
+    rc = sqlite3_prepare_v2(db, "SELECT isEquip FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data %s\n", sqlite3_errmsg(db));
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        exit(0);
+    }
+
+    sqlite3_bind_int(res, 1, idPlayer);
+
+    int isEquip = 0;
+
+    if (sqlite3_step(res) == SQLITE_ROW)
+        isEquip = sqlite3_column_int(res, 0);
+
+    if (isEquip)
+        removeStatsStuff(idPlayer, idStuff);
+
+    sqlite3_finalize(res);
 
     char *sql = sqlite3_mprintf("DELETE FROM PLAYER_STUFF WHERE player_id = %d AND stuff_id = %d;", idPlayer, idStuff);
 
@@ -486,8 +539,40 @@ void removeStuffFromPlayerStuff(int idStuff, int idPlayer)
     sqlite3_free(sql);
     sqlite3_free(err_msg);
     sqlite3_close(db);
+}
 
-    removeStatsStuff(idStuff, idPlayer);
+char *getStuffType(int idStuff)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    char *type = NULL;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT type FROM STUFF WHERE id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_bind_int(res, 1, idStuff);
+
+    while (sqlite3_step(res) == SQLITE_ROW) {
+        type = strdup((const char *)sqlite3_column_text(res, 0));
+    }
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+
+    return type;
 }
 
 /**
@@ -803,4 +888,69 @@ void initShop(int idPlayer)
     initShop(idPlayer);
 
     printf("\n\n");
+}
+
+void equipStuff(int idPlayer, int stuffId)
+{
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    if (strcmp(getStuffType(stuffId), "Consumable") == 0) {
+        printf("Vous ne pouvez pas équiper un objet consommable\n");
+        return;
+    }
+
+    char *sql = sqlite3_mprintf("UPDATE PLAYER_STUFF SET isEquip = 1 WHERE player_id = %d AND stuff_id = %d;", idPlayer, stuffId);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_free(sql);
+    sqlite3_free(err_msg);
+    sqlite3_close(db);
+
+    addStatsStuff(idPlayer, stuffId);
+}
+
+void unequipStuff(int idPlayer, int stuffId)
+{
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    char *sql = sqlite3_mprintf("UPDATE PLAYER_STUFF SET isEquip = 0 WHERE player_id = %d AND stuff_id = %d;", idPlayer, stuffId);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_free(sql);
+    sqlite3_free(err_msg);
+    sqlite3_close(db);
+
+    removeStatsStuff(idPlayer, stuffId);
 }
