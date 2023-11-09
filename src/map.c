@@ -274,7 +274,8 @@ int updateMap(Map *m)
     return 0;
 }
 
-void saveMapToFile(const char *map, const char *filename) {
+void saveMapToFile(const char *map, const char *filename)
+{
     FILE *file = fopen(filename, "w");
 
     if (file == NULL) {
@@ -290,7 +291,6 @@ int eventHandler(char sign, Map m, Player *p)
 {
     int idToFight[1] = {-1};
     int *nbrMonster = (int *)malloc(sizeof(int));
-
 
     switch (sign) {
     case '0':
@@ -323,7 +323,6 @@ int eventHandler(char sign, Map m, Player *p)
         }
         printMapInterface(m.map_left, m.map_top, m.map);
         mov(&m, p);
-
 
         break;
     case '4':
