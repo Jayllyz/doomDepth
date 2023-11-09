@@ -6,18 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <string.h>
 #define MAX_PATH_LENGTH 256
 
-typedef struct{
+typedef struct {
     char storyPath[MAX_PATH_LENGTH];
     char id[10];
     char context[MAX_PATH_LENGTH];
     char situation[MAX_PATH_LENGTH];
     int event;
-}StoryChoice;
+} StoryChoice;
 
-char* initializeStoryChoice(int villageID, int placeID, int scenarioID) {
+char* initializeStoryChoice(int villageID, int placeID, int scenarioID)
+{
     char storyFolderPath[128];
 
     if (getcwd(storyFolderPath, sizeof(storyFolderPath)) != NULL) {
@@ -25,23 +25,24 @@ char* initializeStoryChoice(int villageID, int placeID, int scenarioID) {
         strncat(storyFolderPath, "/story", sizeof(storyFolderPath) - strlen(storyFolderPath) - 1);
 
         char scenarioPath[MAX_PATH_LENGTH];
-        snprintf(scenarioPath, sizeof(scenarioPath), "%s/village_%d/places/place_%d/scenarios/scenario_%d",
-                 storyFolderPath, villageID, placeID, scenarioID);
+        snprintf(scenarioPath, sizeof(scenarioPath), "%s/village_%d/places/place_%d/scenarios/scenario_%d", storyFolderPath, villageID, placeID, scenarioID);
 
         // Allocate memory for the storyPath string and copy it
         char* storyPath = strdup(scenarioPath);
 
         return storyPath;
-    } else {
+    }
+    else {
         perror("getcwd() error");
         exit(1);
     }
 }
 
-void landing(){
+void landing()
+{
     clearScreen();
-    FILE *fp = fopen("ascii/event.txt", "r");
-    char *line = readFileContent(fp);
+    FILE* fp = fopen("ascii/event.txt", "r");
+    char* line = readFileContent(fp);
 
     changeTextColor("yellow");
     printf("%s", line);
@@ -53,30 +54,35 @@ void landing(){
     clearScreen();
 }
 
-int folderExists(const char *path) {
+int folderExists(const char* path)
+{
     if (access(path, F_OK) == 0) {
         // The folder exists
         return 1;
-    } else {
+    }
+    else {
         // The folder does not exist
         return 0;
     }
 }
 
-int hasEventFile(const char *folderPath) {
+int hasEventFile(const char* folderPath)
+{
     char eventFilePath[MAX_PATH_LENGTH];
     snprintf(eventFilePath, sizeof(eventFilePath), "%s/event.txt", folderPath);
 
     if (access(eventFilePath, F_OK) == 0) {
         // The event.txt file exists in the folder
         return 0;
-    } else {
+    }
+    else {
         // The event.txt file does not exist in the folder
         return 1;
     }
 }
 
-char* readFile(const char* path, const char* filename) {
+char* readFile(const char* path, const char* filename)
+{
     size_t path_len = strlen(path);
     size_t filename_len = strlen(filename);
     size_t full_path_len = path_len + 1 + filename_len;
@@ -132,7 +138,7 @@ void event()
 {
     landing();
 
-    StoryChoice *storyChoice = malloc(sizeof(StoryChoice));
+    StoryChoice* storyChoice = malloc(sizeof(StoryChoice));
 
     int villageID = 0;
     int placeID = 0;
@@ -158,30 +164,28 @@ void event()
         strcpy(storyChoice->context, readFile(storyChoice->storyPath, "context.txt"));
         strcpy(storyChoice->situation, readFile(storyChoice->storyPath, "situation.txt"));
 
-
         printf("\nID: %s", storyChoice->id);
         printf("\nContext:\n%s\n", storyChoice->context);
         printf("\nSituation:\n%s\n", storyChoice->situation);
-
 
         scanf("%d", &choice);
 
         // Check the user's choice and update the storyPath
         if (choice == 1) {
             strcat(storyChoice->storyPath, "/blue_pill");
-        } else if (choice == 2) {
+        }
+        else if (choice == 2) {
             strcat(storyChoice->storyPath, "/red_pill");
-        } else {
+        }
+        else {
             printf("Invalid choice. Please choose 1 or 2.\n");
             break;
         }
-
     }
 
     strcpy(storyChoice->id, readFile(storyChoice->storyPath, "id.txt"));
     strcpy(storyChoice->context, readFile(storyChoice->storyPath, "context.txt"));
     strcpy(storyChoice->situation, readFile(storyChoice->storyPath, "situation.txt"));
-
 
     printf("\nID: %s", storyChoice->id);
     printf("\nContext:\n%s\n", storyChoice->context);

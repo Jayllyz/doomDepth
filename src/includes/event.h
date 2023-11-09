@@ -55,8 +55,8 @@ typedef struct {
 void event();
 char* initializeStoryChoice(int villageID, int placeID, int scenarioID);
 void landing();
-int folderExists(const char *path);
-int hasEventFile(const char *folderPath);
+int folderExists(const char* path);
+int hasEventFile(const char* folderPath);
 char* readFile(const char* path, const char* filename);
 
 #endif
