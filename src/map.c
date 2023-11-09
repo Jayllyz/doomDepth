@@ -245,6 +245,7 @@ int updateMap(Map *m)
         i++;
     }
     m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
+    saveMapToFile(m->map, "ascii/map_save");
 
     i = 0;
     //printf("strlen:%lu\n", strlen(m->map) - 1);
@@ -273,10 +274,24 @@ int updateMap(Map *m)
     return 0;
 }
 
+void saveMapToFile(const char *map, const char *filename)
+{
+    FILE *file = fopen(filename, "w");
+
+    if (file == NULL) {
+        perror("Error opening the file");
+        return;
+    }
+
+    fprintf(file, "%s", map);
+    fclose(file);
+}
+
 int eventHandler(char sign, Map m, Player *p)
 {
     int idToFight[1] = {-1};
     int *nbrMonster = (int *)malloc(sizeof(int));
+
     switch (sign) {
     case '0':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
@@ -294,6 +309,7 @@ int eventHandler(char sign, Map m, Player *p)
         }
         printMapInterface(m.map_left, m.map_top, m.map);
         mov(&m, p);
+
         break;
     case '3':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
@@ -323,6 +339,7 @@ int eventHandler(char sign, Map m, Player *p)
         }
         printMapInterface(m.map_left, m.map_top, m.map);
         mov(&m, p);
+
         break;
     }
 
