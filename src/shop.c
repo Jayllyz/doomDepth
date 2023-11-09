@@ -1,5 +1,6 @@
-#include "includes/shop.h"
 #include "includes/ansii_print.h"
+#include "includes/items.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -17,6 +18,8 @@
 #define NB_ITEMS_EACH_ROW 2 //number of stuffs on each row
 #define NB_COL_ITEMS 6 //number of columns for the ascii stuff element
 #define NB_COl_TEXT 90 //number of columns for the text of the stuff
+
+#define PLAYER_STUFF_LIMIT 6 //number of stuffs that the player can have
 
 #define ID_USER 1 //DEV PURPOSE
 
@@ -427,6 +430,9 @@ int checkStuffIsInPlayerStuff(int idStuff, int idPlayer)
 */
 void addStuffToPlayerStuff(int idStuff, int idPlayer)
 {
+    if (countPlayerStuff(idPlayer) >= PLAYER_STUFF_LIMIT)
+        return;
+
     sqlite3 *db;
     char *err_msg = 0;
     int rc = sqlite3_open(DB_FILE, &db);

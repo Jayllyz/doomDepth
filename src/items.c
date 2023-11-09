@@ -1,6 +1,7 @@
-#include "includes/items.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/items.h"
+#include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
 #include <sqlite3.h>
@@ -12,6 +13,9 @@
 
 #define DB_FILE "db/doomdepth.sqlite"
 #define ID_USER 1
+#define NB_ITEMS_EACH_ROW 2 //number of stuffs on each row
+#define NB_COL_ITEMS 6 //number of columns for the ascii stuff element
+#define NB_COl_TEXT 90 //number of columns for the text of the stuff element
 
 stuff *getStuffInfo(int id)
 {
@@ -25,14 +29,13 @@ stuff *getStuffInfo(int id)
         return NULL;
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT id, name, description, attack, defense, life, mana, type, effect FROM STUFF WHERE id = ?;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT id, name, description, attack, defense, life, mana, type, grade, effect FROM STUFF WHERE id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
 
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-
-        return NULL;
+        exit(-1);
     }
 
     sqlite3_bind_int(res, 1, id);
@@ -48,7 +51,30 @@ stuff *getStuffInfo(int id)
     s->life = sqlite3_column_int(res, 5);
     s->mana = sqlite3_column_int(res, 6);
     s->type = strdup((const char *)sqlite3_column_text(res, 7));
-    s->effect = sqlite3_column_int(res, 8);
+    s->grade = sqlite3_column_int(res, 8);
+    s->effect = sqlite3_column_int(res, 9);
+    // rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
+
+    // if (rc != SQLITE_OK) {
+    //     printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+    //     free(s);
+    //     sqlite3_close(db);
+    //     exit(-1);
+    // }
+
+    // sqlite3_bind_int(res, 1, ID_USER);
+
+    // sqlite3_bind_int(res, 2, id);
+
+    // sqlite3_step(res);
+
+    // int count = sqlite3_column_int(res, 0);
+
+    // if (count > 0)
+    //     s->isEquip = 1;
+    // else
+    //     s->isEquip = 0;
+    s->isEquip = 0;
 
     sqlite3_finalize(res);
     sqlite3_close(db);
@@ -262,4 +288,238 @@ void printItemsLogs(Player *p, stuff *s, int nbrMonster, Monster **m, int maxLin
             printf("Vous avez perdu %d points de mana\n", s->mana);
     }
     updateMainLifeBars(maxLines, nbrMonster, m, p);
+}
+
+int countPlayerStuff(int idPlayer)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    sqlite3_close_v2(db);
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return -1;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return -1;
+    }
+
+    sqlite3_bind_int(res, 1, idPlayer);
+    sqlite3_step(res);
+
+    int count = sqlite3_column_int(res, 0);
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+    return count;
+}
+
+stuff *selectStuffFromPlayer(int idPlayer)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    sqlite3_close_v2(db);
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT stuff_id FROM PLAYER_STUFF WHERE player_id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_bind_int(res, 1, idPlayer);
+    rc = sqlite3_step(res);
+    int i = 0;
+
+    stuff *s = (stuff *)malloc(sizeof(stuff) * countPlayerStuff(idPlayer));
+    while (rc == SQLITE_ROW) {
+        int stuff_id = sqlite3_column_int(res, i);
+        s = getStuffInfo(stuff_id);
+        i++;
+        rc = sqlite3_step(res);
+    }
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+    return s;
+}
+
+void printStuffsInventory(stuff *stuffsList, int stuffCount)
+{
+    int ligne = 0;
+    int col = 0;
+    for (int i = 0; i < stuffCount; i++) {
+
+        if (col % NB_ITEMS_EACH_ROW == 0 && i != 0) {
+            ligne += 10;
+            col = 0;
+        }
+
+        printStuffAnsiiWay(NB_COl_TEXT * col, 11 + ligne);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 11 + ligne);
+        printf("Identifiant: %d", stuffsList[i].id);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 12 + ligne);
+        printf("Nom: %s", stuffsList[i].name);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 13 + ligne);
+        printf("Description: %s", stuffsList[i].description);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 14 + ligne);
+        printf("Attaque: %d", stuffsList[i].attack);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 15 + ligne);
+        printf("Défense: %d", stuffsList[i].defense);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 16 + ligne);
+        printf("Grade: %d", stuffsList[i].grade);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 17 + ligne);
+        printf("Type: %s", stuffsList[i].type);
+
+        movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 18 + ligne);
+        printf("Equipé: %s", stuffsList[i].isEquip == 1 ? "Oui" : "Non");
+
+        col++;
+    }
+    printf("\n\n");
+}
+
+void initInventory(int idPlayer)
+{
+    int count = countPlayerStuff(idPlayer);
+    if (count <= 0)
+        return;
+    clearScreen();
+
+    printf("Bienvenue dans votre inventaire\n");
+
+    stuff *s = selectStuffFromPlayer(idPlayer);
+    printStuffsInventory(s, count);
+
+    int choice;
+    do {
+        printf("0 - Retour\n");
+        printf("1 - Changer d'arme\n");
+        printf("2 - Changer d'armure\n");
+        printf("3 - Changer de casque\n");
+        printf("Votre choix : ");
+        choice = getInputInt();
+        clearBuffer();
+        if (choice == 0)
+            return;
+    } while (choice < 1 || choice > 3);
+
+    switch (choice) {
+    case 1:
+        changeEquip(idPlayer, s, "Weapon");
+        break;
+    case 2:
+        changeEquip(idPlayer, s, "Armor");
+        break;
+    case 3:
+        changeEquip(idPlayer, s, "Helmet");
+        break;
+    }
+}
+
+void changeEquip(int idPlayer, stuff *s, char *type)
+{
+    int choice = getInputInt();
+
+    if (choice < 0 || s[choice].isEquip == 1 || strcmp(s[choice].type, type) != 0)
+        return;
+
+    for (int i = 0; i < countPlayerStuff(idPlayer); i++) {
+        if (s[i].isEquip == 1 && strcmp(s[i].type, type) == 0) {
+            removeStatsStuff(s[i].id, idPlayer);
+        }
+    }
+
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    sqlite3_close_v2(db);
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return;
+    }
+
+    char *sql = sqlite3_mprintf("UPDATE PLAYER_STUFF SET isEquip = 0 WHERE player_id = ? AND stuff_id IN (SELECT id FROM STUFF WHERE type = ?);");
+
+    rc = sqlite3_prepare_v2(db, sql, -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_bind_int(res, 1, idPlayer);
+    sqlite3_bind_text(res, 2, type, -1, SQLITE_STATIC);
+
+    rc = sqlite3_step(res);
+
+    if (rc != SQLITE_DONE) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_finalize(res);
+
+    sql = sqlite3_mprintf("UPDATE PLAYER_STUFF SET isEquip = 1 WHERE player_id = ? AND stuff_id = ?;");
+
+    rc = sqlite3_prepare_v2(db, sql, -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_bind_int(res, 1, idPlayer);
+    sqlite3_bind_int(res, 2, s[choice].id);
+
+    rc = sqlite3_step(res);
+
+    if (rc != SQLITE_DONE) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(res);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_finalize(res);
+
+    sqlite3_free(sql);
+    sqlite3_close(db);
+
+    addStatsStuff(s[choice].id, idPlayer);
 }

@@ -1,9 +1,11 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/event.h"
 #include "includes/fight.h"
+#include "includes/items.h"
+#include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #define MAP_FINISHED 2
@@ -27,6 +29,9 @@ const char *arrowKeyGetName(arrowKey_t arrowKey)
         break;
     case ARROWKEY_RIGHT:
         arrowKeyName = "ARROWKEY_RIGHT";
+        break;
+    case INVENTORY:
+        arrowKeyName = "INVENTORY";
         break;
     }
     return arrowKeyName;
@@ -70,8 +75,6 @@ arrowKey_t readArrowKeyPress()
     }
 
     printf(("\n%d %d %d"), buf[0], buf[1], buf[2]);
-    // map the readings to arrow keys if the char 'i' is pressed, print the inventory
-    // look for the i key press
     if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65)) {
         arrowKeyPressed = ARROWKEY_UP;
     }
@@ -84,9 +87,8 @@ arrowKey_t readArrowKeyPress()
     else if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 68)) {
         arrowKeyPressed = ARROWKEY_LEFT;
     }
-    else if (buf[0] == 105) {
-        // must hold i key to open the inventory
-        printf("Open the inventory\n");
+    else if ((buf[0] == 27) && (buf[1] == 79) && (buf[2] == 80)) {
+        arrowKeyPressed = INVENTORY;
     }
 
     return arrowKeyPressed;
@@ -456,6 +458,10 @@ int mov(Map *m, Player *p)
             if (movRight(&m->player_x, &m->player_y, m->map, *m, p) == MAP_FINISHED) {
                 return MAP_FINISHED;
             }
+        }
+        else if (arrowKeyPressed == INVENTORY) {
+            initInventory(1);
+            printMapInterface(m->map_left, m->map_top, m->map);
         }
 
         restoreCursorPos();
