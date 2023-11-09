@@ -5,30 +5,40 @@
 #include "includes/utils.h"
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <string.h>
+#define MAX_PATH_LENGTH 256
 
-/**
- * RPG like adventure
- * How does it work ?
- * 1 - Village / Super Node / Forest
- * The player can move from village to village, village is a super node that is a place AND a village.
- * It allows us to move horizontally and vertically, in the village linked list or in the place linked list.
- * The player can only move to another village if he is at the super node village.
- *
- * 2 - Place / Node / Tree
- * Each village has a circular linked list of places.
- * Each node have 2 scenarios.
- *
- * 3 - Scenario / Branch
- * A scenario is bound to a place.
- * When the player reach a place, a random number is generated between 1 and 2 to chose which scenario it will play.
- * A scenario is a sequence of scenario -> TreeChoice -> scenario -> ...
- *
- *
- *
- */
+typedef struct{
+    char storyPath[MAX_PATH_LENGTH];
+    char id[10];
+    char context[MAX_PATH_LENGTH];
+    char situation[MAX_PATH_LENGTH];
+    int event;
+}StoryChoice;
 
-void event()
-{
+char* initializeStoryChoice(int villageID, int placeID, int scenarioID) {
+    char storyFolderPath[128];
+
+    if (getcwd(storyFolderPath, sizeof(storyFolderPath)) != NULL) {
+        // Append the "story" folder to the current working directory
+        strncat(storyFolderPath, "/story", sizeof(storyFolderPath) - strlen(storyFolderPath) - 1);
+
+        char scenarioPath[MAX_PATH_LENGTH];
+        snprintf(scenarioPath, sizeof(scenarioPath), "%s/village_%d/places/place_%d/scenarios/scenario_%d",
+                 storyFolderPath, villageID, placeID, scenarioID);
+
+        // Allocate memory for the storyPath string and copy it
+        char* storyPath = strdup(scenarioPath);
+
+        return storyPath;
+    } else {
+        perror("getcwd() error");
+        exit(1);
+    }
+}
+
+void landing(){
     clearScreen();
     FILE *fp = fopen("ascii/event.txt", "r");
     char *line = readFileContent(fp);
@@ -40,156 +50,144 @@ void event()
     printf("\n");
     printf("Press any key to continue...\n");
     fgetc(stdin);
+    clearScreen();
+}
 
-    // @TODO Quest system RPG like
-
-    TreeChoice *blue_pill0_1 = malloc(sizeof(TreeChoice));
-    blue_pill0_1->id = 1;
-    blue_pill0_1->context = "You took the blue pill, then a red pill";
-    blue_pill0_1->situation = "You are feeling super weird, the god bestowed you with a new power !";
-    blue_pill0_1->event = BONUS;
-    blue_pill0_1->blue_pill = NULL;
-    blue_pill0_1->red_pill = NULL;
-
-    TreeChoice *blue_pill0_0 = malloc(sizeof(TreeChoice));
-    blue_pill0_0->id = 1;
-    blue_pill0_0->context = "You take the blue pill a second time";
-    blue_pill0_0->situation = "Too bad you can't take the blue pill twice !";
-    blue_pill0_0->event = DEATH;
-    blue_pill0_0->blue_pill = NULL;
-    blue_pill0_0->red_pill = NULL;
-
-    TreeChoice *red_pill1_1 = malloc(sizeof(TreeChoice));
-    red_pill1_1->id = 2;
-    red_pill1_1->context = "You took the red pill a second time";
-    red_pill1_1->situation = "You feel like you could fight a dragon !";
-    red_pill1_1->event = FIGHT;
-    red_pill1_1->blue_pill = NULL;
-    red_pill1_1->red_pill = NULL;
-
-    TreeChoice *red_pill1_0 = malloc(sizeof(TreeChoice));
-    red_pill1_0->id = 2;
-    red_pill1_0->context = "You took the red pill, then a blue pill";
-    red_pill1_0->situation = "This allow you to see the matrix, you can now see the code of the matrix ! You can come back to the 1st time you took a pill !";
-    red_pill1_0->blue_pill = NULL;
-    red_pill1_0->red_pill = NULL;
-
-    TreeChoice *blue_pill = malloc(sizeof(TreeChoice));
-    blue_pill->id = 1;
-    blue_pill->context = "You take the blue pill";
-    blue_pill->situation = "You wake up in your bed and believe whatever you want to believe";
-    blue_pill->blue_pill = blue_pill0_0;
-    blue_pill->red_pill = blue_pill0_1;
-
-    TreeChoice *red_pill = malloc(sizeof(TreeChoice));
-    red_pill->id = 2;
-    red_pill->context = "You take the red pill";
-    red_pill->situation = "You stay in Wonderland and I show you how deep the rabbit-hole goes";
-    red_pill->blue_pill = NULL;
-    red_pill->red_pill = NULL;
-
-    red_pill1_0->blue_pill = blue_pill;
-    red_pill1_0->red_pill = red_pill;
-
-    TreeChoice *start_point_village = malloc(sizeof(TreeChoice));
-    start_point_village->id = 0;
-    start_point_village->context = "You arrived to the village";
-    start_point_village->situation = "A strange guy came to you and ask you to take a pill";
-    start_point_village->blue_pill = blue_pill;
-    start_point_village->red_pill = red_pill;
-
-    TreeChoice *start_point_bar = malloc(sizeof(TreeChoice));
-    start_point_bar->id = 1;
-    start_point_bar->context = "You arrived to the bar";
-    start_point_bar->situation = "A strange guy came to you and ask you to take a pill";
-    start_point_bar->blue_pill = blue_pill;
-    start_point_bar->red_pill = red_pill;
-
-    TreeChoice *start_point_forest = malloc(sizeof(TreeChoice));
-    start_point_forest->id = 2;
-    start_point_forest->context = "You arrived to the forest";
-    start_point_forest->situation = "A strange guy came to you and ask you to take a pill";
-    start_point_forest->blue_pill = blue_pill;
-    start_point_forest->red_pill = red_pill;
-
-    Scenario *scenario_village = malloc(sizeof(Scenario));
-    scenario_village->id = 0;
-    scenario_village->choice = start_point_village;
-
-    Scenario *scenario_bar = malloc(sizeof(Scenario));
-    scenario_bar->id = 1;
-    scenario_bar->choice = start_point_bar;
-
-    Scenario *scenario_forest = malloc(sizeof(Scenario));
-    scenario_forest->id = 2;
-    scenario_forest->choice = start_point_forest;
-
-    Village *village = malloc(sizeof(Village));
-    village->id = 0;
-    village->name = "Village";
-    village->description = "The village is a small village with a few houses";
-    village->scenario = scenario_village;
-    village->next_place = NULL;
-
-    Place *bar = malloc(sizeof(Place));
-    bar->id = 1;
-    bar->name = "Bar";
-    bar->description = "The bar stinks of alcohol and cigarettes";
-    bar->scenario = scenario_bar;
-    bar->next = NULL;
-
-    Place *forest = malloc(sizeof(Place));
-    forest->id = 2;
-    forest->name = "Forest";
-    forest->description = "The forest is a dark and dangerous place";
-    forest->scenario = scenario_forest;
-    forest->next = NULL;
-
-    village->next_place = bar;
-    bar->next = forest;
-    forest->next = bar;
-
-    Protagonist *protagonist = malloc(sizeof(Protagonist));
-    protagonist->village = NULL;
-    protagonist->place = NULL;
-
-    // Starting point is defined randomly
-    int random = rand() % 2;
-    if (random == 0) {
-        protagonist->village = village;
-        protagonist->scenario = scenario_village;
-        protagonist->choice = scenario_village->choice;
+int folderExists(const char *path) {
+    if (access(path, F_OK) == 0) {
+        // The folder exists
+        return 1;
+    } else {
+        // The folder does not exist
+        return 0;
     }
-    else if (random == 1) {
-        protagonist->place = bar;
-        protagonist->scenario = scenario_bar;
-        protagonist->choice = scenario_bar->choice;
+}
+
+int hasEventFile(const char *folderPath) {
+    char eventFilePath[MAX_PATH_LENGTH];
+    snprintf(eventFilePath, sizeof(eventFilePath), "%s/event.txt", folderPath);
+
+    if (access(eventFilePath, F_OK) == 0) {
+        // The event.txt file exists in the folder
+        return 0;
+    } else {
+        // The event.txt file does not exist in the folder
+        return 1;
     }
-    else if (random == 2) {
-        protagonist->place = forest;
-        protagonist->scenario = scenario_forest;
-        protagonist->choice = scenario_forest->choice;
+}
+
+char* readFile(const char* path, const char* filename) {
+    size_t path_len = strlen(path);
+    size_t filename_len = strlen(filename);
+    size_t full_path_len = path_len + 1 + filename_len;
+
+    // Allocate memory for the full path
+    char* full_path = (char*)malloc(full_path_len + 1);
+    if (full_path == NULL) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        exit(EXIT_FAILURE);
     }
 
-    int choice = 0;
-    while (protagonist->choice->blue_pill != NULL && protagonist->choice->red_pill != NULL) {
-        printf("%s\n", protagonist->choice->context);
-        printf("%s\n", protagonist->choice->situation);
-        printf("1 - %s\n", protagonist->choice->blue_pill->context);
-        printf("2 - %s\n", protagonist->choice->red_pill->context);
-        printf("Your choice : \n");
+    strcpy(full_path, path);
+    strcat(full_path, "/");
+    strcat(full_path, filename);
+
+    FILE* file = fopen(full_path, "r");
+    if (file == NULL) {
+        fprintf(stderr, "Failed to open file: %s\n", full_path);
+        free(full_path);
+        exit(EXIT_FAILURE);
+    }
+
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char* file_content = (char*)malloc(file_size + 1); // +1 for null terminator
+    if (file_content == NULL) {
+        fprintf(stderr, "Memory allocation failed.\n");
+        fclose(file);
+        free(full_path);
+        exit(EXIT_FAILURE);
+    }
+
+    size_t read_size = fread(file_content, 1, file_size, file);
+    if (read_size != file_size) {
+        fprintf(stderr, "Failed to read file: %s\n", full_path);
+        fclose(file);
+        free(file_content);
+        free(full_path);
+        exit(EXIT_FAILURE);
+    }
+
+    file_content[file_size] = '\0';
+
+    fclose(file);
+    free(full_path);
+
+    return file_content;
+}
+
+void event()
+{
+    landing();
+
+    StoryChoice *storyChoice = malloc(sizeof(StoryChoice));
+
+    int villageID = 0;
+    int placeID = 0;
+    int scenarioID = 0;
+
+    char* storyPath = initializeStoryChoice(villageID, placeID, scenarioID);
+    //printf("storyPath: %s\n", storyPath);
+
+    if (!folderExists(storyPath)) {
+        printf("\nThe story path \"%s\" does not exist", storyPath);
+        fgetc(stdin);
+        return;
+    }
+
+    int choice;
+
+    strcpy(storyChoice->storyPath, storyPath);
+
+    while (hasEventFile(storyChoice->storyPath)) {
+        printf("storyPath: %s\n", storyChoice->storyPath);
+
+        strcpy(storyChoice->id, readFile(storyChoice->storyPath, "id.txt"));
+        strcpy(storyChoice->context, readFile(storyChoice->storyPath, "context.txt"));
+        strcpy(storyChoice->situation, readFile(storyChoice->storyPath, "situation.txt"));
+
+
+        printf("\nID: %s", storyChoice->id);
+        printf("\nContext:\n%s\n", storyChoice->context);
+        printf("\nSituation:\n%s\n", storyChoice->situation);
+
+
         scanf("%d", &choice);
 
-        if (choice == 1)
-            protagonist->choice = protagonist->choice->blue_pill;
-        else if (choice == 2)
-            protagonist->choice = protagonist->choice->red_pill;
+        // Check the user's choice and update the storyPath
+        if (choice == 1) {
+            strcat(storyChoice->storyPath, "/blue_pill");
+        } else if (choice == 2) {
+            strcat(storyChoice->storyPath, "/red_pill");
+        } else {
+            printf("Invalid choice. Please choose 1 or 2.\n");
+            break;
+        }
+
     }
 
-    printf("%s\n", protagonist->choice->context);
-    printf("%s\n", protagonist->choice->situation);
+    strcpy(storyChoice->id, readFile(storyChoice->storyPath, "id.txt"));
+    strcpy(storyChoice->context, readFile(storyChoice->storyPath, "context.txt"));
+    strcpy(storyChoice->situation, readFile(storyChoice->storyPath, "situation.txt"));
 
-    switch (protagonist->choice->event) {
+
+    printf("\nID: %s", storyChoice->id);
+    printf("\nContext:\n%s\n", storyChoice->context);
+    printf("\nSituation:\n%s\n", storyChoice->situation);
+
+    switch (atoi(readFile(storyChoice->storyPath, "event.txt"))) {
     case DEATH:
         changeTextColor("red");
         printf("You died !\n");
@@ -197,6 +195,14 @@ void event()
     case BONUS:
         changeTextColor("green");
         printf("You got a bonus !\n");
+        break;
+    case MALUS:
+        changeTextColor("red");
+        printf("You got a malus !\n");
+        break;
+    case REWARD:
+        changeTextColor("green");
+        printf("You got a reward !\n");
         break;
     case FIGHT:
         changeTextColor("yellow");
