@@ -1,6 +1,6 @@
-#include "includes/items.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
@@ -32,7 +32,6 @@ stuff *getStuffInfo(int id)
     rc = sqlite3_prepare_v2(db, "SELECT id, name, description, attack, defense, life, mana, type, grade, effect FROM STUFF WHERE id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
-
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(-1);
@@ -43,7 +42,7 @@ stuff *getStuffInfo(int id)
 
     stuff *s = (stuff *)malloc(sizeof(stuff));
 
-    s->id = sqlite3_column_int(res, 0);
+    s->id = id;
     s->name = strdup((const char *)sqlite3_column_text(res, 1));
     s->description = strdup((const char *)sqlite3_column_text(res, 2));
     s->attack = sqlite3_column_int(res, 3);
@@ -53,28 +52,27 @@ stuff *getStuffInfo(int id)
     s->type = strdup((const char *)sqlite3_column_text(res, 7));
     s->grade = sqlite3_column_int(res, 8);
     s->effect = sqlite3_column_int(res, 9);
-    // rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
 
-    // if (rc != SQLITE_OK) {
-    //     printf("Failed to select data: %s\n", sqlite3_errmsg(db));
-    //     free(s);
-    //     sqlite3_close(db);
-    //     exit(-1);
-    // }
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        free(s);
+        sqlite3_close(db);
+        exit(-1);
+    }
 
-    // sqlite3_bind_int(res, 1, ID_USER);
+    sqlite3_bind_int(res, 1, ID_USER);
 
-    // sqlite3_bind_int(res, 2, id);
+    sqlite3_bind_int(res, 2, id);
 
-    // sqlite3_step(res);
+    sqlite3_step(res);
 
-    // int count = sqlite3_column_int(res, 0);
+    int count = sqlite3_column_int(res, 0);
 
-    // if (count > 0)
-    //     s->isEquip = 1;
-    // else
-    //     s->isEquip = 0;
-    s->isEquip = 0;
+    if (count > 0)
+        s->isEquip = 1;
+    else
+        s->isEquip = 0;
 
     sqlite3_finalize(res);
     sqlite3_close(db);

@@ -10,6 +10,6 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines);
 void printItemsLogs(Player *p, stuff *s, int nbrMonster, Monster **m, int maxLines);
 int countPlayerStuff(int idPlayer);
 void initInventory(int idPlayer);
-void changeWeapon(int idPlayer, stuff *s);
+void changeEquip(int idPlayer, stuff *s, char *type);
 
 #endif // ITEMS_H
