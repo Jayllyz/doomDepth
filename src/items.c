@@ -46,13 +46,15 @@ stuff *getStuffInfo(int id)
     const char *name = (const char *)sqlite3_column_text(res, 1);
     if (name == NULL) {
         s->name = NULL;
-    } else {
+    }
+    else {
         s->name = strdup(name);
     }
     const char *description = (const char *)sqlite3_column_text(res, 2);
     if (description == NULL) {
         s->description = NULL;
-    } else {
+    }
+    else {
         s->description = strdup(description);
     }
     s->attack = sqlite3_column_int(res, 3);
@@ -62,10 +64,10 @@ stuff *getStuffInfo(int id)
     const char *type = (const char *)sqlite3_column_text(res, 7);
     if (type == NULL) {
         s->type = NULL;
-    } else {
+    }
+    else {
         s->type = strdup(type);
     }
-
 
     s->grade = sqlite3_column_int(res, 8);
     s->effect = sqlite3_column_int(res, 9);
@@ -360,7 +362,6 @@ stuff **selectStuffFromPlayer(int idPlayer)
     rc = sqlite3_step(res);
     int i = 0;
 
-
     stuff **s = (stuff **)malloc(sizeof(stuff *) * countPlayerStuff(idPlayer));
     while (rc == SQLITE_ROW) {
         int stuff_id = sqlite3_column_int(res, 0);
@@ -437,20 +438,19 @@ void initInventory(int idPlayer)
         choice = getInputInt();
         clearBuffer();
 
-            switch (choice) {
-    case 1:
-        changeEquip(idPlayer, s, "Weapon");
-        break;
-    case 2:
-        changeEquip(idPlayer, s, "Armor");
-        break;
-    case 3:
-        changeEquip(idPlayer, s, "Helmet");
-        break;
-    }
+        switch (choice) {
+        case 1:
+            changeEquip(idPlayer, s, "Weapon");
+            break;
+        case 2:
+            changeEquip(idPlayer, s, "Armor");
+            break;
+        case 3:
+            changeEquip(idPlayer, s, "Helmet");
+            break;
+        }
 
     } while (choice != 0);
-
 }
 
 void changeEquip(int idPlayer, stuff **s, char *type)
