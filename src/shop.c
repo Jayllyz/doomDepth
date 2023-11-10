@@ -481,7 +481,6 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
 
         if (sqlite3_step(res) == SQLITE_ROW) {
             count = sqlite3_column_int(res, 0);
-            printf("count: %d\n", count);
         }
 
         sqlite3_finalize(res);

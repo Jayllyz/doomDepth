@@ -69,7 +69,7 @@ stuff *getStuffInfo(int id)
 
     s->grade = sqlite3_column_int(res, 8);
     s->effect = sqlite3_column_int(res, 9);
-    rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT isEquip FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
@@ -84,12 +84,7 @@ stuff *getStuffInfo(int id)
 
     sqlite3_step(res);
 
-    int count = sqlite3_column_int(res, 0);
-
-    if (count > 0)
-        s->isEquip = 1;
-    else
-        s->isEquip = 0;
+    s->isEquip = sqlite3_column_int(res, 0);
 
     sqlite3_finalize(res);
     sqlite3_close(db);
@@ -425,18 +420,15 @@ void initInventory(int idPlayer)
     int count = countPlayerStuff(idPlayer);
     if (count <= 0)
         return;
-    clearScreen();
-
-    printf("Bienvenue dans votre inventaire\n");
-
-    stuff **s = selectStuffFromPlayer(idPlayer);
-    printf("stuff 1 : %s\n", s[0]->name);
-    printf("stuff 2 : %s\n", s[1]->name);
-
-    printStuffsInventory(s, count);
-
     int choice;
     do {
+        clearScreen();
+
+        printf("Bienvenue dans votre inventaire\n");
+
+        stuff **s = selectStuffFromPlayer(idPlayer);
+
+        printStuffsInventory(s, count);
         printf("0 - Retour\n");
         printf("1 - Changer d'arme\n");
         printf("2 - Changer d'armure\n");
@@ -444,11 +436,8 @@ void initInventory(int idPlayer)
         printf("Votre choix : ");
         choice = getInputInt();
         clearBuffer();
-        if (choice == 0)
-            return;
-    } while (choice < 1 || choice > 3);
 
-    switch (choice) {
+            switch (choice) {
     case 1:
         changeEquip(idPlayer, s, "Weapon");
         break;
@@ -459,10 +448,14 @@ void initInventory(int idPlayer)
         changeEquip(idPlayer, s, "Helmet");
         break;
     }
+
+    } while (choice != 0);
+
 }
 
 void changeEquip(int idPlayer, stuff **s, char *type)
 {
+    printf("\nQuel équipement voulez-vous équiper ? (saisir id)\n");
     int choice = getInputInt();
 
     if (choice < 0 || s[choice]->isEquip == 1 || strcmp(s[choice]->type, type) != 0)
@@ -473,6 +466,8 @@ void changeEquip(int idPlayer, stuff **s, char *type)
             removeStatsStuff(s[i]->id, idPlayer);
         }
     }
+
+    printf("Vous avez équipé %s\n", s[choice]->name);
 
     sqlite3 *db;
     sqlite3_stmt *res;
