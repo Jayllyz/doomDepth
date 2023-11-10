@@ -1,6 +1,6 @@
-#include "includes/items.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #define DB_FILE "db/doomdepth.sqlite"
+#define INVENTORY "ascii/inventory.txt"
 #define ID_USER 1
 #define NB_ITEMS_EACH_ROW 2 //number of stuffs on each row
 #define NB_COL_ITEMS 6 //number of columns for the ascii stuff element
@@ -416,6 +417,25 @@ void printStuffsInventory(stuff **stuffsList, int stuffCount)
     printf("\n\n");
 }
 
+void printInventoryAnsiiWay()
+{
+    FILE *fp = fopen(INVENTORY, "r");
+
+    if (fp == NULL) {
+        printf("Fichier de l\'inventaire introuvable\n");
+        return;
+    }
+
+    char *content = readFileContent(fp);
+    changeTextColor("green");
+    printStringAtCoordinate(28, 0, content);
+    changeTextColor("reset");
+    printf("\n");
+
+    free(content);
+    fclose(fp);
+}
+
 void initInventory(int idPlayer)
 {
     int count = countPlayerStuff(idPlayer);
@@ -425,7 +445,8 @@ void initInventory(int idPlayer)
     do {
         clearScreen();
 
-        printf("Bienvenue dans votre inventaire\n");
+        printInventoryAnsiiWay();
+        printLine();
 
         stuff **s = selectStuffFromPlayer(idPlayer);
 
@@ -460,7 +481,7 @@ void changeEquip(int idPlayer, stuff **s, const char *type, int count)
 {
     printf("\nQuel équipement voulez-vous équiper ? (saisir id)\n");
 
-    int choice;
+    int choice = -1;
     short int found = 0;
     saveCursorPos();
     do {
@@ -470,22 +491,21 @@ void changeEquip(int idPlayer, stuff **s, const char *type, int count)
         clearBuffer();
 
         if (choice < 0)
-            return;
+            continue;
 
         for (int i = 0; i < count; i++) {
-            if (s[i]->id == choice) {
+            if (s[i]->id == choice && strcmp(s[i]->type, type) == 0) {
                 found = 1;
                 choice = i;
+
+                if (s[choice]->isEquip == 1)
+                    found = 0;
+
                 break;
             }
         }
-    } while (found == 0);
 
-    if (s[choice]->isEquip == 1) {
-        printf("Vous avez déjà équipé %s\n", s[choice]->name);
-        sleep(2);
-        return;
-    }
+    } while (found == 0);
 
     for (int i = 0; i < count; i++) {
         if (s[i]->isEquip == 1 && strcmp(s[i]->type, type) == 0) {
