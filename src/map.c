@@ -431,7 +431,7 @@ int movDown(int *x, int *y, char *map, Map m, Player *p)
 
 int mov(Map *m, Player *p)
 {
-    printf("Press any arrow key. Press Ctrl + C to quit.\n");
+    printf("Press any arrow key | F1 to open inventory | Press Ctrl + C to quit.\n");
 
     saveCursorPos();
     while (1) {
