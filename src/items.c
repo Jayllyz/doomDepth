@@ -440,99 +440,54 @@ void initInventory(int idPlayer)
 
         switch (choice) {
         case 1:
-            changeEquip(idPlayer, s, "Weapon");
+            changeEquip(idPlayer, s, "Weapon", count);
             break;
         case 2:
-            changeEquip(idPlayer, s, "Armor");
+            changeEquip(idPlayer, s, "Armor", count);
             break;
         case 3:
-            changeEquip(idPlayer, s, "Helmet");
+            changeEquip(idPlayer, s, "Helmet", count);
             break;
         }
+        free(s);
 
     } while (choice != 0);
+
+    clearScreen();
 }
 
-void changeEquip(int idPlayer, stuff **s, char *type)
+void changeEquip(int idPlayer, stuff **s, const char *type, int count)
 {
     printf("\nQuel équipement voulez-vous équiper ? (saisir id)\n");
     int choice = getInputInt();
-
-    if (choice < 0 || s[choice]->isEquip == 1 || strcmp(s[choice]->type, type) != 0)
+    clearBuffer();
+    if(choice < 0)
         return;
 
-    for (int i = 0; i < countPlayerStuff(idPlayer); i++) {
+    for (int i = 0; i < count; i++) {
+        if (s[i]->id == choice) {
+            choice = i;
+            break;
+        }
+    }
+    
+    if (s[choice]->isEquip == 1) {
+        printf("Vous avez déjà équipé %s\n", s[choice]->name);
+        sleep(2);
+        return;
+    }
+
+    for (int i = 0; i < count ; i++) {
         if (s[i]->isEquip == 1 && strcmp(s[i]->type, type) == 0) {
             removeStatsStuff(s[i]->id, idPlayer);
+            unequipStuff(idPlayer, s[i]->id);
         }
     }
 
-    printf("Vous avez équipé %s\n", s[choice]->name);
-
-    sqlite3 *db;
-    sqlite3_stmt *res;
-    sqlite3_close_v2(db);
-    int rc = sqlite3_open(DB_FILE, &db);
-
-    if (rc != SQLITE_OK) {
-        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
-        sqlite3_free(res);
-        sqlite3_close(db);
-        return;
-    }
-
-    char *sql = sqlite3_mprintf("UPDATE PLAYER_STUFF SET isEquip = 0 WHERE player_id = ? AND stuff_id IN (SELECT id FROM STUFF WHERE type = ?);");
-
-    rc = sqlite3_prepare_v2(db, sql, -1, &res, NULL);
-
-    if (rc != SQLITE_OK) {
-        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
-        sqlite3_free(res);
-        sqlite3_close(db);
-        return;
-    }
-
-    sqlite3_bind_int(res, 1, idPlayer);
-    sqlite3_bind_text(res, 2, type, -1, SQLITE_STATIC);
-
-    rc = sqlite3_step(res);
-
-    if (rc != SQLITE_DONE) {
-        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
-        sqlite3_free(res);
-        sqlite3_close(db);
-        return;
-    }
-
-    sqlite3_finalize(res);
-
-    sql = sqlite3_mprintf("UPDATE PLAYER_STUFF SET isEquip = 1 WHERE player_id = ? AND stuff_id = ?;");
-
-    rc = sqlite3_prepare_v2(db, sql, -1, &res, NULL);
-
-    if (rc != SQLITE_OK) {
-        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
-        sqlite3_free(res);
-        sqlite3_close(db);
-        return;
-    }
-
-    sqlite3_bind_int(res, 1, idPlayer);
-    sqlite3_bind_int(res, 2, s[choice]->id);
-
-    rc = sqlite3_step(res);
-
-    if (rc != SQLITE_DONE) {
-        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
-        sqlite3_free(res);
-        sqlite3_close(db);
-        return;
-    }
-
-    sqlite3_finalize(res);
-
-    sqlite3_free(sql);
-    sqlite3_close(db);
+    equipStuff(idPlayer, s[choice]->id);
 
     addStatsStuff(s[choice]->id, idPlayer);
+
+    printf("Vous avez équipé %s\n", s[choice]->name);
+    sleep(2);
 }

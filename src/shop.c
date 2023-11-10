@@ -605,7 +605,8 @@ void removeStatsStuff(int idSuff, int idPlayer)
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to delete data\n");
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        exit(-1);
     }
 
     sqlite3_free(sql);
@@ -636,7 +637,8 @@ void addStatsStuff(int idSuff, int idPlayer)
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to delete data\n");
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        exit(-1);
     }
 
     sqlite3_free(sql);
