@@ -1,5 +1,5 @@
-#include "includes/shop.h"
 #include "includes/ansii_print.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -88,7 +88,8 @@ stuff getStuffOfPlayerById(int idStuff, int idPlayer)
  * @param int idPlayer The id of the player
  * @return int The level of the stuff
 */
-int getStuffLevelOfPlayerById(int idStuff, int idPlayer){
+int getStuffLevelOfPlayerById(int idStuff, int idPlayer)
+{
     sqlite3 *db;
     sqlite3_stmt *res;
     int rc = sqlite3_open(DB_FILE, &db);
@@ -177,21 +178,13 @@ void initSmith(int idPlayer)
 
     printf("Le prix de l'amélioration est de %d\n", price);
 
-     
     if (price > getPlayerGold(idPlayer)) {
         printf("Vous n'avez pas assez d'argent\n");
         return;
     }
 }
 
-
-
-
-
-
-
 int main()
 {
     initSmith(1);
 }
-
