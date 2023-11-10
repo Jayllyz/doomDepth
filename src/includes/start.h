@@ -29,6 +29,7 @@ typedef struct {
 int createPlayer(char *name, int classId, Player *p);
 int eraseDatabase();
 int playerSetup(Player *p);
+void continueGame(Player *p);
 Spell *affectSpellToPlayer(int playerId, int spellId);
 
 #endif /* START_H */

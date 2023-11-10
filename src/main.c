@@ -120,8 +120,9 @@ int main(int argc, char **argv)
         break;
     case 2:
         clearScreen();
-        printf("Charger une partie\n");
-        //Load player
+        continueGame(p);
+
+        //load map
         break;
     case 3:
         printf("Quitter\n");
