@@ -1,5 +1,6 @@
 #include "includes/shop.h"
 #include "includes/ansii_print.h"
+#include "includes/items.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -17,6 +18,8 @@
 #define NB_ITEMS_EACH_ROW 2 //number of stuffs on each row
 #define NB_COL_ITEMS 6 //number of columns for the ascii stuff element
 #define NB_COl_TEXT 90 //number of columns for the text of the stuff
+
+#define PLAYER_STUFF_LIMIT 6 //number of stuffs that the player can have
 
 #define ID_USER 1 //DEV PURPOSE
 
@@ -427,6 +430,9 @@ int checkStuffIsInPlayerStuff(int idStuff, int idPlayer)
 */
 void addStuffToPlayerStuff(int idStuff, int idPlayer)
 {
+    if (countPlayerStuff(idPlayer) >= PLAYER_STUFF_LIMIT)
+        return;
+
     sqlite3 *db;
     char *err_msg = 0;
     int rc = sqlite3_open(DB_FILE, &db);
@@ -469,6 +475,7 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
         }
 
         sqlite3_bind_int(res, 1, idPlayer);
+        sqlite3_bind_text(res, 2, type, -1, SQLITE_STATIC);
 
         int count = 0;
 
@@ -479,7 +486,7 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
         sqlite3_finalize(res);
         sqlite3_close(db);
 
-        if (count == 0)
+        if (count == 1)
             equipStuff(idPlayer, idStuff);
     }
 }
@@ -598,7 +605,8 @@ void removeStatsStuff(int idSuff, int idPlayer)
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to delete data\n");
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        exit(-1);
     }
 
     sqlite3_free(sql);
@@ -629,7 +637,8 @@ void addStatsStuff(int idSuff, int idPlayer)
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to delete data\n");
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        exit(-1);
     }
 
     sqlite3_free(sql);

@@ -14,6 +14,7 @@ typedef struct {
     int gold;
     char *type;
     int effect;
+    int isEquip;
 } stuff;
 
 void printLine();
