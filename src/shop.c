@@ -475,17 +475,19 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
         }
 
         sqlite3_bind_int(res, 1, idPlayer);
+        sqlite3_bind_text(res, 2, type, -1, SQLITE_STATIC);
 
         int count = 0;
 
         if (sqlite3_step(res) == SQLITE_ROW) {
             count = sqlite3_column_int(res, 0);
+            printf("count: %d\n", count);
         }
 
         sqlite3_finalize(res);
         sqlite3_close(db);
 
-        if (count == 0)
+        if (count == 1)
             equipStuff(idPlayer, idStuff);
     }
 }

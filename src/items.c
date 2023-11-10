@@ -43,13 +43,30 @@ stuff *getStuffInfo(int id)
     stuff *s = (stuff *)malloc(sizeof(stuff));
 
     s->id = id;
-    s->name = strdup((const char *)sqlite3_column_text(res, 1));
-    s->description = strdup((const char *)sqlite3_column_text(res, 2));
+    const char *name = (const char *)sqlite3_column_text(res, 1);
+    if (name == NULL) {
+        s->name = NULL;
+    } else {
+        s->name = strdup(name);
+    }
+    const char *description = (const char *)sqlite3_column_text(res, 2);
+    if (description == NULL) {
+        s->description = NULL;
+    } else {
+        s->description = strdup(description);
+    }
     s->attack = sqlite3_column_int(res, 3);
     s->defense = sqlite3_column_int(res, 4);
     s->life = sqlite3_column_int(res, 5);
     s->mana = sqlite3_column_int(res, 6);
-    s->type = strdup((const char *)sqlite3_column_text(res, 7));
+    const char *type = (const char *)sqlite3_column_text(res, 7);
+    if (type == NULL) {
+        s->type = NULL;
+    } else {
+        s->type = strdup(type);
+    }
+
+
     s->grade = sqlite3_column_int(res, 8);
     s->effect = sqlite3_column_int(res, 9);
     rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
@@ -321,7 +338,7 @@ int countPlayerStuff(int idPlayer)
     return count;
 }
 
-stuff *selectStuffFromPlayer(int idPlayer)
+stuff **selectStuffFromPlayer(int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -348,20 +365,20 @@ stuff *selectStuffFromPlayer(int idPlayer)
     rc = sqlite3_step(res);
     int i = 0;
 
-    stuff *s = (stuff *)malloc(sizeof(stuff) * countPlayerStuff(idPlayer));
+
+    stuff **s = (stuff **)malloc(sizeof(stuff *) * countPlayerStuff(idPlayer));
     while (rc == SQLITE_ROW) {
-        int stuff_id = sqlite3_column_int(res, i);
-        s = getStuffInfo(stuff_id);
+        int stuff_id = sqlite3_column_int(res, 0);
+        s[i] = getStuffInfo(stuff_id);
         i++;
         rc = sqlite3_step(res);
     }
-
     sqlite3_finalize(res);
     sqlite3_close(db);
     return s;
 }
 
-void printStuffsInventory(stuff *stuffsList, int stuffCount)
+void printStuffsInventory(stuff **stuffsList, int stuffCount)
 {
     int ligne = 0;
     int col = 0;
@@ -375,28 +392,28 @@ void printStuffsInventory(stuff *stuffsList, int stuffCount)
         printStuffAnsiiWay(NB_COl_TEXT * col, 11 + ligne);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 11 + ligne);
-        printf("Identifiant: %d", stuffsList[i].id);
+        printf("Identifiant: %d", stuffsList[i]->id);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 12 + ligne);
-        printf("Nom: %s", stuffsList[i].name);
+        printf("Nom: %s", stuffsList[i]->name);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 13 + ligne);
-        printf("Description: %s", stuffsList[i].description);
+        printf("Description: %s", stuffsList[i]->description);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 14 + ligne);
-        printf("Attaque: %d", stuffsList[i].attack);
+        printf("Attaque: %d", stuffsList[i]->attack);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 15 + ligne);
-        printf("Défense: %d", stuffsList[i].defense);
+        printf("Défense: %d", stuffsList[i]->defense);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 16 + ligne);
-        printf("Grade: %d", stuffsList[i].grade);
+        printf("Grade: %d", stuffsList[i]->grade);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 17 + ligne);
-        printf("Type: %s", stuffsList[i].type);
+        printf("Type: %s", stuffsList[i]->type);
 
         movCursor(NB_COl_TEXT * col + NB_COL_ITEMS, 18 + ligne);
-        printf("Equipé: %s", stuffsList[i].isEquip == 1 ? "Oui" : "Non");
+        printf("Equipé: %s", stuffsList[i]->isEquip == 1 ? "Oui" : "Non");
 
         col++;
     }
@@ -412,7 +429,10 @@ void initInventory(int idPlayer)
 
     printf("Bienvenue dans votre inventaire\n");
 
-    stuff *s = selectStuffFromPlayer(idPlayer);
+    stuff **s = selectStuffFromPlayer(idPlayer);
+    printf("stuff 1 : %s\n", s[0]->name);
+    printf("stuff 2 : %s\n", s[1]->name);
+
     printStuffsInventory(s, count);
 
     int choice;
@@ -441,16 +461,16 @@ void initInventory(int idPlayer)
     }
 }
 
-void changeEquip(int idPlayer, stuff *s, char *type)
+void changeEquip(int idPlayer, stuff **s, char *type)
 {
     int choice = getInputInt();
 
-    if (choice < 0 || s[choice].isEquip == 1 || strcmp(s[choice].type, type) != 0)
+    if (choice < 0 || s[choice]->isEquip == 1 || strcmp(s[choice]->type, type) != 0)
         return;
 
     for (int i = 0; i < countPlayerStuff(idPlayer); i++) {
-        if (s[i].isEquip == 1 && strcmp(s[i].type, type) == 0) {
-            removeStatsStuff(s[i].id, idPlayer);
+        if (s[i]->isEquip == 1 && strcmp(s[i]->type, type) == 0) {
+            removeStatsStuff(s[i]->id, idPlayer);
         }
     }
 
@@ -503,7 +523,7 @@ void changeEquip(int idPlayer, stuff *s, char *type)
     }
 
     sqlite3_bind_int(res, 1, idPlayer);
-    sqlite3_bind_int(res, 2, s[choice].id);
+    sqlite3_bind_int(res, 2, s[choice]->id);
 
     rc = sqlite3_step(res);
 
@@ -519,5 +539,5 @@ void changeEquip(int idPlayer, stuff *s, char *type)
     sqlite3_free(sql);
     sqlite3_close(db);
 
-    addStatsStuff(s[choice].id, idPlayer);
+    addStatsStuff(s[choice]->id, idPlayer);
 }
