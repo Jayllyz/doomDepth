@@ -461,7 +461,7 @@ void changeEquip(int idPlayer, stuff **s, const char *type, int count)
     printf("\nQuel équipement voulez-vous équiper ? (saisir id)\n");
     int choice = getInputInt();
     clearBuffer();
-    if(choice < 0)
+    if (choice < 0)
         return;
 
     for (int i = 0; i < count; i++) {
@@ -470,14 +470,14 @@ void changeEquip(int idPlayer, stuff **s, const char *type, int count)
             break;
         }
     }
-    
+
     if (s[choice]->isEquip == 1) {
         printf("Vous avez déjà équipé %s\n", s[choice]->name);
         sleep(2);
         return;
     }
 
-    for (int i = 0; i < count ; i++) {
+    for (int i = 0; i < count; i++) {
         if (s[i]->isEquip == 1 && strcmp(s[i]->type, type) == 0) {
             removeStatsStuff(s[i]->id, idPlayer);
             unequipStuff(idPlayer, s[i]->id);
