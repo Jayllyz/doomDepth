@@ -631,7 +631,7 @@ void printPlayerGold(int idPlayer)
 {
     movCursor(65, 8);
 
-    changeTextColor("yellow");
+    changeTextColor("orange");
     printf("Gold: %d", getplayerGold(idPlayer));
     changeTextColor("reset");
 }
