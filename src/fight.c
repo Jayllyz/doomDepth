@@ -268,7 +268,10 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
     FILE *fplayer;
     clearScreen();
     selectPlayerInfo(p);
-    printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
+    //printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
+    char * playerStats = malloc(sizeof(char) * 128);
+    sprintf(playerStats, "%s Lv.%d(%d/50)\n⚔️ \033[0;31m %d\033[0m    🛡️ \033[0;32m %d\033[0m", p->name, p->level, p->experience, p->attack, p->defense);
+    printStringAtCoordinate(0, 2, playerStats);
 
     int nbMonster;
 
@@ -358,8 +361,16 @@ int normalAttack(Player *p, Monster *m)
     if (m->life < 0)
         m->life = 0;
 
-    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
-    printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
+    //printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
+    //printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
+    char *damageDone = malloc(sizeof(char) * 64);
+    sprintf(damageDone, "\033[0;32m[DMG] \033[0m%s: -\033[0;32m%d HP\033[0m", m->name, damage);
+    char *healthLeft = malloc(sizeof(char) * 64);
+    sprintf(healthLeft, "\033[0;31m[HP]  \033[0m%s: \033[0;31m%d HP\033[0m", m->name, m->life);
+
+    printStringAtCoordinate(100, 35, damageDone);
+    printStringAtCoordinate(100, 36, healthLeft);
+    movCursor(100, 37);
 
     return damage;
 }
@@ -374,7 +385,8 @@ void monsterAttack(Player *p, Monster *m)
     int randomCC = rand() % 100;
     if (randomCC < 15) {
         damage *= 2;
-        printf("Coup critique !\n");
+        //printf("Coup critique !");
+        printStringAtCoordinate(80, 37, "Coup critique !");
     }
 
     p->life -= damage;
@@ -383,8 +395,15 @@ void monsterAttack(Player *p, Monster *m)
         p->life = 0;
     }
 
-    printf("Le %s vous a infligé \033[0;31m%d\033[0m dégats\n", m->name, damage);
-    printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
+    char * monsterAttack = malloc(sizeof(char) * 64);
+    sprintf(monsterAttack, "\033[0;31m[DMG] \033[0m%s: -\033[0;31m%d HP\033[0m", p->name, damage);
+    char * healthLeft = malloc(sizeof(char) * 64);
+    sprintf(healthLeft, "\033[0;32m[HP]  \033[0m%s: \033[0;32m%d HP\033[0m", p->name, p->life);
+    //printf("Le %s vous a infligé \033[0;31m%d\033[0m dégats\n", m->name, damage);
+    //printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
+
+    printStringAtCoordinate(100, 38, monsterAttack);
+    printStringAtCoordinate(100, 39, healthLeft);
 }
 
 void monsterSpell(Player *p, Monster *m)
@@ -404,9 +423,20 @@ void monsterSpell(Player *p, Monster *m)
     if (p->life < 0)
         p->life = 0;
 
-    printf("Le %s a utilisé le sort %s\n", m->name, m->spell[0]->name);
-    printf("Il vous a infligé \033[0;32m%d\033[0m dégats\n", damage);
-    printf("Il vous reste \033[0;31m%02d\033[0m points de vie\n", p->life);
+    //printf("Le %s a utilisé le sort %s\n", m->name, m->spell[0]->name);
+    //printf("Il vous a infligé \033[0;32m%d\033[0m dégats\n", damage);
+    //printf("Il vous reste \033[0;31m%02d\033[0m points de vie\n", p->life);
+
+    char * monsterSpell = malloc(sizeof(char) * 64);
+    sprintf(monsterSpell, "\033[0;34m[SPELL] \033[0m%s used \033[0;34m%s\033[0m", m->name, m->spell[0]->name);
+    char * damageDone = malloc(sizeof(char) * 64);
+    sprintf(damageDone, "\033[0;31m[DMG] \033[0m%s: -\033[0;31m%d HP\033[0m", p->name, damage);
+    char * healthLeft = malloc(sizeof(char) * 64);
+    sprintf(healthLeft, "\033[0;32m[HP]  \033[0m%s: \033[0;32m%d HP\033[0m", p->name, p->life);
+
+    printStringAtCoordinate(100, 37, monsterSpell);
+    printStringAtCoordinate(100, 38, damageDone);
+    printStringAtCoordinate(100, 39, healthLeft);
 }
 
 int getSpellsCount(int playerId)
@@ -661,22 +691,40 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
 {
     int lifeBar = (p->life * 10) / 10;
     changeTextColor("green");
+    movCursor(5, 29);
     printf("%s HP : ", p->name);
+
+    movCursor(5, 30);
+    clearLine();
+    changeTextColor("green");
     for (int i = 0; i < lifeBar; i++)
-        printf("\033[0;32m█\033[0m");
+        printStringAtCoordinate(i+5, 30, "█");
+        //printf("\033[0;32m█\033[0m"); // green
+    changeTextColor("red");
     for (int i = 0; i < 10 - lifeBar; i++)
-        printf("\033[0;31m█\033[0m");
-    printf("\033[0;32m %d \033[0m", p->life);
+        printStringAtCoordinate(i+5, 30, "█");
+
+        //printf("\033[0;31m█\033[0m"); // red
+    changeTextColor("green");
+    movCursor(7 + lifeBar, 30);
+    printf("\033[0;32m %d \033[0m", p->life); // green
     printf("\n\n");
 
     if (mana == 1) {
         int manaBar = (p->mana * 10) / 10;
         changeTextColor("blue");
-        printf("%s Mana : ", p->name);
+        //printf("%s Mana : ", p->name);
+
         for (int i = 0; i < manaBar; i++)
-            printf("\033[0;34m█\033[0m");
+            printStringAtCoordinate(i+5, 31, "█");
+            //printf("\033[0;34m█\033[0m"); // blue
+
+        changeTextColor("red");
         for (int i = 0; i < 10 - manaBar; i++)
-            printf("\033[0;31m█\033[0m");
+            printStringAtCoordinate(i+5, 31, "█");
+            //printf("\033[0;31m█\033[0m"); // red
+
+        movCursor(7 + manaBar, 31);
         printf("\033[0;34m %d \033[0m", p->mana);
         printf("\n\n");
     }
@@ -684,14 +732,18 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
     for (int i = 0; i < nbrMonster; i++) {
         changeTextColor("red");
         if (m[i]->life == 0) {
+            movCursor(5, 33 + i);
             printf("%s %d est mort\n\n", m[i]->name, i + 1);
             continue;
         }
         lifeBar = (m[i]->life * 10) / 10;
+        movCursor(5, 33 + i);
         printf("%s %d HP : ", m[i]->name, i + 1);
         for (int j = 0; j < lifeBar; j++)
-            printf("\033[0;31m█\033[0m");
-        printf("\033[0;31m %d \033[0m", m[i]->life);
+            printStringAtCoordinate(j+5, 33 + i, "█");
+            //printf("\033[0;31m█\033[0m");
+
+        printf("\033[0;31m %d %s %d\033[0m", m[i]->life, m[i]->name, i+1);
         printf("\n\n");
     }
 
