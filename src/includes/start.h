@@ -31,5 +31,6 @@ int eraseDatabase();
 int playerSetup(Player *p);
 void continueGame(Player *p);
 Spell *affectSpellToPlayer(int playerId, int spellId);
+Spell **loadPlayerSpells(int playerId);
 
 #endif /* START_H */

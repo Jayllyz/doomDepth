@@ -240,28 +240,57 @@ void continueGame(Player *p)
     p->mana = sqlite3_column_int(select, 7);
     p->gold = sqlite3_column_int(select, 8);
     p->classId = sqlite3_column_int(select, 9);
+    p->spell = loadPlayerSpells(p->id);
 
     sqlite3_finalize(select);
 
-    sqlite3_stmt *selectSpell;
-    rc = sqlite3_prepare_v2(db, "SELECT spell_id FROM PLAYER_SPELL WHERE player_id = ?;", -1, &selectSpell, NULL);
+    sqlite3_close(db);
+}
+
+Spell **loadPlayerSpells(int playerId)
+{
+    sqlite3 *db;
+    int rc = sqlite3_open(DB_FILE, &db);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select data\n");
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return;
+        return NULL;
     }
 
-    sqlite3_bind_int(selectSpell, 1, p->id);
+    sqlite3_stmt *select;
 
-    int i = 0;
-    while (sqlite3_step(selectSpell) == SQLITE_ROW) {
-        int spellId = sqlite3_column_int(selectSpell, 0);
-        // p->spell[i] = affectSpellToPlayer(p->id, spellId);
-        i++;
+    rc = sqlite3_prepare_v2(db,
+        "SELECT COUNT(*), SPELL.id, SPELL.name, SPELL.description, SPELL.attack, SPELL.grade, SPELL.mana, SPELL.type FROM SPELL INNER JOIN PLAYER_SPELL ON SPELL.id = "
+        "PLAYER_SPELL.spell_id WHERE PLAYER_SPELL.player_id = ?;",
+        -1, &select, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return NULL;
     }
 
-    sqlite3_finalize(selectSpell);
+    sqlite3_bind_int(select, 1, playerId);
+    sqlite3_step(select);
 
+    int nbrSpell = sqlite3_column_int(select, 0);
+
+    Spell **spells = (Spell **)malloc(nbrSpell * sizeof(Spell *));
+
+    for (int i = 0; i < nbrSpell; i++) {
+        spells[i] = (Spell *)malloc(sizeof(Spell));
+        spells[i]->id = sqlite3_column_int(select, 1);
+        spells[i]->name = strdup((const char *)sqlite3_column_text(select, 2));
+        spells[i]->description = strdup((const char *)sqlite3_column_text(select, 3));
+        spells[i]->attack = sqlite3_column_int(select, 4);
+        spells[i]->grade = sqlite3_column_int(select, 5);
+        spells[i]->mana = sqlite3_column_int(select, 6);
+        spells[i]->type = strdup((const char *)sqlite3_column_text(select, 7));
+        sqlite3_step(select);
+    }
+
+    sqlite3_finalize(select);
     sqlite3_close(db);
+    return spells;
 }
