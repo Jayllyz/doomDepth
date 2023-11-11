@@ -1,6 +1,7 @@
-#include "includes/shop.h"
 #include "includes/ansii_print.h"
 #include "includes/utils.h"
+#include "includes/smith.h"
+#include "includes/shop.h"
 #include <math.h>
 #include <sqlite3.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@
 #define ITEMS "ascii/shop/stuff.txt"
 #define DB_FILE "db/doomdepth.sqlite"
 #define TAUX_AMELIORATION 0.1
+#define MAX_STUFF_LEVEL 10
 
 /**
  * @brief Read the content of a file and print it
@@ -56,30 +58,35 @@ stuff getStuffOfPlayerById(int idStuff, int idPlayer)
     rc = sqlite3_prepare_v2(db, "SELECT * FROM STUFF WHERE id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select data\n");
+        printf("Failed to prepare statement\n");
         sqlite3_close(db);
     }
 
     sqlite3_bind_int(res, 1, idStuff);
 
-    stuff stuff;
+    stuff result;
 
-    while (sqlite3_step(res) == SQLITE_ROW) {
+    result.name = NULL;
+    result.description = NULL;
+    result.type = NULL;
 
-        stuff.name = strdup((const char *)sqlite3_column_text(res, 1));
-        stuff.description = strdup((const char *)sqlite3_column_text(res, 2));
-        stuff.attack = sqlite3_column_int(res, 3);
-        stuff.defense = sqlite3_column_int(res, 4);
-        stuff.grade = sqlite3_column_int(res, 5);
-        stuff.gold = sqlite3_column_int(res, 6);
-        stuff.type = strdup((const char *)sqlite3_column_text(res, 7));
+    if (sqlite3_step(res) == SQLITE_ROW) {
+        result.name = strdup((const char *)sqlite3_column_text(res, 1));
+        result.description = strdup((const char *)sqlite3_column_text(res, 2));
+        result.attack = sqlite3_column_int(res, 3);
+        result.defense = sqlite3_column_int(res, 4);
+        result.grade = sqlite3_column_int(res, 5);
+        result.gold = sqlite3_column_int(res, 6);
+        result.type = strdup((const char *)sqlite3_column_text(res, 7));
+    }
+    else {
+        printf("No data found for id = %d\n", idStuff);
     }
 
     sqlite3_finalize(res);
-
     sqlite3_close(db);
 
-    return stuff;
+    return result;
 }
 
 /**
@@ -122,6 +129,39 @@ int getStuffLevelOfPlayerById(int idStuff, int idPlayer){
 }
 
 /**
+ * @brief Upgrade the player stuff
+ * @param int idStuff The id of the stuff
+ * @param int idPlayer The id of the player
+ * @return void
+*/
+void upgradePlayerStuff(int idStuff, int idPlayer){
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    char *sql = sqlite3_mprintf("UPDATE PLAYER_STUFF SET level = level + 1 WHERE player_id = %d AND stuff_id = %d;", idPlayer, idStuff);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_free(sql);
+    sqlite3_free(err_msg);
+    sqlite3_close(db);
+}
+
+/**
  * @brief Init the smith 
  * @param int idPlayer The id of the player
  * @return void
@@ -145,7 +185,7 @@ void initSmith(int idPlayer)
     }
     else {
         changeTextColor("orange");
-        printf("Mince ! Vous n'avez rien à vendre \n");
+        printf("Mince ! Vous n'avez rien dans votre inventaire\n");
         changeTextColor("reset");
     }
 
@@ -153,45 +193,91 @@ void initSmith(int idPlayer)
     printLine();
     printf("\n\n");
 
-    printf("Entrer le numéro du stuff que vous voulez améliorer\n");
-    printf("Entrer 0 pour quitter\n");
+    int choice;
+    do {
+        printf("Entrer le numéro du stuff que vous voulez améliorer\n");
+        printf("Entrer 0 pour quitter\n");
 
-    int choice = getInputInt();
-
-    while (choice < 0) {
-        printf("Veuillez entrer un choix valide\n");
         choice = getInputInt();
+        clearBuffer();
+    } while (choice < 0);
+
+    if (choice != 0) {
+
+        stuff stuff = getStuffOfPlayerById(choice, idPlayer);
+        int level = getStuffLevelOfPlayerById(choice, idPlayer);
+
+        printf("Vous avez choisi %s\n", stuff.name);
+
+        if (level >= MAX_STUFF_LEVEL) {
+            changeTextColor("orange");
+            printf("Votre stuff est déjà au niveau maximum\n");
+            changeTextColor("reset");
+
+            printf("\n\n");
+            printf("Appuyer sur entrer pour continuer\n");
+            clearBuffer();
+
+            initSmith(idPlayer);
+        }
+        else{
+            printf("Votre stuff est de niveau %d\n", level);
+        }
+
+        int price = stuff.gold * (1 + level * TAUX_AMELIORATION);
+
+        printf("\n\n");
+
+        printf("Le prix de l'amélioration est de %d", price);
+        changeTextColor("orange");
+        printf(" gold\n");
+        changeTextColor("reset");
+
+        printf("\n\n");
+
+        changeTextColor("red");
+        printf("Voulez-vous améliorer ce stuff ?\n");
+        changeTextColor("reset");
+        printf("1. Oui\n");
+        printf("2. Non\n");
+
+        int choice2;
+        do {
+            choice2 = getInputInt();
+            clearBuffer();
+        } while (choice2 < 1 || choice2 > 2);
+
+        if (choice2 == 1) {
+            int gold = getPlayerGold(idPlayer);
+            if (price > gold) {
+                changeTextColor("red");
+                printf("Vous n'avez pas assez d'argent\n");
+                changeTextColor("reset");
+                
+                printf("\n\n");
+                printf("Appuyer sur entrer pour continuer\n");
+                clearBuffer();
+
+                initSmith(idPlayer);
+            }
+
+            removeGoldToPlayer(price, idPlayer);
+            upgradePlayerStuff(choice, idPlayer);
+            changeTextColor("green");
+            printf("Votre stuff a été amélioré\n");
+            changeTextColor("reset");
+        }
+
+        printf("\n\n");
+        printf("Appuyer sur entrer pour continuer\n");
+        clearBuffer();
+
+        initSmith(idPlayer);
     }
 
-    if (choice == 0) {
-        return;
-    }
+    return;  
 
-    stuff stuff = getStuffOfPlayerById(choice, idPlayer);
-    int level = getStuffLevelOfPlayerById(choice, idPlayer);
 
-    printf("Vous avez choisi %s\n", stuff.name);
-    printf("Votre stuff est de niveau %d\n", level);
-
-    int price = stuff.gold * (1 + level * TAUX_AMELIORATION);
-
-    printf("Le prix de l'amélioration est de %d\n", price);
-
-     
-    if (price > getPlayerGold(idPlayer)) {
-        printf("Vous n'avez pas assez d'argent\n");
-        return;
-    }
 }
 
-
-
-
-
-
-
-int main()
-{
-    initSmith(1);
-}
 

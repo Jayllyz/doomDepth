@@ -228,7 +228,7 @@ stuff *getStuffFromShop(int *stuffCount)
         currentStuff->attack = sqlite3_column_int(res, 3);
         currentStuff->defense = sqlite3_column_int(res, 4);
         currentStuff->grade = sqlite3_column_int(res, 5);
-        currentStuff->gold = sqlite3_column_int(res, NB_COL_ITEMS);
+        currentStuff->gold = sqlite3_column_int(res, 6);
         currentStuff->type = strdup((const char *)sqlite3_column_text(res, 7));
 
         (*stuffCount)++;
@@ -347,7 +347,7 @@ int getStuffprice(int idStuff)
  * @param int idPlayer The id of the player
  * @return int The gold of the player
 */
-int getplayerGold(int idPlayer)
+int getPlayerGold(int idPlayer)
 {
     sqlite3 *db;
     sqlite3_stmt *res;
@@ -632,7 +632,7 @@ void printPlayerGold(int idPlayer)
     movCursor(65, 8);
 
     changeTextColor("orange");
-    printf("Gold: %d", getplayerGold(idPlayer));
+    printf("Gold: %d", getPlayerGold(idPlayer));
     changeTextColor("reset");
 }
 
@@ -659,47 +659,41 @@ void buyStuffInit(int idPlayer)
         printf("Aucun élément trouvé dans la base de données.\n");
     }
 
-    int choice = -1;
-
-    while (choice != 0) {
+    int choice;
+    do {
 
         printf("Entrer le numéro du stuff que vous voulez acheter\n");
         printf("Entrer 0 pour quitter\n");
 
         choice = getInputInt();
+        clearBuffer();
 
-        while (choice < 0) {
-            printf("Veuillez entrer un choix valide\n");
-            choice = getInputInt();
-        }
+        if(choice != 0 && choice > stuffCount){
+            
+            int price = getStuffprice(choice);
 
-        if (choice == 0) {
-            return;
-        }
+            if (checkStuffIsInPlayerStuff(choice, idPlayer)) {
+                changeTextColor("orange");
+                printf("Vous avez déjà ce stuff\n\n");
+                changeTextColor("reset");
+                return;
+            }
 
-        int price = getStuffprice(choice);
+            if (price > getPlayerGold(idPlayer)) {
+                changeTextColor("red");
+                printf("Vous n'avez pas assez d'or pour acheter ce stuff\n");
+                changeTextColor("reset");
+                return;
+            }
 
-        if (checkStuffIsInPlayerStuff(choice, idPlayer)) {
-            changeTextColor("orange");
-            printf("Vous avez déjà ce stuff\n\n");
+            removeGoldToPlayer(price, idPlayer);
+            addStuffToPlayerStuff(choice, idPlayer);
+
+            changeTextColor("green");
+            printf("Vous avez acheté le stuff avec succès\n\n");
             changeTextColor("reset");
-            continue;
         }
-
-        if (price > getplayerGold(idPlayer)) {
-            changeTextColor("red");
-            printf("Vous n'avez pas assez d'or pour acheter ce stuff\n");
-            changeTextColor("reset");
-            continue;
-        }
-
-        removeGoldToPlayer(price, idPlayer);
-        addStuffToPlayerStuff(choice, idPlayer);
-
-        changeTextColor("green");
-        printf("Vous avez acheté le stuff avec succès\n\n");
-        changeTextColor("reset");
-    }
+    } while (choice != 0);
 
     return;
 }
@@ -713,9 +707,8 @@ void sellStuffInit(int idPlayer)
 {
     clearScreen();
 
-    int choice = -1;
-
-    while (choice != 0) {
+    int choice;
+    do {
         printDealerAnsiiWay();
         printPlayerGold(idPlayer);
         printf("\n\n");
@@ -728,6 +721,13 @@ void sellStuffInit(int idPlayer)
             free(stuffsList);
         }
         else {
+            clearScreen();
+            printDealerAnsiiWay();
+            printPlayerGold(idPlayer);
+            printf("\n\n");
+            printLine();
+
+
             changeTextColor("orange");
             printf("Mince ! Vous n'avez rien à vendre \n");
             changeTextColor("reset");
@@ -737,15 +737,7 @@ void sellStuffInit(int idPlayer)
         printf("Entrer 0 pour quitter\n");
 
         choice = getInputInt();
-
-        while (choice < 0) {
-            printf("Veuillez entrer un choix valide\n");
-            choice = getInputInt();
-        }
-
-        if (choice == 0) {
-            return;
-        }
+        clearBuffer();
 
         if (!checkStuffIsInPlayerStuff(choice, idPlayer)) {
             printf("Vous ne possédez pas ce stuff\n");
@@ -757,7 +749,8 @@ void sellStuffInit(int idPlayer)
         changeTextColor("green");
         printf("Vous avez vendu le stuff avec succès\n\n");
         changeTextColor("reset");
-    }
+    } while (choice != 0);
+
 
     return;
 }
@@ -782,12 +775,11 @@ void initShop(int idPlayer)
     printf("2. Vendre un stuff\n");
     printf("3. Quitter\n");
 
-    int choice = getInputInt();
-
-    while (choice < 1 || choice > 3) {
-        printf("Veuillez entrer un choix valide\n");
+    int choice;
+    do {
         choice = getInputInt();
-    }
+        clearBuffer();
+    } while (choice < 1 || choice > 3);
 
     switch (choice) {
     case 1:

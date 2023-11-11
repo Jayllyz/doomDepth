@@ -34,7 +34,7 @@ stuff *getStuffOfPLayer(int *stuffCount, int idPlayer);
 
 int getStuffprice(int idStuff);
 
-int getplayerGold(int idPlayer);
+int getPlayerGold(int idPlayer);
 
 int checkStuffIsInPlayerStuff(int idStuff, int idPlayer);
 
