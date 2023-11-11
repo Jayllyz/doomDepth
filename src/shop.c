@@ -382,6 +382,43 @@ int getPlayerGold(int idPlayer)
 }
 
 /**
+ * @brief Get the number of stuff in the player's stuff
+ * @param int idPlayer The id of the player
+ * @return int The number of stuff
+*/
+int getNbStuffInPlayerStuff(int idPlayer){
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    int rc = sqlite3_open(DB_FILE, &db);
+    int nbStuff = 0;
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return -1;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_STUFF WHERE player_id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return -1;
+    }
+
+    sqlite3_bind_int(res, 1, idPlayer);
+    sqlite3_step(res);
+
+    nbStuff = sqlite3_column_int(res, 0);
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+
+    return nbStuff;
+}
+
+
+/**
  * @brief Check if a stuff is in the player's stuff
  * @param int idStuff The id of the stuff
  * @param int idPlayer The id of the player
@@ -762,7 +799,16 @@ void buyStuffInit(int idPlayer)
         choice = getInputInt();
         clearBuffer();
 
-        if (choice != 0 && choice > stuffCount) {
+        if (choice != 0) {
+            
+            int nbStuffPlayer = getNbStuffInPlayerStuff(idPlayer);
+
+            if (nbStuffPlayer >= PLAYER_STUFF_LIMIT) {
+                changeTextColor("red");
+                printf("Vous avez atteint la limite de stuffs dans votre inventaire\n");
+                changeTextColor("reset");
+                continue;
+            }
 
             int price = getStuffprice(choice);
 
@@ -770,14 +816,14 @@ void buyStuffInit(int idPlayer)
                 changeTextColor("orange");
                 printf("Vous avez déjà ce stuff\n\n");
                 changeTextColor("reset");
-                return;
+                continue;
             }
 
             if (price > getPlayerGold(idPlayer)) {
                 changeTextColor("red");
                 printf("Vous n'avez pas assez d'or pour acheter ce stuff\n");
                 changeTextColor("reset");
-                return;
+                continue;
             }
 
             removeGoldToPlayer(price, idPlayer);
