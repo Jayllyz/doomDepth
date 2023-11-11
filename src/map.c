@@ -375,6 +375,7 @@ int eventHandler(char sign, Map m, Player *p)
             printf("You got 100 gold !\n");
             p->gold += 100;
             updatePlayerInfo(p);
+            break;
         case GOLD_LOST:
             changeTextColor("red");
             printf("You lost half of your gold !\n");
@@ -387,7 +388,7 @@ int eventHandler(char sign, Map m, Player *p)
             break;
         }
         changeTextColor("reset");
-        sleep(3);
+        sleep(3); // @TODO replace it with a key press
         clearScreen();
         if (updateMap(&m) == MAP_FINISHED) {
             return MAP_FINISHED;

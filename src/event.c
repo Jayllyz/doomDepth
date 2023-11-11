@@ -140,9 +140,12 @@ int event()
 
     StoryChoice* storyChoice = malloc(sizeof(StoryChoice));
 
-    int villageID = 0;
-    int placeID = 0;
-    int scenarioID = 0;
+    int villageID = 0; // @TODO add more village
+    int placeID = 2;
+    int scenarioID = 0; // @TODO add more scenario
+
+    // generate a number between 1 an 3
+    placeID = rand() % 3;
 
     char* storyPath = initializeStoryChoice(villageID, placeID, scenarioID);
     //printf("storyPath: %s\n", storyPath);
@@ -191,7 +194,7 @@ int event()
     printf("\nContext:\n%s\n", storyChoice->context);
     printf("\nSituation:\n%s\n", storyChoice->situation);
 
-    sleep(3);
+    sleep(3); // @TODO remove this
 
     printf("Press any key to continue...\n");
     fgetc(stdin);
