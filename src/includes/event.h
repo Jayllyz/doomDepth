@@ -12,6 +12,7 @@ enum {
     MALUS,
     REWARD,
     FIGHT,
+    GOLD,
 };
 
 struct TreeChoice {
