@@ -471,7 +471,8 @@ int mov(Map *m, Player *p)
     }
 }
 
-void findStartingPos(Map *m){
+void findStartingPos(Map *m)
+{
     for (int i = 0; i < strlen(m->map); i++) {
         if (m->map[i] == '9') {
             //printf("i: %d\n", i);
@@ -512,7 +513,6 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     printStringAtCoordinate((int)((map_left + map_width) * 1.5), 0, dragon);
     changeTextColor("reset");
 
-
     int x = map_width / 2 + map_left;
     if (x % 2 != map_width % 2) {
         //x++;
@@ -524,7 +524,6 @@ int map(const char *filename, const char *monster, int map_width, int map_height
 
     m.map = readFileContent(fp);
     findStartingPos(&m);
-
 
     printMapInterface(m.map_left, m.map_top, m.map);
 

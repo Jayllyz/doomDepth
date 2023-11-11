@@ -134,7 +134,6 @@ int main(int argc, char **argv)
         fclose(fp);
         // convert char to int
 
-
         for (int i = map_save[0] - '0'; i < 4; i++) {
             printf("loading map %d\n", i);
             fgetc(stdin);
@@ -151,20 +150,20 @@ int main(int argc, char **argv)
                 return 0;
             }
 
-            if (i == map_save[0] - '0'){
+            if (i == map_save[0] - '0') {
                 int isMap = map(save_file, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
                 if (isMap == 1) {
                     printf("File %s or %s not found\n", filename, monster);
                     return 1;
                 }
-            } else {
+            }
+            else {
                 int isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
                 if (isMap == 1) {
                     printf("File %s or %s not found\n", filename, monster);
                     return 1;
                 }
             }
-
         }
 
         clearScreen();
