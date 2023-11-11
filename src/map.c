@@ -4,6 +4,7 @@
 #include "includes/fight.h"
 #include "includes/items.h"
 #include "includes/shop.h"
+#include "includes/smith.h"
 #include "includes/utils.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -330,6 +331,16 @@ int eventHandler(char sign, Map m, Player *p)
     case '4':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Welcome to the Smith!");
+
+        initSmith(p->id);
+
+        clearScreen();
+        if (updateMap(&m) == MAP_FINISHED) {
+            return MAP_FINISHED;
+        }
+        printMapInterface(m.map_left, m.map_top, m.map);
+        mov(&m, p);
+
         break;
     case '?':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
