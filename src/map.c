@@ -375,11 +375,11 @@ int eventHandler(char sign, Map m, Player *p)
             printf("You got 100 gold !\n");
             p->gold += 100;
             updatePlayerInfo(p);
-            case GOLD_LOST:
-                changeTextColor("red");
-                printf("You lost half of your gold !\n");
-                p->gold /= 2;
-                updatePlayerInfo(p);
+        case GOLD_LOST:
+            changeTextColor("red");
+            printf("You lost half of your gold !\n");
+            p->gold /= 2;
+            updatePlayerInfo(p);
             break;
         default:
             changeTextColor("blue");
