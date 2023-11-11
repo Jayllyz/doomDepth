@@ -108,10 +108,14 @@ Spell *affectSpellToPlayer(int playerId, int spellId)
 
     char *sql = sqlite3_mprintf("INSERT INTO PLAYER_SPELL (player_id, spell_id) VALUES (%d, %d);", playerId, spellId);
 
+    printf("%s\n", sql);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
         printf("Failed to insert data\n");
+        sqlite3_errcode(db);
+        sqlite3_errmsg(db);
+        printf("code: %d, msg: %s\n", sqlite3_errcode(db), sqlite3_errmsg(db));
         sqlite3_free(err_msg);
         sqlite3_close(db);
         return NULL;
@@ -200,4 +204,93 @@ int playerSetup(Player *p)
     } while (choice < 1 || choice > 3);
 
     return createPlayer(name, choice, p);
+}
+
+void continueGame(Player *p)
+{
+    sqlite3 *db;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_stmt *select;
+    rc = sqlite3_prepare_v2(db, "SELECT id, name, level, experience, life, attack, defense, mana, gold, class_id FROM PLAYER WHERE id = ?;", -1, &select, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_bind_int(select, 1, 1);
+    sqlite3_step(select);
+
+    p->id = sqlite3_column_int(select, 0);
+    p->name = strdup((const char *)sqlite3_column_text(select, 1));
+    p->level = sqlite3_column_int(select, 2);
+    p->experience = sqlite3_column_int(select, 3);
+    p->life = sqlite3_column_int(select, 4);
+    p->maxLife = sqlite3_column_int(select, 4);
+    p->attack = sqlite3_column_int(select, 5);
+    p->defense = sqlite3_column_int(select, 6);
+    p->mana = sqlite3_column_int(select, 7);
+    p->gold = sqlite3_column_int(select, 8);
+    p->classId = sqlite3_column_int(select, 9);
+    p->spell = loadPlayerSpells(p->id);
+
+    sqlite3_finalize(select);
+
+    sqlite3_close(db);
+}
+
+Spell **loadPlayerSpells(int playerId)
+{
+    sqlite3 *db;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_stmt *select;
+
+    rc = sqlite3_prepare_v2(db,
+        "SELECT COUNT(*), SPELL.id, SPELL.name, SPELL.description, SPELL.attack, SPELL.grade, SPELL.mana, SPELL.type FROM SPELL INNER JOIN PLAYER_SPELL ON SPELL.id = "
+        "PLAYER_SPELL.spell_id WHERE PLAYER_SPELL.player_id = ?;",
+        -1, &select, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return NULL;
+    }
+
+    sqlite3_bind_int(select, 1, playerId);
+    sqlite3_step(select);
+
+    int nbrSpell = sqlite3_column_int(select, 0);
+
+    Spell **spells = (Spell **)malloc(nbrSpell * sizeof(Spell *));
+
+    for (int i = 0; i < nbrSpell; i++) {
+        spells[i] = (Spell *)malloc(sizeof(Spell));
+        spells[i]->id = sqlite3_column_int(select, 1);
+        spells[i]->name = strdup((const char *)sqlite3_column_text(select, 2));
+        spells[i]->description = strdup((const char *)sqlite3_column_text(select, 3));
+        spells[i]->attack = sqlite3_column_int(select, 4);
+        spells[i]->grade = sqlite3_column_int(select, 5);
+        spells[i]->mana = sqlite3_column_int(select, 6);
+        spells[i]->type = strdup((const char *)sqlite3_column_text(select, 7));
+        sqlite3_step(select);
+    }
+
+    sqlite3_finalize(select);
+    sqlite3_close(db);
+    return spells;
 }

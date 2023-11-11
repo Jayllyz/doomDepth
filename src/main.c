@@ -120,8 +120,61 @@ int main(int argc, char **argv)
         break;
     case 2:
         clearScreen();
-        printf("Charger une partie\n");
-        //Load player
+        continueGame(p);
+
+        char *save_file = (char *)malloc(sizeof(char) * 25);
+        strcpy(save_file, "ascii/map_save");
+        FILE *fp = fopen(save_file, "r");
+        if (fp == NULL) {
+            printf("Fichier de sauvegarde introuvable\n");
+            return 1;
+        }
+
+        char *map_save = readFileContent(fp);
+        fclose(fp);
+        // convert char to int
+
+        for (int i = map_save[0] - '0'; i < 4; i++) {
+            printf("loading map %d\n", i);
+            fgetc(stdin);
+
+            if (snprintf(filename, 25, "ascii/map%d.txt", i) < 0) {
+                printf("Error while loading map %d\n", i);
+                free(p);
+                return 0;
+            }
+
+            if (snprintf(monster, 25, "ascii/monster/%d.txt", i) < 0) {
+                printf("Error while loading monster %d\n", i);
+                free(p);
+                return 0;
+            }
+
+            if (i == map_save[0] - '0') {
+                int isMap = map(save_file, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
+                if (isMap == 1) {
+                    printf("File %s or %s not found\n", filename, monster);
+                    return 1;
+                }
+            }
+            else {
+                int isMap = map(filename, monster, MAP_WIDTH, MAP_HEIGHT, MAP_LEFT, MAP_TOP, p);
+                if (isMap == 1) {
+                    printf("File %s or %s not found\n", filename, monster);
+                    return 1;
+                }
+            }
+        }
+
+        clearScreen();
+        changeTextColor("red");
+        printf("HERE IS THE FINAL BOSS\n");
+        fgetc(stdin);
+        changeTextColor("reset");
+        fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
+        printf("Vous avez fini le jeu, bravo !\n");
+        free(idToFight);
+        free(nbMonster);
         break;
     case 3:
         printf("Quitter\n");
