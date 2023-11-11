@@ -37,6 +37,8 @@ int getStuffprice(int idStuff);
 
 int getPlayerGold(int idPlayer);
 
+int getNbStuffInPlayerStuff(int idPlayer);
+
 int checkStuffIsInPlayerStuff(int idStuff, int idPlayer);
 
 void addStuffToPlayerStuff(int idStuff, int idPlayer);
@@ -55,9 +57,9 @@ void addGoldToPlayer(int gold, int idPlayer);
 
 void printPlayerGold(int idPlayer);
 
-void buyStuffInit();
+void buyStuffInit(int idPlayer);
 
-void sellStuffInit();
+void sellStuffInit(int idPlayer);
 
 void initShop(int idPlayer);
 

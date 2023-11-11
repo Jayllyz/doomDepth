@@ -18,7 +18,6 @@
 #define NB_ITEMS_EACH_ROW 2 //number of stuffs on each row
 #define NB_COL_ITEMS 6 //number of columns for the ascii stuff element
 #define NB_COl_TEXT 90 //number of columns for the text of the stuff
-
 #define PLAYER_STUFF_LIMIT 6 //number of stuffs that the player can have
 
 #define ID_USER 1 //DEV PURPOSE
@@ -152,8 +151,6 @@ void printStuffs(stuff *stuffsList, int stuffCount)
             ligne += 10;
             col = 0;
         }
-
-        printf("%d", col);
 
         printStuffAnsiiWay(NB_COl_TEXT * col, 11 + ligne);
 
