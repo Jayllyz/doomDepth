@@ -386,7 +386,8 @@ int getPlayerGold(int idPlayer)
  * @param int idPlayer The id of the player
  * @return int The number of stuff
 */
-int getNbStuffInPlayerStuff(int idPlayer){
+int getNbStuffInPlayerStuff(int idPlayer)
+{
     sqlite3 *db;
     sqlite3_stmt *res;
     int rc = sqlite3_open(DB_FILE, &db);
@@ -416,7 +417,6 @@ int getNbStuffInPlayerStuff(int idPlayer){
 
     return nbStuff;
 }
-
 
 /**
  * @brief Check if a stuff is in the player's stuff
@@ -800,7 +800,7 @@ void buyStuffInit(int idPlayer)
         clearBuffer();
 
         if (choice != 0) {
-            
+
             int nbStuffPlayer = getNbStuffInPlayerStuff(idPlayer);
 
             if (nbStuffPlayer >= PLAYER_STUFF_LIMIT) {
