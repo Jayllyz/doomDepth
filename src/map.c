@@ -362,8 +362,8 @@ int eventHandler(char sign, Map m, Player *p)
         case MALUS:
             changeTextColor("red");
             printf("You got a malus !\n");
-                p->attack /= 2;
-                updatePlayerInfo(p);
+            p->attack /= 2;
+            updatePlayerInfo(p);
             break;
         case REWARD:
             changeTextColor("green");
