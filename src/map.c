@@ -249,10 +249,10 @@ int updateMap(Map *m)
     m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
     saveMapToFile(m->map, "ascii/map_save");
 
-    i = 0;
+    i = 1;
     //printf("strlen:%lu\n", strlen(m->map) - 1);
 
-    while (i < 98) {
+    while (i < 97) {
         //printf("->%c<-", m->map[i]);
 
         if (m->map[i] == '2') {
