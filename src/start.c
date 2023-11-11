@@ -119,8 +119,6 @@ int getRandomSpellId(char *type)
     sqlite3_step(select);
     int id = sqlite3_column_int(select, 0);
 
-    printf("id: %d\n", id);
-
     sqlite3_finalize(select);
     sqlite3_close(db);
     return id;

@@ -21,7 +21,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster);
 void defeat();
 void rewardStuff(Player *p);
 void rewards(Player *p, Monster **m, int nbrMonster);
-void levelUp(Player *p);
+char *levelUp(Player *p);
 int normalAttack(Player *p, Monster *m);
 void monsterAttack(Player *p, Monster *m);
 int showPlayerSpells(Player *p);

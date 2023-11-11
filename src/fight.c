@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
@@ -445,7 +445,7 @@ int getSpellsCount(int playerId)
     return 1;
 }
 
-void levelUp(Player *p)
+char *levelUp(Player *p)
 {
     p->level++;
     p->life += 10;
@@ -457,14 +457,17 @@ void levelUp(Player *p)
 
     if (getSpellsCount(1) < MAX_PLAYER_SPELL) {
         int random = rand() % 100;
-        if (random) {
+        if (random < 20) {
             char *type = getClassName(p->classId);
             int id = getRandomSpellId(type);
             p->spell[getSpellsCount(1)] = affectSpellToPlayer(p->id, id);
+
+            return p->spell[getSpellsCount(1) - 1]->name;
         }
     }
 
     updatePlayerInfo(p);
+    return NULL;
 }
 
 void rewardStuff(Player *p)
@@ -509,16 +512,13 @@ void rewards(Player *p, Monster **m, int nbrMonster)
         }
     }
 
-    int xp = (m[0]->level * 10) * nbrMonster * 100;
+    int xp = (m[0]->level * 10) * nbrMonster;
     int gold = (m[0]->level * 5) * nbrMonster;
 
     if (boss == 1) {
         xp *= 2;
         gold *= 2;
     }
-
-    if (p->experience + xp >= 50)
-        levelUp(p);
 
     FILE *fp = fopen(WIN_FILE, "r");
 
@@ -532,8 +532,18 @@ void rewards(Player *p, Monster **m, int nbrMonster)
     printStringAtCoordinate(0, 0, content);
     changeTextColor("reset");
 
+    if (p->experience + xp >= 50) {
+        char *spell = levelUp(p);
+        printf("Vous avez gagné un niveau !\n");
+        if (spell != NULL)
+            printf("Vous avez appris le sort %s\n", spell);
+    }
+    else {
+        p->experience += xp;
+    }
+
     printf("Vous avez gagné %d points d'expérience\n", xp);
-    printf("Progression exp : %d/%d\n", p->experience + xp, 50);
+    printf("Niveau : %d | %d points d'expérience\n", p->level, p->experience);
     printf("Vous avez gagné %d pièces d'or\n", gold);
     printf("Total or : %d\n", p->gold + gold);
     printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
