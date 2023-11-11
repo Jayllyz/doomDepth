@@ -369,8 +369,7 @@ int eventHandler(char sign, Map m, Player *p)
             changeTextColor("green");
             printf("You got a reward !\n");
             rewardStuff(p);
-            p->
-            break;
+            p->break;
         case FIGHT:
             changeTextColor("yellow");
             printf("You got a fight !\n");
