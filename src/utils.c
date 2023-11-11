@@ -63,3 +63,17 @@ void clearLinesFrom(int startLine)
     printf("\033[%d;1H", startLine);
     printf("\033[J");
 }
+
+char *getClassName(int classId)
+{
+    switch (classId) {
+    case 1:
+        return "Warrior";
+    case 2:
+        return "Mage";
+    case 3:
+        return "Rogue";
+    default:
+        return "Inconnue";
+    }
+}

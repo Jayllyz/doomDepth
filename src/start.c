@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define DB_FILE "db/doomdepth.sqlite"
-#define MAX_PLAYER_SPELL 2
+#define MAX_PLAYER_SPELL 4
 
 int createPlayer(char *name, int classId, Player *p)
 {
@@ -94,6 +94,36 @@ int createPlayer(char *name, int classId, Player *p)
     return 0;
 }
 
+int getRandomSpellId(char *type)
+{
+    sqlite3 *db;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return -1;
+    }
+
+    sqlite3_stmt *select;
+    rc = sqlite3_prepare_v2(db, "SELECT id FROM SPELL WHERE type = ? ORDER BY RANDOM() LIMIT 1;", -1, &select, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return -1;
+    }
+
+    sqlite3_bind_text(select, 1, type, -1, SQLITE_STATIC);
+
+    sqlite3_step(select);
+    int id = sqlite3_column_int(select, 0);
+
+    sqlite3_finalize(select);
+    sqlite3_close(db);
+    return id;
+}
+
 Spell *affectSpellToPlayer(int playerId, int spellId)
 {
     sqlite3 *db;
@@ -108,14 +138,10 @@ Spell *affectSpellToPlayer(int playerId, int spellId)
 
     char *sql = sqlite3_mprintf("INSERT INTO PLAYER_SPELL (player_id, spell_id) VALUES (%d, %d);", playerId, spellId);
 
-    printf("%s\n", sql);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to insert data\n");
-        sqlite3_errcode(db);
-        sqlite3_errmsg(db);
-        printf("code: %d, msg: %s\n", sqlite3_errcode(db), sqlite3_errmsg(db));
+        printf("Failed to insert data %s\n", err_msg);
         sqlite3_free(err_msg);
         sqlite3_close(db);
         return NULL;

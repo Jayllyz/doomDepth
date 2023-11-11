@@ -14,7 +14,7 @@
 #define DB_FILE "db/doomdepth.sqlite"
 #define WIN_FILE "ascii/win.txt"
 #define DEFEAT_FILE "ascii/defeat.txt"
-#define MAX_PLAYER_SPELL 2
+#define MAX_PLAYER_SPELL 4
 #define MAX_MONSTER_SPELL 1
 
 int randomMonster(int level)
@@ -409,7 +409,43 @@ void monsterSpell(Player *p, Monster *m)
     printf("Il vous reste \033[0;31m%02d\033[0m points de vie\n", p->life);
 }
 
-void levelUp(Player *p)
+int getSpellsCount(int playerId)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Erreur lors de l'ouverture de la base de données\n");
+        sqlite3_close(db);
+        return 0;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT COUNT(*) FROM PLAYER_SPELL WHERE player_id = ?;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return 0;
+    }
+
+    sqlite3_bind_int(res, 1, playerId);
+
+    rc = sqlite3_step(res);
+
+    if (rc == SQLITE_ROW) {
+        int count = sqlite3_column_int(res, 0);
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+        return count;
+    }
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+    return 1;
+}
+
+char *levelUp(Player *p)
 {
     p->level++;
     p->life += 10;
@@ -417,6 +453,21 @@ void levelUp(Player *p)
     p->attack += 5;
     p->defense += 5;
     p->experience = 0;
+    p->mana += 10;
+
+    if (getSpellsCount(1) < MAX_PLAYER_SPELL) {
+        int random = rand() % 100;
+        if (random < 20) {
+            char *type = getClassName(p->classId);
+            int id = getRandomSpellId(type);
+            p->spell[getSpellsCount(1)] = affectSpellToPlayer(p->id, id);
+
+            return p->spell[getSpellsCount(1) - 1]->name;
+        }
+    }
+
+    updatePlayerInfo(p);
+    return NULL;
 }
 
 void rewardStuff(Player *p)
@@ -469,9 +520,6 @@ void rewards(Player *p, Monster **m, int nbrMonster)
         gold *= 2;
     }
 
-    if (p->experience + xp >= 50)
-        levelUp(p);
-
     FILE *fp = fopen(WIN_FILE, "r");
 
     if (fp == NULL) {
@@ -484,8 +532,18 @@ void rewards(Player *p, Monster **m, int nbrMonster)
     printStringAtCoordinate(0, 0, content);
     changeTextColor("reset");
 
+    if (p->experience + xp >= 50) {
+        char *spell = levelUp(p);
+        printf("Vous avez gagné un niveau !\n");
+        if (spell != NULL)
+            printf("Vous avez appris le sort %s\n", spell);
+    }
+    else {
+        p->experience += xp;
+    }
+
     printf("Vous avez gagné %d points d'expérience\n", xp);
-    printf("Progression exp : %d/%d\n", p->experience + xp, 50);
+    printf("Niveau : %d | %d points d'expérience\n", p->level, p->experience);
     printf("Vous avez gagné %d pièces d'or\n", gold);
     printf("Total or : %d\n", p->gold + gold);
     printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
@@ -496,6 +554,7 @@ void rewards(Player *p, Monster **m, int nbrMonster)
     p->experience += xp;
     p->gold += gold;
     printf("Appuyez sur entrée pour continuer\n");
+    updatePlayerInfo(p);
     getInputChar();
     free(content);
     free(m);
@@ -750,11 +809,8 @@ void monsterTurn(const int *nbrMonster, Monster **m, Player *p)
 void fightMonster(Player *p, Monster **m, int *nbrMonster)
 {
     int *maxLife = (int *)malloc(sizeof(int) * *nbrMonster);
-    int boss = 0;
     for (int i = 0; i < *nbrMonster; i++) {
         maxLife[i] = m[i]->life;
-        if (m[i]->isBoss == 1)
-            boss = 1;
     }
     int damageNormalAttack = p->attack - m[0]->defense;
     int choice;
