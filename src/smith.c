@@ -1,4 +1,5 @@
 #include "includes/ansii_print.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include "includes/smith.h"
 #include "includes/shop.h"
@@ -95,7 +96,8 @@ stuff getStuffOfPlayerById(int idStuff, int idPlayer)
  * @param int idPlayer The id of the player
  * @return int The level of the stuff
 */
-int getStuffLevelOfPlayerById(int idStuff, int idPlayer){
+int getStuffLevelOfPlayerById(int idStuff, int idPlayer)
+{
     sqlite3 *db;
     sqlite3_stmt *res;
     int rc = sqlite3_open(DB_FILE, &db);
