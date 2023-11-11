@@ -13,6 +13,7 @@ enum {
     REWARD,
     FIGHT,
     GOLD,
+    GOLD_LOST,
 };
 
 struct TreeChoice {

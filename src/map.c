@@ -369,16 +369,17 @@ int eventHandler(char sign, Map m, Player *p)
             changeTextColor("green");
             printf("You got a reward !\n");
             rewardStuff(p);
-            p->break;
-        case FIGHT:
-            changeTextColor("yellow");
-            printf("You got a fight !\n");
             break;
         case GOLD:
             changeTextColor("yellow");
             printf("You got 100 gold !\n");
             p->gold += 100;
             updatePlayerInfo(p);
+            case GOLD_LOST:
+                changeTextColor("red");
+                printf("You lost half of your gold !\n");
+                p->gold /= 2;
+                updatePlayerInfo(p);
             break;
         default:
             changeTextColor("blue");
