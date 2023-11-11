@@ -471,6 +471,25 @@ int mov(Map *m, Player *p)
     }
 }
 
+void findStartingPos(Map *m){
+    for (int i = 0; i < strlen(m->map); i++) {
+        if (m->map[i] == '9') {
+            //printf("i: %d\n", i);
+            /*m.player_x = (i % 11) * 2 + m.map_left;
+            m.player_y = (i / 11) + m.map_top;
+            printf("x:%d, y:%d\n", m.player_x, m.player_y);
+            break;*/
+            int x = (i % 11) * 2 + m->map_left;
+            int y = (i / 11) + m->map_top;
+            m->player_x = x;
+            m->player_y = y;
+            break;
+        }
+    }
+    //fgetc(stdin);
+    return;
+}
+
 int map(const char *filename, const char *monster, int map_width, int map_height, int map_left, int map_top, Player *p)
 {
     Map m = {map_top, map_left, map_width, map_height, NULL, 0, 0};
@@ -493,15 +512,19 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     printStringAtCoordinate((int)((map_left + map_width) * 1.5), 0, dragon);
     changeTextColor("reset");
 
+
     int x = map_width / 2 + map_left;
     if (x % 2 != map_width % 2) {
         //x++;
     }
     int y = map_height / 2 + map_top;
+
     m.player_x = x;
     m.player_y = y;
 
     m.map = readFileContent(fp);
+    findStartingPos(&m);
+
 
     printMapInterface(m.map_left, m.map_top, m.map);
 

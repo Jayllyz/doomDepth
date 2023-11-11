@@ -108,10 +108,14 @@ Spell *affectSpellToPlayer(int playerId, int spellId)
 
     char *sql = sqlite3_mprintf("INSERT INTO PLAYER_SPELL (player_id, spell_id) VALUES (%d, %d);", playerId, spellId);
 
+    printf("%s\n", sql);
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
     if (rc != SQLITE_OK) {
         printf("Failed to insert data\n");
+        sqlite3_errcode(db);
+        sqlite3_errmsg(db);
+        printf("code: %d, msg: %s\n", sqlite3_errcode(db), sqlite3_errmsg(db));
         sqlite3_free(err_msg);
         sqlite3_close(db);
         return NULL;
@@ -253,7 +257,7 @@ void continueGame(Player *p)
     int i = 0;
     while (sqlite3_step(selectSpell) == SQLITE_ROW) {
         int spellId = sqlite3_column_int(selectSpell, 0);
-        p->spell[i] = affectSpellToPlayer(p->id, spellId);
+        // p->spell[i] = affectSpellToPlayer(p->id, spellId);
         i++;
     }
 
