@@ -52,7 +52,7 @@ typedef struct {
     TreeChoice* choice;
 } Protagonist;
 
-void event();
+int event();
 char* initializeStoryChoice(int villageID, int placeID, int scenarioID);
 void landing();
 int folderExists(const char* path);

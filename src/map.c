@@ -345,7 +345,42 @@ int eventHandler(char sign, Map m, Player *p)
     case '?':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Here is a random event!");
-        event();
+        int event_result = event();
+        printf("event_result: %d\n", event_result);
+        switch (event_result) {
+        case DEATH:
+            changeTextColor("red");
+            printf("You died !\n");
+            defeat();
+            break;
+        case BONUS:
+            changeTextColor("green");
+            printf("You got a bonus !\n");
+            p->attack += 15;
+            updatePlayerInfo(p);
+            break;
+        case MALUS:
+            changeTextColor("red");
+            printf("You got a malus !\n");
+                p->attack /= 2;
+                updatePlayerInfo(p);
+            break;
+        case REWARD:
+            changeTextColor("green");
+            printf("You got a reward !\n");
+            rewardStuff(p);
+            break;
+        case FIGHT:
+            changeTextColor("yellow");
+            printf("You got a fight !\n");
+            break;
+        default:
+            changeTextColor("blue");
+            printf("End of side quest.\n");
+            break;
+        }
+        changeTextColor("reset");
+        sleep(3);
         clearScreen();
         if (updateMap(&m) == MAP_FINISHED) {
             return MAP_FINISHED;

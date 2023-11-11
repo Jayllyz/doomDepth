@@ -72,12 +72,12 @@ int hasEventFile(const char* folderPath)
     snprintf(eventFilePath, sizeof(eventFilePath), "%s/event.txt", folderPath);
 
     if (access(eventFilePath, F_OK) == 0) {
-        // The event.txt file exists in the folder
-        return 0;
+        // event.txt file exists
+        return 1;
     }
     else {
-        // The event.txt file does not exist in the folder
-        return 1;
+        // event.txt file does not exist
+        return 0;
     }
 }
 
@@ -134,7 +134,7 @@ char* readFile(const char* path, const char* filename)
     return file_content;
 }
 
-void event()
+int event()
 {
     landing();
 
@@ -150,14 +150,14 @@ void event()
     if (!folderExists(storyPath)) {
         printf("\nThe story path \"%s\" does not exist", storyPath);
         fgetc(stdin);
-        return;
+        return -1;
     }
 
     int choice;
 
     strcpy(storyChoice->storyPath, storyPath);
 
-    while (hasEventFile(storyChoice->storyPath)) {
+    while (!hasEventFile(storyChoice->storyPath)) {
         printf("storyPath: %s\n", storyChoice->storyPath);
 
         strcpy(storyChoice->id, readFile(storyChoice->storyPath, "id.txt"));
@@ -168,7 +168,7 @@ void event()
         printf("\nContext:\n%s\n", storyChoice->context);
         printf("\nSituation:\n%s\n", storyChoice->situation);
 
-        scanf("%d", &choice);
+        choice = getInputInt();
 
         // Check the user's choice and update the storyPath
         if (choice == 1) {
@@ -191,32 +191,12 @@ void event()
     printf("\nContext:\n%s\n", storyChoice->context);
     printf("\nSituation:\n%s\n", storyChoice->situation);
 
-    switch (atoi(readFile(storyChoice->storyPath, "event.txt"))) {
-    case DEATH:
-        changeTextColor("red");
-        printf("You died !\n");
-        break;
-    case BONUS:
-        changeTextColor("green");
-        printf("You got a bonus !\n");
-        break;
-    case MALUS:
-        changeTextColor("red");
-        printf("You got a malus !\n");
-        break;
-    case REWARD:
-        changeTextColor("green");
-        printf("You got a reward !\n");
-        break;
-    case FIGHT:
-        changeTextColor("yellow");
-        printf("You got a fight !\n");
-        break;
-    default:
-        changeTextColor("blue");
-        printf("End of side quest.\n");
-        break;
-    }
-    changeTextColor("reset");
-    scanf("%d", &choice);
+    sleep(3);
+
+    printf("Press any key to continue...\n");
+    fgetc(stdin);
+    clearScreen();
+
+    int event_result = atoi(readFile(storyChoice->storyPath, "event.txt"));
+    return event_result;
 }
