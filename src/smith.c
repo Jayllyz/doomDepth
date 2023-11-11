@@ -1,8 +1,7 @@
+#include "includes/smith.h"
 #include "includes/ansii_print.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
-#include "includes/smith.h"
-#include "includes/shop.h"
 #include <math.h>
 #include <sqlite3.h>
 #include <stdio.h>
@@ -136,7 +135,8 @@ int getStuffLevelOfPlayerById(int idStuff, int idPlayer)
  * @param int idPlayer The id of the player
  * @return void
 */
-void upgradePlayerStuff(int idStuff, int idPlayer){
+void upgradePlayerStuff(int idStuff, int idPlayer)
+{
     sqlite3 *db;
     char *err_msg = 0;
     int rc = sqlite3_open(DB_FILE, &db);
@@ -222,7 +222,7 @@ void initSmith(int idPlayer)
 
             initSmith(idPlayer);
         }
-        else{
+        else {
             printf("Votre stuff est de niveau %d\n", level);
         }
 
@@ -255,7 +255,7 @@ void initSmith(int idPlayer)
                 changeTextColor("red");
                 printf("Vous n'avez pas assez d'argent\n");
                 changeTextColor("reset");
-                
+
                 printf("\n\n");
                 printf("Appuyer sur entrer pour continuer\n");
                 clearBuffer();
@@ -277,9 +277,5 @@ void initSmith(int idPlayer)
         initSmith(idPlayer);
     }
 
-    return;  
-
-
+    return;
 }
-
-

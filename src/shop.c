@@ -668,8 +668,8 @@ void buyStuffInit(int idPlayer)
         choice = getInputInt();
         clearBuffer();
 
-        if(choice != 0 && choice > stuffCount){
-            
+        if (choice != 0 && choice > stuffCount) {
+
             int price = getStuffprice(choice);
 
             if (checkStuffIsInPlayerStuff(choice, idPlayer)) {
@@ -727,7 +727,6 @@ void sellStuffInit(int idPlayer)
             printf("\n\n");
             printLine();
 
-
             changeTextColor("orange");
             printf("Mince ! Vous n'avez rien à vendre \n");
             changeTextColor("reset");
@@ -750,7 +749,6 @@ void sellStuffInit(int idPlayer)
         printf("Vous avez vendu le stuff avec succès\n\n");
         changeTextColor("reset");
     } while (choice != 0);
-
 
     return;
 }
