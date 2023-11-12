@@ -268,8 +268,8 @@ int updateMap(Map *m)
         //printf("->%c<-", m->map[i]);
 
         if (m->map[i] == '2') {
-                isMonster = 1;
-                break;
+            isMonster = 1;
+            break;
         }
         i++;
     }
@@ -606,8 +606,8 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     m.map = readFileContent(fp);
     findStartingPos(&m);
     int isMapFinished = updateMap(&m);
-    if (isMapFinished == MAP_FINISHED){
-        return  MAP_FINISHED;
+    if (isMapFinished == MAP_FINISHED) {
+        return MAP_FINISHED;
     }
 
     printMapInterface(m.map_left, m.map_top, m.map);

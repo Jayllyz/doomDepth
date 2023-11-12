@@ -469,7 +469,7 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
     if (countPlayerStuff(idPlayer) >= PLAYER_STUFF_LIMIT)
         return;
 
-    if (checkStuffIsInPlayerStuff(idStuff, 1) == 1){
+    if (checkStuffIsInPlayerStuff(idStuff, 1) == 1) {
         return;
     }
 

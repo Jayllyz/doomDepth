@@ -328,11 +328,10 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 
         int line_width = getMonsterWidth(monsters[i]->id);
 
-
         changeTextColor("red");
         printStringAtCoordinate((int)(y + line_width / 2 - (strlen(monsters[i]->name) / 2)), x, monsters[i]->name);
-        printLifeBarAtCoordinate(monsters[i]->life, y, x+1);
-        printStringAtCoordinate(y, x+3, readFileContent(fp));
+        printLifeBarAtCoordinate(monsters[i]->life, y, x + 1);
+        printStringAtCoordinate(y, x + 3, readFileContent(fp));
         fclose(fp);
 
         y += 50;
@@ -459,12 +458,12 @@ void monsterSpell(Player *p, Monster *m)
     char *healthLeft = malloc(sizeof(char) * 64);
     sprintf(healthLeft, "\033[0;32m[HP]  \033[0m%s: \033[0;32m%d HP\033[0m", p->name, p->life);
 
-        movCursor(100, 37);
-        clearLine();
-        movCursor(100, 38);
-        clearLine();
-        movCursor(100, 39);
-        clearLine();
+    movCursor(100, 37);
+    clearLine();
+    movCursor(100, 38);
+    clearLine();
+    movCursor(100, 39);
+    clearLine();
     printStringAtCoordinate(100, 37, monsterSpell);
     printStringAtCoordinate(100, 38, damageDone);
     printStringAtCoordinate(100, 39, healthLeft);
@@ -559,7 +558,7 @@ void rewardStuff(Player *p)
 
     int id = sqlite3_column_int(res, 0);
     char *name = strdup((const char *)sqlite3_column_text(res, 1));
-    if (checkStuffIsInPlayerStuff(id, 1) == 1){
+    if (checkStuffIsInPlayerStuff(id, 1) == 1) {
         rewardStuff(p);
     }
 
@@ -691,7 +690,6 @@ int usePlayerSpell(Player *p, Monster *m, int spellId)
     printStringAtCoordinate(100, 35, damageDone);
     printStringAtCoordinate(100, 36, healthLeft);
 
-
     return damage;
 }
 
@@ -747,7 +745,8 @@ int chooseMonster(Monster **m, int nbrMonster)
     return choice - 1;
 }
 
-void getCursorPosition(int *row, int *col) {
+void getCursorPosition(int *row, int *col)
+{
     printf("\033[6n");
     scanf("\033[%d;%dR", row, col);
 }
@@ -762,7 +761,7 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
     //printf("row : %d, col : %d", row, col);
 
     changeTextColor("green");
-    movCursor(5, row-1);
+    movCursor(5, row - 1);
     printf("%s HP : ", p->name);
 
     movCursor(5, row);
@@ -795,7 +794,7 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
             printStringAtCoordinate(i + 5, row + 1, "█");
         //printf("\033[0;31m█\033[0m"); // red
 
-        movCursor(7 + manaBar, row+1);
+        movCursor(7 + manaBar, row + 1);
         printf("\033[0;34m %d \033[0m", p->mana);
         printf("\n\n");
     }
@@ -869,7 +868,7 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
     int damage = normalAttack(p, m[target]);
     int max_hp = maxLife[target];
 
-    removeHP(target * 50 + 50 + m[target]->life + damage -1, 8 - (target * 1), damage > max_hp ? max_hp : damage);
+    removeHP(target * 50 + 50 + m[target]->life + damage - 1, 8 - (target * 1), damage > max_hp ? max_hp : damage);
 
     updateMainLifeBars(maxLines, nbrMonster, m, p);
 }
@@ -899,7 +898,7 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const 
 
     int damage = usePlayerSpell(p, m[target], spellChoice);
     int max_hp = maxLife[target];
-    removeHP(target * 50 + 50 + m[target]->life + damage, 8 - (target *1), damage > max_hp ? max_hp : damage);
+    removeHP(target * 50 + 50 + m[target]->life + damage, 8 - (target * 1), damage > max_hp ? max_hp : damage);
 
     updateMainLifeBars(maxLines, nbrMonster, m, p);
 

@@ -39,5 +39,4 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
 void printCombatInterface(int nbrMonster, int damageNormalAttack);
 void getCursorPosition(int *row, int *col);
 
-
 #endif // FIGHT_H
