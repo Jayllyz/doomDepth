@@ -343,7 +343,7 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Welcome to the Smith!");
 
-        initSmith(p->id);
+        initSmith(p);
 
         clearScreen();
         if (updateMap(&m) == MAP_FINISHED) {

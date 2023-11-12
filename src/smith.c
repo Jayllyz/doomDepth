@@ -3,6 +3,7 @@
 #include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
+#include "includes/fight.h"
 #include <math.h>
 #include <sqlite3.h>
 #include <stdio.h>
@@ -165,13 +166,43 @@ void upgradePlayerStuff(int idStuff, int idPlayer)
     sqlite3_close(db);
 }
 
+void updateStuffStats(int level, int idStuff)
+{
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return;
+    }
+
+    char *sql = sqlite3_mprintf("UPDATE STUFF SET attack = attack + (%d * 2), defense = defense + (%d * 2), life = life + (%d * 2), mana = mana + (%d * 2) WHERE id = %d;", level, level, level, level, idStuff);
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to update data: %s\n", sqlite3_errmsg(db));
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+        return;
+    }
+
+    sqlite3_free(sql);
+    sqlite3_free(err_msg);
+    sqlite3_close(db);
+}
+
 /**
  * @brief Init the smith 
  * @param int idPlayer The id of the player
  * @return void
 */
-void initSmith(int idPlayer)
+void initSmith(Player *p)
 {
+    int idPlayer = p->id;
+
     clearScreen();
 
     printSmithAnsiiWay();
@@ -230,7 +261,7 @@ void initSmith(int idPlayer)
             printf("Appuyer sur entrer pour continuer\n");
             clearBuffer();
 
-            initSmith(idPlayer);
+            initSmith(p);
         }
         else {
             printf("Votre stuff est de niveau %d\n", level);
@@ -273,11 +304,15 @@ void initSmith(int idPlayer)
                 printf("Appuyer sur entrer pour continuer\n");
                 clearBuffer();
 
-                initSmith(idPlayer);
+                initSmith(p);
             }
 
             removeGoldToPlayer(price, idPlayer);
             upgradePlayerStuff(choice, idPlayer);
+
+            level += 1;
+            updateStuffStats(level, choice);
+    
             changeTextColor("green");
             printf("Votre stuff a été amélioré\n");
             changeTextColor("reset");
@@ -287,7 +322,7 @@ void initSmith(int idPlayer)
         printf("Appuyer sur entrer pour continuer\n");
         clearBuffer();
 
-        initSmith(idPlayer);
+        initSmith(p);
     }
 
     return;
