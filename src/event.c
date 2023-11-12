@@ -1,5 +1,5 @@
-#include "includes/ansii_print.h"
 #include "includes/event.h"
+#include "includes/ansii_print.h"
 #include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
