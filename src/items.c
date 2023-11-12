@@ -1,6 +1,6 @@
-#include "includes/items.h"
 #include "includes/ansii_print.h"
 #include "includes/fight.h"
+#include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
@@ -451,6 +451,7 @@ void initInventory(int idPlayer)
         stuff **s = selectStuffFromPlayer(idPlayer);
 
         printStuffsInventory(s, count);
+
         printf("0 - Retour\n");
         printf("1 - Changer d'arme\n");
         printf("2 - Changer d'armure\n");
@@ -479,7 +480,7 @@ void initInventory(int idPlayer)
 
 void changeEquip(int idPlayer, stuff **s, const char *type, int count)
 {
-    printf("\nQuel équipement voulez-vous équiper ? (saisir id)\n");
+    printf("\nQuel équipement voulez-vous équiper ? (-1 pour quitter)\n");
 
     int choice = -1;
     short int found = 0;
@@ -491,7 +492,7 @@ void changeEquip(int idPlayer, stuff **s, const char *type, int count)
         clearBuffer();
 
         if (choice < 0)
-            continue;
+            return;
 
         for (int i = 0; i < count; i++) {
             if (s[i]->id == choice && strcmp(s[i]->type, type) == 0) {
