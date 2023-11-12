@@ -144,8 +144,7 @@ int event()
     int placeID = 2;
     int scenarioID = 0; // @TODO add more scenario
 
-    // generate a number between 1 an 3
-    placeID = rand() % 3;
+    //placeID = rand() % 3;
 
     char* storyPath = initializeStoryChoice(villageID, placeID, scenarioID);
     //printf("storyPath: %s\n", storyPath);

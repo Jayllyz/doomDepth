@@ -268,8 +268,8 @@ int updateMap(Map *m)
         //printf("->%c<-", m->map[i]);
 
         if (m->map[i] == '2') {
-            isMonster = 1;
-            break;
+                isMonster = 1;
+                break;
         }
         i++;
     }
@@ -305,6 +305,7 @@ int eventHandler(char sign, Map m, Player *p)
 {
     int idToFight[1] = {-1};
     int *nbrMonster = (int *)malloc(sizeof(int));
+    //*nbrMonster = 3;
 
     switch (sign) {
     case '0':
@@ -315,7 +316,6 @@ int eventHandler(char sign, Map m, Player *p)
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
 
         printf("Fight begins!");
-        //        *nbrMonster = 2;
         fightMonster(p, loadFightScene(p, nbrMonster, idToFight), nbrMonster);
         clearScreen();
         if (updateMap(&m) == MAP_FINISHED) {
@@ -605,6 +605,10 @@ int map(const char *filename, const char *monster, int map_width, int map_height
 
     m.map = readFileContent(fp);
     findStartingPos(&m);
+    int isMapFinished = updateMap(&m);
+    if (isMapFinished == MAP_FINISHED){
+        return  MAP_FINISHED;
+    }
 
     printMapInterface(m.map_left, m.map_top, m.map);
 

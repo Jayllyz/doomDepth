@@ -469,6 +469,10 @@ void addStuffToPlayerStuff(int idStuff, int idPlayer)
     if (countPlayerStuff(idPlayer) >= PLAYER_STUFF_LIMIT)
         return;
 
+    if (checkStuffIsInPlayerStuff(idStuff, 1) == 1){
+        return;
+    }
+
     sqlite3 *db;
     char *err_msg = 0;
     int rc = sqlite3_open(DB_FILE, &db);

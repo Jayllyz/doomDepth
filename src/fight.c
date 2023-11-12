@@ -29,7 +29,7 @@ int randomMonster(int level)
         return 1;
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT id FROM MONSTER WHERE level = ? ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT id FROM MONSTER WHERE level <= ? ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
@@ -266,6 +266,7 @@ void updatePlayerInfo(Player *p)
 
 Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 {
+
     FILE *fplayer;
     clearScreen();
     selectPlayerInfo(p);
@@ -273,7 +274,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
     char *playerStats = malloc(sizeof(char) * 128);
     sprintf(playerStats, "%s Lvl.%d(%d/50)\n⚔️ \033[0;31m %d\033[0m    🛡️ \033[0;32m %d\033[0m", p->name, p->level, p->experience, p->attack, p->defense);
     printStringAtCoordinate(0, 2, playerStats);
-
+    free(playerStats);
     int nbMonster;
 
     if (idToFight[0] == -1)
@@ -295,6 +296,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
     fclose(fplayer);
 
     int y = 50;
+    int x = 7;
 
     Monster **monsters = (Monster **)malloc(sizeof(Monster *) * nbMonster);
 
@@ -326,13 +328,15 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
 
         int line_width = getMonsterWidth(monsters[i]->id);
 
+
         changeTextColor("red");
-        printStringAtCoordinate((int)(y + line_width / 2 - (strlen(monsters[i]->name) / 2)), 7, monsters[i]->name);
-        printLifeBarAtCoordinate(monsters[i]->life, y, 8);
-        printStringAtCoordinate(y, 10, readFileContent(fp));
+        printStringAtCoordinate((int)(y + line_width / 2 - (strlen(monsters[i]->name) / 2)), x, monsters[i]->name);
+        printLifeBarAtCoordinate(monsters[i]->life, y, x+1);
+        printStringAtCoordinate(y, x+3, readFileContent(fp));
         fclose(fp);
 
         y += 50;
+        x -= 1;
     }
 
     *nbrMonster = nbMonster;
@@ -352,9 +356,11 @@ int normalAttack(Player *p, Monster *m)
         damage = 1;
 
     int randomCC = rand() % 100;
+    movCursor(100, 37);
+    clearLine();
     if (randomCC < 15) {
         damage *= 2;
-        printf("Coup critique !\n");
+        printStringAtCoordinate(100, 37, "Coup critique !");
     }
 
     m->life -= damage;
@@ -369,6 +375,10 @@ int normalAttack(Player *p, Monster *m)
     char *healthLeft = malloc(sizeof(char) * 64);
     sprintf(healthLeft, "\033[0;31m[HP]  \033[0m%s: \033[0;31m%d HP\033[0m", m->name, m->life);
 
+    movCursor(100, 35);
+    clearLine(); // @TODO check if combat log is print properly to avoid [DMG] Dragon: -1 HPP <- this
+    movCursor(100, 36);
+    clearLine();
     printStringAtCoordinate(100, 35, damageDone);
     printStringAtCoordinate(100, 36, healthLeft);
     movCursor(100, 37);
@@ -387,10 +397,12 @@ void monsterAttack(Player *p, Monster *m)
         damage = 1;
 
     int randomCC = rand() % 100;
+    movCursor(100, 41);
+    clearLine();
     if (randomCC < 15) {
         damage *= 2;
         //printf("Coup critique !");
-        printStringAtCoordinate(80, 37, "Coup critique !");
+        printStringAtCoordinate(100, 41, "Coup critique !");
     }
 
     p->life -= damage;
@@ -406,6 +418,10 @@ void monsterAttack(Player *p, Monster *m)
     //printf("Le %s vous a infligé \033[0;31m%d\033[0m dégats\n", m->name, damage);
     //printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
 
+    movCursor(100, 38);
+    clearLine();
+    movCursor(100, 39);
+    clearLine();
     printStringAtCoordinate(100, 38, monsterAttack);
     printStringAtCoordinate(100, 39, healthLeft);
 
@@ -420,9 +436,11 @@ void monsterSpell(Player *p, Monster *m)
         damage = 1;
 
     int randomCC = rand() % 100;
+    movCursor(120, 41);
     if (randomCC < 10) {
         damage *= 2;
-        printf("Coup critique !\n");
+        //printf("Coup critique !\n");
+        printStringAtCoordinate(120, 41, "Coup critique !");
     }
 
     p->life -= damage;
@@ -441,6 +459,12 @@ void monsterSpell(Player *p, Monster *m)
     char *healthLeft = malloc(sizeof(char) * 64);
     sprintf(healthLeft, "\033[0;32m[HP]  \033[0m%s: \033[0;32m%d HP\033[0m", p->name, p->life);
 
+        movCursor(100, 37);
+        clearLine();
+        movCursor(100, 38);
+        clearLine();
+        movCursor(100, 39);
+        clearLine();
     printStringAtCoordinate(100, 37, monsterSpell);
     printStringAtCoordinate(100, 38, damageDone);
     printStringAtCoordinate(100, 39, healthLeft);
@@ -523,7 +547,7 @@ void rewardStuff(Player *p)
         exit(EXIT_FAILURE);
     }
 
-    rc = sqlite3_prepare_v2(db, "SELECT id, name FROM STUFF WHERE grade = 3 ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
+    rc = sqlite3_prepare_v2(db, "SELECT id, name FROM STUFF WHERE grade >= 3 ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
@@ -535,6 +559,9 @@ void rewardStuff(Player *p)
 
     int id = sqlite3_column_int(res, 0);
     char *name = strdup((const char *)sqlite3_column_text(res, 1));
+    if (checkStuffIsInPlayerStuff(id, 1) == 1){
+        rewardStuff(p);
+    }
 
     printf("Vous avez reçu un l\'objet légendaire : %s\n", name);
     addStuffToPlayerStuff(id, 1);
@@ -629,9 +656,12 @@ int usePlayerSpell(Player *p, Monster *m, int spellId)
         damage = 1;
 
     int randomCC = rand() % 100;
+    movCursor(130, 37);
+    clearLine();
     if (randomCC < 10) {
         damage *= 2;
         printf("Coup critique !\n");
+        printStringAtCoordinate(130, 37, "Coup critique !");
     }
 
     m->life -= damage;
@@ -640,9 +670,28 @@ int usePlayerSpell(Player *p, Monster *m, int spellId)
         m->life = 0;
 
     p->mana -= p->spell[spellId]->mana;
-    printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
-    printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
-    printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
+    //printf("Vous avez utilisé le sort %s\n", p->spell[spellId]->name);
+    //printf("Vous avez infligé \033[0;32m%d\033[0m dégats au %s\n", damage, m->name);
+    //printf("Il reste \033[0;31m%02d\033[0m points de vie au %s\n", m->life, m->name);
+
+    char *playerSpell = malloc(sizeof(char) * 64);
+    sprintf(playerSpell, "\033[0;34m[SPELL] \033[0m%s used \033[0;34m%s\033[0m", p->name, p->spell[spellId]->name);
+    char *damageDone = malloc(sizeof(char) * 64);
+    sprintf(damageDone, "\033[0;31m[DMG] \033[0m%s: -\033[0;31m%d HP\033[0m", m->name, damage);
+    char *healthLeft = malloc(sizeof(char) * 64);
+    sprintf(healthLeft, "\033[0;32m[HP]  \033[0m%s: \033[0;32m%d HP\033[0m", m->name, p->life);
+
+    movCursor(100, 37);
+    clearLine();
+    movCursor(100, 38);
+    clearLine();
+    movCursor(100, 39);
+    clearLine();
+    printStringAtCoordinate(100, 34, playerSpell);
+    printStringAtCoordinate(100, 35, damageDone);
+    printStringAtCoordinate(100, 36, healthLeft);
+
+
     return damage;
 }
 
@@ -698,26 +747,37 @@ int chooseMonster(Monster **m, int nbrMonster)
     return choice - 1;
 }
 
+void getCursorPosition(int *row, int *col) {
+    printf("\033[6n");
+    scanf("\033[%d;%dR", row, col);
+}
+
 void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
 {
     int lifeBar = (p->life * 10) / 10;
+    int row = 44;
+    int col = 5;
+
+    //getCursorPosition(&row, &col);
+    //printf("row : %d, col : %d", row, col);
+
     changeTextColor("green");
-    movCursor(5, 29);
+    movCursor(5, row-1);
     printf("%s HP : ", p->name);
 
-    movCursor(5, 30);
+    movCursor(5, row);
     clearLine();
     changeTextColor("green");
     for (int i = 0; i < lifeBar; i++)
-        printStringAtCoordinate(i + 5, 30, "█");
+        printStringAtCoordinate(i + 5, row, "█");
     //printf("\033[0;32m█\033[0m"); // green
     changeTextColor("red");
     for (int i = 0; i < 10 - lifeBar; i++)
-        printStringAtCoordinate(i + 5, 30, "█");
+        printStringAtCoordinate(i + 5, row, "█");
 
     //printf("\033[0;31m█\033[0m"); // red
     changeTextColor("green");
-    movCursor(7 + lifeBar, 30);
+    movCursor(7 + lifeBar, row);
     printf("\033[0;32m %d \033[0m", p->life); // green
     printf("\n\n");
 
@@ -727,15 +787,15 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
         //printf("%s Mana : ", p->name);
 
         for (int i = 0; i < manaBar; i++)
-            printStringAtCoordinate(i + 5, 31, "█");
+            printStringAtCoordinate(i + 5, row + 1, "█");
         //printf("\033[0;34m█\033[0m"); // blue
 
         changeTextColor("red");
         for (int i = 0; i < 10 - manaBar; i++)
-            printStringAtCoordinate(i + 5, 31, "█");
+            printStringAtCoordinate(i + 5, row + 1, "█");
         //printf("\033[0;31m█\033[0m"); // red
 
-        movCursor(7 + manaBar, 31);
+        movCursor(7 + manaBar, row+1);
         printf("\033[0;34m %d \033[0m", p->mana);
         printf("\n\n");
     }
@@ -743,15 +803,15 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
     for (int i = 0; i < nbrMonster; i++) {
         changeTextColor("red");
         if (m[i]->life == 0) {
-            movCursor(5, 33 + i);
+            movCursor(5, row + 3 + i);
             printf("%s %d est mort\n\n", m[i]->name, i + 1);
             continue;
         }
         lifeBar = (m[i]->life * 10) / 10;
-        movCursor(5, 33 + i);
+        movCursor(5, row + 3 + i);
         printf("%s %d HP : ", m[i]->name, i + 1);
         for (int j = 0; j < lifeBar; j++)
-            printStringAtCoordinate(j + 5, 33 + i, "█");
+            printStringAtCoordinate(j + 5, row + 3 + i, "█");
         //printf("\033[0;31m█\033[0m");
 
         printf("\033[0;31m %d %s %d\033[0m", m[i]->life, m[i]->name, i + 1);
@@ -808,7 +868,8 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
 
     int damage = normalAttack(p, m[target]);
     int max_hp = maxLife[target];
-    removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
+
+    removeHP(target * 50 + 50 + m[target]->life + damage -1, 8 - (target * 1), damage > max_hp ? max_hp : damage);
 
     updateMainLifeBars(maxLines, nbrMonster, m, p);
 }
@@ -838,7 +899,7 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const 
 
     int damage = usePlayerSpell(p, m[target], spellChoice);
     int max_hp = maxLife[target];
-    removeHP(target * 50 + 50 + m[target]->life + damage, 8, damage > max_hp ? max_hp : damage);
+    removeHP(target * 50 + 50 + m[target]->life + damage, 8 - (target *1), damage > max_hp ? max_hp : damage);
 
     updateMainLifeBars(maxLines, nbrMonster, m, p);
 
@@ -871,10 +932,13 @@ void monsterTurn(const int *nbrMonster, Monster **m, Player *p)
 
 void fightMonster(Player *p, Monster **m, int *nbrMonster)
 {
+
     int *maxLife = (int *)malloc(sizeof(int) * *nbrMonster);
     for (int i = 0; i < *nbrMonster; i++) {
+
         maxLife[i] = m[i]->life;
     }
+
     int damageNormalAttack = p->attack - m[0]->defense;
     int choice;
     int maxLines = 0;
@@ -890,6 +954,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
         if (lines > maxLines)
             maxLines = lines;
     }
+
     free(filePath);
     maxLines += 10;
     int startPrint = maxLines + 4;

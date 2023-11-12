@@ -37,5 +37,7 @@ int attackWithSpell(int maxLines, int nbrMonster, Monster **m, Player *p, const 
 void updateMainLifeBars(int maxLines, int nbrMonster, Monster **m, Player *p);
 void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife);
 void printCombatInterface(int nbrMonster, int damageNormalAttack);
+void getCursorPosition(int *row, int *col);
+
 
 #endif // FIGHT_H
