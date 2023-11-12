@@ -285,7 +285,6 @@ void continueGame(Player *p)
     rc = sqlite3_prepare_v2(
         db, "SELECT id, name, level, experience, life, attack, defense, mana, gold, class_id, maxLife, maxMana FROM PLAYER WHERE id = ?;", -1, &select, NULL);
 
-
     if (rc != SQLITE_OK) {
         printf("Your journey hasn't started yet !\n");
         sqlite3_close(db);
@@ -314,7 +313,6 @@ void continueGame(Player *p)
         printf("Your journey hasn't started yet !\n");
         exit(EXIT_SUCCESS);
     }
-
 
     sqlite3_finalize(select);
     sqlite3_close(db);

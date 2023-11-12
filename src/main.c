@@ -36,7 +36,6 @@ void printGameMenu()
     fclose(fp);
 }
 
-
 void printFinal()
 {
     FILE *fp = fopen(FINAL, "r");
@@ -144,7 +143,6 @@ int main(int argc, char **argv)
         printf("Press a key to continue...");
         fgetc(stdin);
 
-
         free(idToFight);
         free(nbMonster);
         break;
@@ -206,7 +204,6 @@ int main(int argc, char **argv)
         fgetc(stdin);
         changeTextColor("reset");
         fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
-
 
         clearScreen();
         changeTextColor("yellow");

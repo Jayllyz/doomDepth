@@ -270,7 +270,6 @@ int updateMap(Map *m)
         i++;
     }
 
-
     if (!isMonster) {
         return MAP_FINISHED;
     }

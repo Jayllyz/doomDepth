@@ -229,10 +229,10 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
                     //printf("Vous avez utilisé %s\n", stuffs[choice]->name);
                     movCursor(100, 35);
                     clearLine(); // @TODO if cursor moved reset it
-                    printf("\033[0;33m[ITEMS] \033[0m%s used %s\033[0m",p->name, stuffs[choice]->name);
+                    printf("\033[0;33m[ITEMS] \033[0m%s used %s\033[0m", p->name, stuffs[choice]->name);
                     movCursor(100, 36);
                     clearLine();
-                    printf("\033[0;32m[HEAL] \033[0m%s: \033[0m",p->name);
+                    printf("\033[0;32m[HEAL] \033[0m%s: \033[0m", p->name);
 
                     if (p->life + stuffs[choice]->life > p->maxLife) {
                         p->life = p->maxLife;
@@ -296,10 +296,10 @@ void printItemsLogs(Player *p, stuff *s, int nbrMonster, Monster **m, int maxLin
     if (s->effect == DAMAGE) {
         movCursor(100, 35);
         clearLine(); // @TODO if cursor moved reset it
-        printf("\033[0;33m[ITEMS] \033[0m%s used %s\033[0m",p->name, s->name);
+        printf("\033[0;33m[ITEMS] \033[0m%s used %s\033[0m", p->name, s->name);
         movCursor(100, 36);
         clearLine();
-        printf("\033[0;34m[DMG] \033[0m%s: - %d\033[0m",m[nbrMonster]->name, s->attack);
+        printf("\033[0;34m[DMG] \033[0m%s: - %d\033[0m", m[nbrMonster]->name, s->attack);
 
         if (s->attack > m[nbrMonster]->maxLife)
             s->attack = m[nbrMonster]->maxLife;
