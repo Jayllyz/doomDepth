@@ -182,12 +182,12 @@ void printSignWithColor(char sign)
         printf("? ");
         changeTextColor("reset");
         break;
-        case '+':
+    case '+':
         changeTextColor("green");
         printf("+ ");
         changeTextColor("reset");
         break;
-        case '!':
+    case '!':
         changeTextColor("yellow");
         printf("! ");
         changeTextColor("reset");
