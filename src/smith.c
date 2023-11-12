@@ -1,9 +1,9 @@
 #include "includes/smith.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/utils.h"
-#include "includes/fight.h"
 #include <math.h>
 #include <sqlite3.h>
 #include <stdio.h>
@@ -178,7 +178,9 @@ void updateStuffStats(int level, int idStuff)
         return;
     }
 
-    char *sql = sqlite3_mprintf("UPDATE STUFF SET attack = attack + (%d * 2), defense = defense + (%d * 2), life = life + (%d * 2), mana = mana + (%d * 2) WHERE id = %d;", level, level, level, level, idStuff);
+    char *sql
+        = sqlite3_mprintf("UPDATE STUFF SET attack = attack + (%d * 2), defense = defense + (%d * 2), life = life + (%d * 2), mana = mana + (%d * 2) WHERE id = %d;",
+            level, level, level, level, idStuff);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -312,7 +314,7 @@ void initSmith(Player *p)
 
             level += 1;
             updateStuffStats(level, choice);
-    
+
             changeTextColor("green");
             printf("Votre stuff a été amélioré\n");
             changeTextColor("reset");
