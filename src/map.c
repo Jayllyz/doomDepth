@@ -76,7 +76,6 @@ arrowKey_t readArrowKeyPress()
         return arrowKeyPressed;
     }
 
-    // printf(("\n%d %d %d"), buf[0], buf[1], buf[2]);
     if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65)) {
         arrowKeyPressed = ARROWKEY_UP;
     }
@@ -250,7 +249,6 @@ int updateMap(Map *m)
     int clear = 1;
     int isMonster = 0;
     int i = 0;
-    // clear last player starting pos
     while (clear) {
         if (m->map[i] == '9') {
             m->map[i] = '0';
@@ -262,10 +260,8 @@ int updateMap(Map *m)
     saveMapToFile(m->map, "ascii/map_save");
 
     i = 1;
-    //printf("strlen:%lu\n", strlen(m->map) - 1);
 
     while (i < 97) {
-        //printf("->%c<-", m->map[i]);
 
         if (m->map[i] == '2') {
             isMonster = 1;
@@ -274,17 +270,10 @@ int updateMap(Map *m)
         i++;
     }
 
-    //printf("%s", m->map);
 
     if (!isMonster) {
         return MAP_FINISHED;
     }
-
-    // update starting pos
-    //printf("x:%d, y%d\n", (m->player_x - m->map_left) / 2, m->player_y - m->map_top);
-    //printf ("%s", m->map);
-
-    //m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
     return 0;
 }
 
@@ -336,7 +325,6 @@ int eventHandler(char sign, Map m, Player *p)
             return MAP_FINISHED;
         }
         printMapInterface(m.map_left, m.map_top, m.map);
-        mov(&m, p);
 
         break;
     case '4':
@@ -350,7 +338,6 @@ int eventHandler(char sign, Map m, Player *p)
             return MAP_FINISHED;
         }
         printMapInterface(m.map_left, m.map_top, m.map);
-        mov(&m, p);
 
         break;
 
@@ -359,21 +346,18 @@ int eventHandler(char sign, Map m, Player *p)
         p->life = p->maxLife;
         updatePlayerInfo(p);
         updateMap(&m);
-        //mov(&m, p); // @TODO find why it makes player skip the cell
         break;
 
     case '!':
         printStringAtCoordinate(2, 19, "You found a treasure !");
         rewardStuff(p);
         updateMap(&m);
-        mov(&m, p);
         break;
 
     case '?':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Here is a random event!");
         int event_result = event();
-        printf("event_result: %d\n", event_result);
         switch (event_result) {
         case DEATH:
             changeTextColor("red");
@@ -421,7 +405,6 @@ int eventHandler(char sign, Map m, Player *p)
             return MAP_FINISHED;
         }
         printMapInterface(m.map_left, m.map_top, m.map);
-        mov(&m, p);
 
         break;
     }
@@ -548,7 +531,6 @@ int mov(Map *m, Player *p)
         restoreCursorPos();
         printf(("                               \n"));
         restoreCursorPos();
-        //printf("Key pressed = %d\n", arrowKeyPressed);
     }
 }
 
@@ -556,11 +538,7 @@ void findStartingPos(Map *m)
 {
     for (int i = 0; i < strlen(m->map); i++) {
         if (m->map[i] == '9') {
-            //printf("i: %d\n", i);
-            /*m.player_x = (i % 11) * 2 + m.map_left;
-            m.player_y = (i / 11) + m.map_top;
-            printf("x:%d, y:%d\n", m.player_x, m.player_y);
-            break;*/
+
             int x = (i % 11) * 2 + m->map_left;
             int y = (i / 11) + m->map_top;
             m->player_x = x;
@@ -568,7 +546,6 @@ void findStartingPos(Map *m)
             break;
         }
     }
-    //fgetc(stdin);
     return;
 }
 
@@ -595,9 +572,7 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     changeTextColor("reset");
 
     int x = map_width / 2 + map_left;
-    // if (x % 2 != map_width % 2) {
-    //     //x++;
-    // }
+
     int y = map_height / 2 + map_top;
 
     m.player_x = x;

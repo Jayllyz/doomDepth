@@ -10,6 +10,7 @@
 #include <time.h>
 
 #define MENU_FILE "ascii/menu.txt"
+#define FINAL "ascii/final.txt"
 #define DRAGON "ascii/monster/5.txt"
 
 #define MAP_LEFT 5
@@ -23,6 +24,25 @@ void printGameMenu()
 
     if (fp == NULL) {
         printf("Fichier du menu introuvable\n");
+        return;
+    }
+
+    int c = fgetc(fp);
+    while (c != EOF) {
+        printf("%c", c);
+        c = fgetc(fp);
+    }
+
+    fclose(fp);
+}
+
+
+void printFinal()
+{
+    FILE *fp = fopen(FINAL, "r");
+
+    if (fp == NULL) {
+        printf("Fichier de final introuvable\n");
         return;
     }
 
@@ -80,7 +100,6 @@ int main(int argc, char **argv)
         printf("Nouvelle partie\n");
         playerSetup(p);
         clearScreen();
-        printf("Votre personnage a bien ete cree, \nvous etes niveau %d\n", p->level);
 
         for (int i = 1; i < 4; i++) {
             printf("Donjon %d\n", i);
@@ -116,13 +135,25 @@ int main(int argc, char **argv)
         int *nbMonster = (int *)malloc(sizeof(int));
         *nbMonster = 1;
         fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
-        printf("Vous avez fini le jeu, bravo !\n");
+
+        clearScreen();
+        changeTextColor("yellow");
+        printFinal();
+
+        eraseDatabase();
+        printf("Press a key to continue...");
+        fgetc(stdin);
+
+
         free(idToFight);
         free(nbMonster);
         break;
     case 2:
         clearScreen();
         continueGame(p);
+
+        fgetc(stdin);
+
         printf("Votre personnage a bien ete charge, %s\n", p->name);
 
         char *save_file = (char *)malloc(sizeof(char) * 25);
@@ -175,7 +206,16 @@ int main(int argc, char **argv)
         fgetc(stdin);
         changeTextColor("reset");
         fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
-        printf("Vous avez fini le jeu, bravo !\n");
+
+
+        clearScreen();
+        changeTextColor("yellow");
+        printFinal();
+
+        eraseDatabase();
+        printf("Press a key to continue...");
+        fgetc(stdin);
+
         free(idToFight);
         free(nbMonster);
         break;

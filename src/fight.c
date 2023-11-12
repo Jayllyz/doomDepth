@@ -81,6 +81,7 @@ Monster *getMonsterInfo(int id)
     m->attack = sqlite3_column_int(res, 2);
     m->defense = sqlite3_column_int(res, 3);
     m->life = sqlite3_column_int(res, 4);
+    m->maxLife = sqlite3_column_int(res, 4);
     m->level = sqlite3_column_int(res, 5);
     m->isBoss = sqlite3_column_int(res, 6);
 
@@ -757,9 +758,6 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
     int row = 44;
     int col = 5;
 
-    //getCursorPosition(&row, &col);
-    //printf("row : %d, col : %d", row, col);
-
     changeTextColor("green");
     movCursor(5, row - 1);
     printf("%s HP : ", p->name);
@@ -769,30 +767,26 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
     changeTextColor("green");
     for (int i = 0; i < lifeBar; i++)
         printStringAtCoordinate(i + 5, row, "█");
-    //printf("\033[0;32m█\033[0m"); // green
     changeTextColor("red");
     for (int i = 0; i < 10 - lifeBar; i++)
         printStringAtCoordinate(i + 5, row, "█");
 
-    //printf("\033[0;31m█\033[0m"); // red
     changeTextColor("green");
     movCursor(7 + lifeBar, row);
     printf("\033[0;32m %d \033[0m", p->life); // green
+    clearLine();
     printf("\n\n");
 
     if (mana == 1) {
         int manaBar = (p->mana * 10) / 10;
         changeTextColor("blue");
-        //printf("%s Mana : ", p->name);
 
         for (int i = 0; i < manaBar; i++)
             printStringAtCoordinate(i + 5, row + 1, "█");
-        //printf("\033[0;34m█\033[0m"); // blue
 
         changeTextColor("red");
         for (int i = 0; i < 10 - manaBar; i++)
             printStringAtCoordinate(i + 5, row + 1, "█");
-        //printf("\033[0;31m█\033[0m"); // red
 
         movCursor(7 + manaBar, row + 1);
         printf("\033[0;34m %d \033[0m", p->mana);
@@ -867,8 +861,10 @@ void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p
 
     int damage = normalAttack(p, m[target]);
     int max_hp = maxLife[target];
+    if (damage > max_hp)
+        damage = max_hp;
 
-    removeHP(target * 50 + 50 + m[target]->life + damage - 1, 8 - (target * 1), damage > max_hp ? max_hp : damage);
+    removeHP(target * 50 + 50 + m[target]->life + damage - 1, 8 - (target * 1), damage);
 
     updateMainLifeBars(maxLines, nbrMonster, m, p);
 }
@@ -1023,8 +1019,8 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
     }
 
     if (p->life <= 0) {
-        clearLinesFrom(maxLines + 4);
-        movCursor(0, maxLines + 6);
+        movCursor(0, 44);
+        clearLine();
 
         printLifeBar(p, m, *nbrMonster, 0);
         printf("Vous êtes mort\n");

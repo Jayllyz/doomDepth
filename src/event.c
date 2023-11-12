@@ -141,7 +141,7 @@ int event()
     StoryChoice* storyChoice = malloc(sizeof(StoryChoice));
 
     int villageID = 0; // @TODO add more village
-    int placeID = 2;
+    int placeID = 0;
     int scenarioID = 0; // @TODO add more scenario
 
     placeID = rand() % 3;
@@ -150,7 +150,7 @@ int event()
     //printf("storyPath: %s\n", storyPath);
 
     if (!folderExists(storyPath)) {
-        printf("\nThe story path \"%s\" does not exist", storyPath);
+        //printf("\nThe story path \"%s\" does not exist", storyPath);
         fgetc(stdin);
         free(storyChoice);
         free(storyPath);
@@ -189,7 +189,7 @@ int event()
         strcpy(storyChoice->situation, situation);
         free(situation);
 
-        printf("\nID: %s", storyChoice->id);
+        //printf("\nID: %s", storyChoice->id);
         printf("\nContext:\n%s\n", storyChoice->context);
         printf("\nSituation:\n%s\n", storyChoice->situation);
 

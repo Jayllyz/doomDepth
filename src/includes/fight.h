@@ -7,6 +7,7 @@ typedef struct {
     char *name;
     int level;
     int life;
+    int maxLife;
     int attack;
     int defense;
     int isBoss;
@@ -38,5 +39,6 @@ void updateMainLifeBars(int maxLines, int nbrMonster, Monster **m, Player *p);
 void attackWithNormalAttack(int maxLines, int nbrMonster, Monster **m, Player *p, const int *maxLife);
 void printCombatInterface(int nbrMonster, int damageNormalAttack);
 void getCursorPosition(int *row, int *col);
+void removeHP(int lastHP_x, int y, int life_to_remove);
 
 #endif // FIGHT_H
