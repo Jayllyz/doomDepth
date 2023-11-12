@@ -21,6 +21,7 @@ typedef struct {
     int attack;
     int defense;
     int mana;
+    int maxMana;
     int gold;
     int classId;
     Spell **spell;

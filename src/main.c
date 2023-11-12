@@ -83,8 +83,10 @@ int main(int argc, char **argv)
         printf("Votre personnage a bien ete cree, \nvous etes niveau %d\n", p->level);
 
         for (int i = 1; i < 4; i++) {
-            printf("loading map %d\n", i);
-            fgetc(stdin);
+            printf("Donjon %d\n", i);
+            // fgetc(stdin);
+            p->mana = p->maxMana;
+            p->life = p->maxLife;
 
             if (snprintf(filename, 25, "ascii/map%d.txt", i) < 0) {
                 printf("Error while loading map %d\n", i);
@@ -121,6 +123,7 @@ int main(int argc, char **argv)
     case 2:
         clearScreen();
         continueGame(p);
+        printf("Votre personnage a bien ete charge, %s\n", p->name);
 
         char *save_file = (char *)malloc(sizeof(char) * 25);
         strcpy(save_file, "ascii/map_save");
@@ -136,7 +139,7 @@ int main(int argc, char **argv)
 
         for (int i = map_save[0] - '0'; i < 4; i++) {
             printf("loading map %d\n", i);
-            fgetc(stdin);
+            // fgetc(stdin);
 
             if (snprintf(filename, 25, "ascii/map%d.txt", i) < 0) {
                 printf("Error while loading map %d\n", i);

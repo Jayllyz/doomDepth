@@ -27,6 +27,8 @@ int createPlayer(char *name, int classId, Player *p)
     int defense = 10;
     int mana = 25;
     int gold = 100;
+    int maxLife = 99;
+    int maxMana = 25;
 
     switch (classId) {
     case 1: // Guerrier
@@ -43,9 +45,9 @@ int createPlayer(char *name, int classId, Player *p)
         break;
     }
 
-    char *sql = sqlite3_mprintf(
-        "INSERT INTO PLAYER (id, name, level, experience, life, attack, defense, mana, gold, class_id) VALUES ('%d', '%s', %d, %d, %d, %d, %d, %d, %d, %d);", 1, name,
-        level, experience, life, attack, defense, mana, gold, classId);
+    char *sql = sqlite3_mprintf("INSERT INTO PLAYER (id, name, level, experience, life, attack, defense, mana, gold, class_id, maxLife, maxMana) VALUES ('%d', '%s', %d, "
+                                "%d, %d, %d, %d, %d, %d, %d, %d, %d);",
+        1, name, level, experience, life, attack, defense, mana, gold, classId, maxLife, maxMana);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -81,12 +83,13 @@ int createPlayer(char *name, int classId, Player *p)
     p->level = level;
     p->experience = experience;
     p->life = life;
-    p->maxLife = life;
     p->attack = attack;
     p->defense = defense;
     p->mana = mana;
     p->gold = gold;
     p->classId = classId;
+    p->maxLife = maxLife;
+    p->maxMana = maxMana;
 
     sqlite3_free(sql);
     sqlite3_free(err_msg);
@@ -244,7 +247,8 @@ void continueGame(Player *p)
     }
 
     sqlite3_stmt *select;
-    rc = sqlite3_prepare_v2(db, "SELECT id, name, level, experience, life, attack, defense, mana, gold, class_id FROM PLAYER WHERE id = ?;", -1, &select, NULL);
+    rc = sqlite3_prepare_v2(
+        db, "SELECT id, name, level, experience, life, attack, defense, mana, gold, class_id, maxLife, maxMana FROM PLAYER WHERE id = ?;", -1, &select, NULL);
 
     if (rc != SQLITE_OK) {
         printf("Failed to select data\n");
@@ -260,12 +264,11 @@ void continueGame(Player *p)
     p->level = sqlite3_column_int(select, 2);
     p->experience = sqlite3_column_int(select, 3);
     p->life = sqlite3_column_int(select, 4);
-    p->maxLife = sqlite3_column_int(select, 4);
-    p->attack = sqlite3_column_int(select, 5);
     p->defense = sqlite3_column_int(select, 6);
     p->mana = sqlite3_column_int(select, 7);
-    p->gold = sqlite3_column_int(select, 8);
     p->classId = sqlite3_column_int(select, 9);
+    p->maxLife = sqlite3_column_int(select, 10);
+    p->maxMana = sqlite3_column_int(select, 11);
     p->spell = loadPlayerSpells(p->id);
 
     sqlite3_finalize(select);

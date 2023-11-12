@@ -1,5 +1,5 @@
-#include "includes/event.h"
 #include "includes/ansii_print.h"
+#include "includes/event.h"
 #include "includes/fight.h"
 #include "includes/map.h"
 #include "includes/utils.h"
@@ -153,25 +153,48 @@ int event()
     if (!folderExists(storyPath)) {
         printf("\nThe story path \"%s\" does not exist", storyPath);
         fgetc(stdin);
+        free(storyChoice);
+        free(storyPath);
         return -1;
     }
-
-    int choice;
 
     strcpy(storyChoice->storyPath, storyPath);
 
     while (!hasEventFile(storyChoice->storyPath)) {
         printf("storyPath: %s\n", storyChoice->storyPath);
 
-        strcpy(storyChoice->id, readFile(storyChoice->storyPath, "id.txt"));
-        strcpy(storyChoice->context, readFile(storyChoice->storyPath, "context.txt"));
-        strcpy(storyChoice->situation, readFile(storyChoice->storyPath, "situation.txt"));
+        char* id = readFile(storyChoice->storyPath, "id.txt");
+        if (id == NULL) {
+            fprintf(stderr, "Failed to read file: %s\n", "id.txt");
+            free(storyChoice);
+            exit(EXIT_FAILURE);
+        }
+        strcpy(storyChoice->id, id);
+        free(id);
+
+        char* context = readFile(storyChoice->storyPath, "context.txt");
+        if (context == NULL) {
+            fprintf(stderr, "Failed to read file: %s\n", "context.txt");
+            free(storyChoice);
+            exit(EXIT_FAILURE);
+        }
+        strcpy(storyChoice->context, context);
+        free(context);
+
+        char* situation = readFile(storyChoice->storyPath, "situation.txt");
+        if (situation == NULL) {
+            fprintf(stderr, "Failed to read file: %s\n", "situation.txt");
+            free(storyChoice);
+            exit(EXIT_FAILURE);
+        }
+        strcpy(storyChoice->situation, situation);
+        free(situation);
 
         printf("\nID: %s", storyChoice->id);
         printf("\nContext:\n%s\n", storyChoice->context);
         printf("\nSituation:\n%s\n", storyChoice->situation);
 
-        choice = getInputInt();
+        int choice = getInputInt();
 
         // Check the user's choice and update the storyPath
         if (choice == 1) {
@@ -186,9 +209,32 @@ int event()
         }
     }
 
-    strcpy(storyChoice->id, readFile(storyChoice->storyPath, "id.txt"));
-    strcpy(storyChoice->context, readFile(storyChoice->storyPath, "context.txt"));
-    strcpy(storyChoice->situation, readFile(storyChoice->storyPath, "situation.txt"));
+    char* id = readFile(storyChoice->storyPath, "id.txt");
+    if (id == NULL) {
+        fprintf(stderr, "Failed to read file: %s\n", "id.txt");
+        free(storyChoice);
+        exit(EXIT_FAILURE);
+    }
+    strcpy(storyChoice->id, id);
+    free(id);
+
+    char* context = readFile(storyChoice->storyPath, "context.txt");
+    if (context == NULL) {
+        fprintf(stderr, "Failed to read file: %s\n", "context.txt");
+        free(storyChoice);
+        exit(EXIT_FAILURE);
+    }
+    strcpy(storyChoice->context, context);
+    free(context);
+
+    char* situation = readFile(storyChoice->storyPath, "situation.txt");
+    if (situation == NULL) {
+        fprintf(stderr, "Failed to read file: %s\n", "situation.txt");
+        free(storyChoice);
+        exit(EXIT_FAILURE);
+    }
+    strcpy(storyChoice->situation, situation);
+    free(situation);
 
     printf("\nID: %s", storyChoice->id);
     printf("\nContext:\n%s\n", storyChoice->context);

@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
@@ -246,8 +246,9 @@ void updatePlayerInfo(Player *p)
         return;
     }
 
-    char *sql = sqlite3_mprintf("UPDATE PLAYER SET level = %d, attack = %d, defense = %d, experience = %d, life = %d, mana = %d, gold = %d WHERE id = 1;", p->level,
-        p->attack, p->defense, p->experience, p->life, p->mana, p->gold);
+    char *sql = sqlite3_mprintf(
+        "UPDATE PLAYER SET level = %d, attack = %d, defense = %d, experience = %d, life = %d, mana = %d, gold = %d, maxLife = %d, maxMana = %d WHERE id = 1;", p->level,
+        p->attack, p->defense, p->experience, p->life, p->mana, p->gold, p->maxLife, p->maxMana);
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -270,7 +271,7 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
     selectPlayerInfo(p);
     //printf("%s \nNiveau %d \nattack : %d \ndefense : %d\nxp : %d/50", p->name, p->level, p->attack, p->defense, p->experience);
     char *playerStats = malloc(sizeof(char) * 128);
-    sprintf(playerStats, "%s Lv.%d(%d/50)\n⚔️ \033[0;31m %d\033[0m    🛡️ \033[0;32m %d\033[0m", p->name, p->level, p->experience, p->attack, p->defense);
+    sprintf(playerStats, "%s Lvl.%d(%d/50)\n⚔️ \033[0;31m %d\033[0m    🛡️ \033[0;32m %d\033[0m", p->name, p->level, p->experience, p->attack, p->defense);
     printStringAtCoordinate(0, 2, playerStats);
 
     int nbMonster;
@@ -372,6 +373,9 @@ int normalAttack(Player *p, Monster *m)
     printStringAtCoordinate(100, 36, healthLeft);
     movCursor(100, 37);
 
+    free(damageDone);
+    free(healthLeft);
+
     return damage;
 }
 
@@ -404,6 +408,9 @@ void monsterAttack(Player *p, Monster *m)
 
     printStringAtCoordinate(100, 38, monsterAttack);
     printStringAtCoordinate(100, 39, healthLeft);
+
+    free(monsterAttack);
+    free(healthLeft);
 }
 
 void monsterSpell(Player *p, Monster *m)
@@ -437,6 +444,9 @@ void monsterSpell(Player *p, Monster *m)
     printStringAtCoordinate(100, 37, monsterSpell);
     printStringAtCoordinate(100, 38, damageDone);
     printStringAtCoordinate(100, 39, healthLeft);
+
+    free(monsterSpell);
+    free(damageDone);
 }
 
 int getSpellsCount(int playerId)
@@ -484,6 +494,7 @@ char *levelUp(Player *p)
     p->defense += 5;
     p->experience = 0;
     p->mana += 10;
+    p->maxMana += 10;
 
     if (getSpellsCount(1) < MAX_PLAYER_SPELL) {
         int random = rand() % 100;
@@ -509,7 +520,7 @@ void rewardStuff(Player *p)
     if (rc != SQLITE_OK) {
         printf("Cannot open database: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     rc = sqlite3_prepare_v2(db, "SELECT id, name FROM STUFF WHERE grade = 3 ORDER BY RANDOM() LIMIT 1;", -1, &res, NULL);
@@ -517,7 +528,7 @@ void rewardStuff(Player *p)
     if (rc != SQLITE_OK) {
         printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return;
+        exit(EXIT_FAILURE);
     }
 
     sqlite3_step(res);
@@ -572,8 +583,8 @@ void rewards(Player *p, Monster **m, int nbrMonster)
         p->experience += xp;
     }
 
-    printf("Vous avez gagné %d points d'expérience\n", xp);
-    printf("Niveau : %d | %d points d'expérience\n", p->level, p->experience);
+    printf("Vous avez gagné %d points d'expériences\n", xp);
+    printf("Niveau : %d | %d / 50 points d'expériences\n", p->level, p->experience);
     printf("Vous avez gagné %d pièces d'or\n", gold);
     printf("Total or : %d\n", p->gold + gold);
     printf("Il vous reste \033[0;32m%02d\033[0m points de vie\n", p->life);
@@ -873,7 +884,7 @@ void fightMonster(Player *p, Monster **m, int *nbrMonster)
             printf("Erreur lors de l'allocation de la mémoire\n");
             free(maxLife);
             free(filePath);
-            return;
+            exit(EXIT_FAILURE);
         }
         int lines = countLines(filePath);
         if (lines > maxLines)

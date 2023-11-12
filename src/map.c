@@ -1,14 +1,15 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/event.h"
 #include "includes/fight.h"
 #include "includes/items.h"
+#include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/smith.h"
 #include "includes/utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #define MAP_FINISHED 2
 
 const char *arrowKeyGetName(arrowKey_t arrowKey)
