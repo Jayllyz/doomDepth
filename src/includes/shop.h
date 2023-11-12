@@ -66,4 +66,6 @@ void initShop(int idPlayer);
 void equipStuff(int idPlayer, int stuffId);
 
 void unequipStuff(int idPlayer, int stuffId);
+
+int biggestIdStuff(int idPlayer);
 #endif

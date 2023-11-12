@@ -1,7 +1,7 @@
-#include "includes/shop.h"
 #include "includes/ansii_print.h"
 #include "includes/items.h"
 #include "includes/map.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -781,6 +781,7 @@ void buyStuffInit(int idPlayer)
 
     int stuffCount;
     stuff *stuffsList = getStuffFromShop(&stuffCount);
+    int biggestId = biggestIdStuff(idPlayer);
     if (stuffsList) {
         printStuffs(stuffsList, stuffCount);
         free(stuffsList);
@@ -796,11 +797,11 @@ void buyStuffInit(int idPlayer)
         clearLine();
         printf("Entrer le numéro du stuff que vous voulez acheter\n");
         printf("Entrer 0 pour quitter\n");
-
+        clearLine();
         choice = getInputInt();
         clearBuffer();
 
-        if (choice > 0) {
+        if (choice > 0 && choice <= biggestId) {
 
             int nbStuffPlayer = getNbStuffInPlayerStuff(idPlayer);
 
@@ -1003,4 +1004,36 @@ void unequipStuff(int idPlayer, int stuffId)
     sqlite3_close(db);
 
     removeStatsStuff(idPlayer, stuffId);
+}
+
+int biggestIdStuff(int idPlayer)
+{
+    sqlite3 *db;
+    sqlite3_stmt *res;
+    int rc = sqlite3_open(DB_FILE, &db);
+    int biggestId = 0;
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        return -1;
+    }
+
+    rc = sqlite3_prepare_v2(db, "SELECT MAX(id) FROM STUFF;", -1, &res, NULL);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to select data\n");
+        sqlite3_close(db);
+        return -1;
+    }
+
+    sqlite3_bind_int(res, 1, idPlayer);
+    sqlite3_step(res);
+
+    biggestId = sqlite3_column_int(res, 0);
+
+    sqlite3_finalize(res);
+    sqlite3_close(db);
+
+    return biggestId;
 }

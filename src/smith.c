@@ -1,6 +1,7 @@
-#include "includes/smith.h"
 #include "includes/ansii_print.h"
+#include "includes/map.h"
 #include "includes/shop.h"
+#include "includes/smith.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -8,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #define SMITH "ascii/smith/smith.txt"
 #define ITEMS "ascii/shop/stuff.txt"
@@ -109,7 +111,7 @@ int getStuffLevelOfPlayerById(int idStuff, int idPlayer)
     rc = sqlite3_prepare_v2(db, "SELECT level FROM PLAYER_STUFF WHERE player_id = ? AND stuff_id = ?;", -1, &res, NULL);
 
     if (rc != SQLITE_OK) {
-        printf("Failed to select data\n");
+        printf("Failed to select data: %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
     }
 
@@ -189,22 +191,30 @@ void initSmith(int idPlayer)
         changeTextColor("orange");
         printf("Mince ! Vous n'avez rien dans votre inventaire\n");
         changeTextColor("reset");
+        free(stuffsList);
+        sleep(2);
+        return;
     }
+
+    int bigggestId = biggestIdStuff(1);
 
     printf("\n\n");
     printLine();
     printf("\n\n");
 
     int choice;
+    saveCursorPos();
     do {
+        restoreCursorPos();
+        clearLine();
         printf("Entrer le numéro du stuff que vous voulez améliorer\n");
         printf("Entrer 0 pour quitter\n");
 
         choice = getInputInt();
         clearBuffer();
-    } while (choice < 0);
+    } while (choice < 0 && choice > bigggestId);
 
-    if (choice != 0) {
+    if (choice > 0 && choice <= bigggestId) {
 
         stuff stuff = getStuffOfPlayerById(choice, idPlayer);
         int level = getStuffLevelOfPlayerById(choice, idPlayer);
@@ -244,7 +254,10 @@ void initSmith(int idPlayer)
         printf("2. Non\n");
 
         int choice2;
+        saveCursorPos();
         do {
+            restoreCursorPos();
+            clearLine();
             choice2 = getInputInt();
             clearBuffer();
         } while (choice2 < 1 || choice2 > 2);
