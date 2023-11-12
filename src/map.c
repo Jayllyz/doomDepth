@@ -182,6 +182,16 @@ void printSignWithColor(char sign)
         printf("? ");
         changeTextColor("reset");
         break;
+        case '+':
+        changeTextColor("green");
+        printf("+ ");
+        changeTextColor("reset");
+        break;
+        case '!':
+        changeTextColor("yellow");
+        printf("! ");
+        changeTextColor("reset");
+        break;
     case '9':
         changeTextColor("blue");
         printf("x ");
@@ -270,7 +280,7 @@ int updateMap(Map *m)
     }
 
     // update starting pos
-    printf("x:%d, y%d\n", (m->player_x - m->map_left) / 2, m->player_y - m->map_top);
+    //printf("x:%d, y%d\n", (m->player_x - m->map_left) / 2, m->player_y - m->map_top);
     //printf ("%s", m->map);
 
     //m->map[(m->map_width / 2 + 1) * (m->player_y - m->map_top) + (m->player_x - m->map_left) / 2] = '9';
@@ -342,6 +352,22 @@ int eventHandler(char sign, Map m, Player *p)
         mov(&m, p);
 
         break;
+
+    case '+':
+        printStringAtCoordinate(2, 19, "You got a heal !");
+        p->life = p->maxLife;
+        updatePlayerInfo(p);
+        updateMap(&m);
+        //mov(&m, p); // @TODO find why it makes player skip the cell
+        break;
+
+    case '!':
+        printStringAtCoordinate(2, 19, "You found a treasure !");
+        rewardStuff(p);
+        updateMap(&m);
+        mov(&m, p);
+        break;
+
     case '?':
         movCursor(m.map_width / 2 + m.map_left - m.map_width / 2, m.map_top + m.map_height + 1);
         printf("Here is a random event!");
@@ -485,7 +511,7 @@ int movDown(int *x, int *y, char *map, Map m, Player *p)
 
 int mov(Map *m, Player *p)
 {
-    printf("Press any arrow key | F1 to open inventory | Press Ctrl + C to quit.\n");
+    printStringAtCoordinate(2, 20, "Press any arrow key | F1 to open inventory | Press Ctrl + C to quit.\n");
 
     saveCursorPos();
     while (1) {
