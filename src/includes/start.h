@@ -34,5 +34,6 @@ void continueGame(Player *p);
 Spell *affectSpellToPlayer(int playerId, int spellId);
 Spell **loadPlayerSpells(int playerId);
 int getRandomSpellId(char *type);
+void resetStuffTable();
 
 #endif /* START_H */

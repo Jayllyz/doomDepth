@@ -8,6 +8,38 @@
 #define DB_FILE "db/doomdepth.sqlite"
 #define MAX_PLAYER_SPELL 4
 
+void resetStuffTable()
+{
+
+    sqlite3 *db;
+    char *err_msg = 0;
+    int rc = sqlite3_open(DB_FILE, &db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+    }
+
+    char *sql = sqlite3_mprintf(
+        "INSERT INTO STUFF VALUES(1,'Sword of Valor','A powerful sword imbued with holy energy',30,10,4,10,'Weapon',0,0,0); INSERT INTO STUFF VALUES(2,'Mage Robe','A "
+        "robe that enhances magical abilities',5,15,3,10,'Armor',0,0,0); INSERT INTO STUFF VALUES(3,'Poison Dagger','A dagger coated with deadly "
+        "poison',20,5,2,10,'Weapon',0,0,0); INSERT INTO STUFF VALUES(4,'Plate Mail','Heavy armor providing excellent protection',5,25,4,10,'Armor',0,0,0); INSERT INTO "
+        "STUFF VALUES(5,'Healing Potion','Restores health when consumed',0,0,1,10,'Consumable',2,15,0); INSERT INTO STUFF VALUES(7,'Fiole de mana','Buvez cette viole "
+        "pour obtenir du mana supplémentaire.',0,0,0,15,'Consumable',2,0,10); INSERT INTO STUFF VALUES(6,'bombe','BOOM !',19,0,1,15,'Consumable',1,0,0); INSERT INTO "
+        "STUFF VALUES(8,'Viande de zombie','Malade à coup sur',0,0,1,0,'Consumable',3,5,0);");
+
+    rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
+
+    if (rc != SQLITE_OK) {
+        printf("Failed to insert data %s\n", err_msg);
+        sqlite3_free(err_msg);
+        sqlite3_close(db);
+    }
+
+    sqlite3_free(sql);
+    sqlite3_close(db);
+}
+
 int createPlayer(char *name, int classId, Player *p)
 {
     sqlite3 *db;
@@ -192,7 +224,7 @@ int eraseDatabase()
         return 1;
     }
 
-    char *sql = sqlite3_mprintf("DELETE FROM PLAYER; DELETE FROM PLAYER_STUFF; DELETE FROM PLAYER_SPELL;");
+    char *sql = sqlite3_mprintf("DELETE FROM PLAYER; DELETE FROM PLAYER_STUFF; DELETE FROM PLAYER_SPELL; DELETE FROM STUFF;");
 
     rc = sqlite3_exec(db, sql, 0, 0, &err_msg);
 
@@ -212,6 +244,8 @@ int eraseDatabase()
 int playerSetup(Player *p)
 {
     int erase = eraseDatabase();
+    resetStuffTable();
+
     if (erase != 0)
         return 1;
 
