@@ -1,6 +1,6 @@
-#include "includes/smith.h"
 #include "includes/ansii_print.h"
 #include "includes/shop.h"
+#include "includes/smith.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -64,7 +64,7 @@ stuff getStuffOfPlayerById(int idStuff, int idPlayer)
 
     sqlite3_bind_int(res, 1, idStuff);
 
-    stuff result;
+    stuff result = {0};
 
     result.name = NULL;
     result.description = NULL;

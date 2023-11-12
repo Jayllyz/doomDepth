@@ -1,6 +1,7 @@
-#include "includes/shop.h"
 #include "includes/ansii_print.h"
 #include "includes/items.h"
+#include "includes/map.h"
+#include "includes/shop.h"
 #include "includes/utils.h"
 #include <math.h>
 #include <sqlite3.h>
@@ -8,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #define SHOP "ascii/shop/shop.txt"
 #define DEALER "ascii/shop/dealer.txt"
@@ -788,20 +790,23 @@ void buyStuffInit(int idPlayer)
     }
 
     int choice;
+    saveCursorPos();
     do {
-
+        restoreCursorPos();
+        clearLine();
         printf("Entrer le numéro du stuff que vous voulez acheter\n");
         printf("Entrer 0 pour quitter\n");
 
         choice = getInputInt();
         clearBuffer();
 
-        if (choice != 0) {
+        if (choice > 0) {
 
             int nbStuffPlayer = getNbStuffInPlayerStuff(idPlayer);
 
             if (nbStuffPlayer >= PLAYER_STUFF_LIMIT) {
                 changeTextColor("red");
+                clearLine();
                 printf("Vous avez atteint la limite de stuffs dans votre inventaire\n");
                 changeTextColor("reset");
                 continue;
@@ -811,6 +816,7 @@ void buyStuffInit(int idPlayer)
 
             if (checkStuffIsInPlayerStuff(choice, idPlayer)) {
                 changeTextColor("orange");
+                clearLine();
                 printf("Vous avez déjà ce stuff\n\n");
                 changeTextColor("reset");
                 continue;
@@ -818,6 +824,7 @@ void buyStuffInit(int idPlayer)
 
             if (price > getPlayerGold(idPlayer)) {
                 changeTextColor("red");
+                clearLine();
                 printf("Vous n'avez pas assez d'or pour acheter ce stuff\n");
                 changeTextColor("reset");
                 continue;
@@ -827,6 +834,7 @@ void buyStuffInit(int idPlayer)
             addStuffToPlayerStuff(choice, idPlayer);
 
             changeTextColor("green");
+            clearLine();
             printf("Vous avez acheté le stuff avec succès\n\n");
             changeTextColor("reset");
         }

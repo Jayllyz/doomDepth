@@ -1,5 +1,5 @@
-#include "includes/fight.h"
 #include "includes/ansii_print.h"
+#include "includes/fight.h"
 #include "includes/items.h"
 #include "includes/map.h"
 #include "includes/shop.h"
@@ -172,7 +172,7 @@ void removeHP(int lastHP_x, int y, int life_to_remove)
         printCharAtCoordinate(lastHP_x - i, y, 'X');
     }
     movCursor(100, 0);
-    printf("lastHP_x: %d", lastHP_x);
+    // printf("lastHP_x: %d", lastHP_x);
     restoreCursorPos();
 }
 

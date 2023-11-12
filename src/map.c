@@ -1,8 +1,8 @@
-#include "includes/map.h"
 #include "includes/ansii_print.h"
 #include "includes/event.h"
 #include "includes/fight.h"
 #include "includes/items.h"
+#include "includes/map.h"
 #include "includes/shop.h"
 #include "includes/smith.h"
 #include "includes/utils.h"
@@ -76,7 +76,7 @@ arrowKey_t readArrowKeyPress()
         return arrowKeyPressed;
     }
 
-    printf(("\n%d %d %d"), buf[0], buf[1], buf[2]);
+    // printf(("\n%d %d %d"), buf[0], buf[1], buf[2]);
     if ((buf[0] == 27) && (buf[1] == 91) && (buf[2] == 65)) {
         arrowKeyPressed = ARROWKEY_UP;
     }
@@ -595,9 +595,9 @@ int map(const char *filename, const char *monster, int map_width, int map_height
     changeTextColor("reset");
 
     int x = map_width / 2 + map_left;
-    if (x % 2 != map_width % 2) {
-        //x++;
-    }
+    // if (x % 2 != map_width % 2) {
+    //     //x++;
+    // }
     int y = map_height / 2 + map_top;
 
     m.player_x = x;
