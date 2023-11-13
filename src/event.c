@@ -147,7 +147,6 @@ int event()
     placeID = rand() % 3;
 
     char* storyPath = initializeStoryChoice(villageID, placeID, scenarioID);
-    //printf("storyPath: %s\n", storyPath);
 
     if (!folderExists(storyPath)) {
         //printf("\nThe story path \"%s\" does not exist", storyPath);
@@ -160,7 +159,6 @@ int event()
     strcpy(storyChoice->storyPath, storyPath);
 
     while (!hasEventFile(storyChoice->storyPath)) {
-        printf("storyPath: %s\n", storyChoice->storyPath);
 
         char* id = readFile(storyChoice->storyPath, "id.txt");
         if (id == NULL) {
@@ -235,7 +233,6 @@ int event()
     strcpy(storyChoice->situation, situation);
     free(situation);
 
-    printf("\nID: %s", storyChoice->id);
     printf("\nContext:\n%s\n", storyChoice->context);
     printf("\nSituation:\n%s\n", storyChoice->situation);
 
