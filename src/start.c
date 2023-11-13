@@ -288,31 +288,24 @@ void continueGame(Player *p)
     if (rc != SQLITE_OK) {
         printf("Your journey hasn't started yet !\n");
         sqlite3_close(db);
-        exit(1);
+        exit(EXIT_SUCCESS);
     }
 
     sqlite3_bind_int(select, 1, 1);
     sqlite3_step(select);
 
-    if (rc == SQLITE_ROW) {
-        p->id = sqlite3_column_int(select, 0);
-        p->name = strdup((const char *)sqlite3_column_text(select, 1));
-        p->level = sqlite3_column_int(select, 2);
-        p->experience = sqlite3_column_int(select, 3);
-        p->life = sqlite3_column_int(select, 4);
-        p->defense = sqlite3_column_int(select, 6);
-        p->mana = sqlite3_column_int(select, 7);
-        p->classId = sqlite3_column_int(select, 9);
-        p->maxLife = sqlite3_column_int(select, 10);
-        p->maxMana = sqlite3_column_int(select, 11);
-        p->spell = loadPlayerSpells(p->id);
-    }
-    else {
-        sqlite3_finalize(select);
-        sqlite3_close(db);
-        printf("Your journey hasn't started yet !\n");
-        exit(EXIT_SUCCESS);
-    }
+    p->id = sqlite3_column_int(select, 0);
+    p->name = strdup((const char *)sqlite3_column_text(select, 1));
+    p->level = sqlite3_column_int(select, 2);
+    p->experience = sqlite3_column_int(select, 3);
+    p->life = sqlite3_column_int(select, 4);
+    p->defense = sqlite3_column_int(select, 6);
+    p->mana = sqlite3_column_int(select, 7);
+    p->classId = sqlite3_column_int(select, 9);
+    p->maxLife = sqlite3_column_int(select, 10);
+    p->maxMana = sqlite3_column_int(select, 11);
+    p->spell = loadPlayerSpells(p->id);
+
 
     sqlite3_finalize(select);
     sqlite3_close(db);
