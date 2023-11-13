@@ -306,7 +306,6 @@ void continueGame(Player *p)
     p->maxMana = sqlite3_column_int(select, 11);
     p->spell = loadPlayerSpells(p->id);
 
-
     sqlite3_finalize(select);
     sqlite3_close(db);
 }
