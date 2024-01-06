@@ -1,12 +1,33 @@
-on: push
-    
-name: clang-format Code Formatter
+---
+name: "Clang format"
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
-  lint:
-    name: clang-format Code Formatter
+  format:
     runs-on: ubuntu-latest
     steps:
-    - name: Clang Code Formatter
-      uses: Mavrikant/clang-format-action@ubuntu-22.04
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 2
+
+      - uses: jayllyz/clang-format-action@v1
+        # Default options
+        with:
+          check: false
+          style: file
+          extensions: cpp,h,hpp,c
+
+      # commit the changes (if there are any)
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "clang-format ✅"
+          branch: ${{ github.head_ref }}
+...
