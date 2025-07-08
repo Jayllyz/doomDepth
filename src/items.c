@@ -42,6 +42,11 @@ stuff *getStuffInfo(int id)
     sqlite3_step(res);
 
     stuff *s = (stuff *)malloc(sizeof(stuff));
+    if (!s) {
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+        return NULL;
+    }
 
     s->id = id;
     const char *name = (const char *)sqlite3_column_text(res, 1);
@@ -155,6 +160,11 @@ stuff **getUsableStuffs(int idPlayer, int count)
     int i = 0;
 
     stuff **stuffs = (stuff **)malloc(sizeof(stuff *) * count);
+    if (!stuffs) {
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+        return NULL;
+    }
     while (rc == SQLITE_ROW) {
         int stuff_id = sqlite3_column_int(res, i);
         stuffs[i] = getStuffInfo(stuff_id);
@@ -390,6 +400,11 @@ stuff **selectStuffFromPlayer(int idPlayer)
     int i = 0;
 
     stuff **s = (stuff **)malloc(sizeof(stuff *) * countPlayerStuff(idPlayer));
+    if (!s) {
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+        return NULL;
+    }
     while (rc == SQLITE_ROW) {
         int stuff_id = sqlite3_column_int(res, 0);
         s[i] = getStuffInfo(stuff_id);

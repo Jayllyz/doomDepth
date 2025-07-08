@@ -130,8 +130,17 @@ int main(int argc, char **argv)
         fgetc(stdin);
         changeTextColor("reset");
         int *idToFight = (int *)malloc(sizeof(int));
+        if (!idToFight) {
+            printf("Memory allocation failed\n");
+            return 1;
+        }
         idToFight[0] = 5;
         int *nbMonster = (int *)malloc(sizeof(int));
+        if (!nbMonster) {
+            free(idToFight);
+            printf("Memory allocation failed\n");
+            return 1;
+        }
         *nbMonster = 1;
         fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
 
@@ -155,6 +164,10 @@ int main(int argc, char **argv)
         printf("Votre personnage a bien ete charge, %s\n", p->name);
 
         char *save_file = (char *)malloc(sizeof(char) * 25);
+        if (!save_file) {
+            printf("Memory allocation failed\n");
+            return 1;
+        }
         strcpy(save_file, "ascii/map_save");
         FILE *fp = fopen(save_file, "r");
         if (fp == NULL) {

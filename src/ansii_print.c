@@ -79,6 +79,9 @@ char *readFileContent(FILE *fp)
     fseek(fp, 0, SEEK_SET);
 
     char *content = (char *)malloc(file_size + 1);
+    if (!content) {
+        return NULL;
+    }
 
     fread(content, 1, file_size, fp);
 

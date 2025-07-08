@@ -42,6 +42,10 @@ void landing()
 {
     clearScreen();
     FILE* fp = fopen("ascii/event.txt", "r");
+    if (!fp) {
+        printf("Error: Cannot open event file\n");
+        return;
+    }
     char* line = readFileContent(fp);
 
     changeTextColor("yellow");

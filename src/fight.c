@@ -75,6 +75,10 @@ Monster *getMonsterInfo(int id)
     sqlite3_step(res);
 
     Monster *m = (Monster *)malloc(sizeof(Monster));
+    if (!m) {
+        sqlite3_finalize(res);
+        return NULL;
+    }
     m->id = sqlite3_column_int(res, 0);
 
     m->name = strdup((const char *)sqlite3_column_text(res, 1));
@@ -86,8 +90,24 @@ Monster *getMonsterInfo(int id)
     m->isBoss = sqlite3_column_int(res, 6);
 
     m->spell = (Spell **)malloc(MAX_MONSTER_SPELL * sizeof(Spell *));
+    if (!m->spell) {
+        free(m->name);
+        free(m);
+        sqlite3_finalize(res);
+        return NULL;
+    }
     for (int i = 0; i < MAX_MONSTER_SPELL; i++) {
         m->spell[i] = (Spell *)malloc(sizeof(Spell));
+        if (!m->spell[i]) {
+            for (int j = 0; j < i; j++) {
+                free(m->spell[j]);
+            }
+            free(m->spell);
+            free(m->name);
+            free(m);
+            sqlite3_finalize(res);
+            return NULL;
+        }
         m->spell[i]->id = -1;
     }
 
@@ -140,6 +160,11 @@ Spell *setMonsterSpell(int idSpell)
     sqlite3_step(select);
 
     Spell *s = (Spell *)malloc(sizeof(Spell));
+    if (!s) {
+        sqlite3_finalize(select);
+        sqlite3_close(db);
+        return NULL;
+    }
 
     s->id = sqlite3_column_int(select, 0);
     s->name = strdup((const char *)sqlite3_column_text(select, 1));
@@ -180,6 +205,9 @@ void removeHP(int lastHP_x, int y, int life_to_remove)
 int getMonsterWidth(int id)
 {
     char *file = (char *)malloc(sizeof(char) * 25);
+    if (!file) {
+        return 0;
+    }
     if (snprintf(file, 25, "ascii/monster/%d.txt", id) < 0) {
         printf("Fichier introuvable\n");
         free(file);
@@ -289,6 +317,11 @@ Monster **loadFightScene(Player *p, int *nbrMonster, const int idToFight[])
         fplayer = fopen("ascii/player/mage.txt", "r");
     else
         fplayer = fopen("ascii/player/archer.txt", "r");
+
+    if (!fplayer) {
+        printf("Error: Cannot open player file\n");
+        return NULL;
+    }
 
     char *contentPlayer = readFileContent(fplayer);
     changeTextColor("blue");
@@ -559,13 +592,21 @@ void rewardStuff(Player *p)
 
     int id = sqlite3_column_int(res, 0);
     char *name = strdup((const char *)sqlite3_column_text(res, 1));
+    if (!name) {
+        sqlite3_finalize(res);
+        sqlite3_close(db);
+        return;
+    }
     if (checkStuffIsInPlayerStuff(id, 1) == 1) {
+        free(name);
         rewardStuff(p);
+        return;
     }
 
     printf("Vous avez reçu un l\'objet légendaire : %s\n", name);
     addStuffToPlayerStuff(id, 1);
 
+    free(name);
     sqlite3_finalize(res);
     sqlite3_close(db);
 }
@@ -756,7 +797,6 @@ void printLifeBar(Player *p, Monster **m, const int nbrMonster, int mana)
 {
     int lifeBar = (p->life * 10) / 10;
     int row = 44;
-    int col = 5;
 
     changeTextColor("green");
     movCursor(5, row - 1);

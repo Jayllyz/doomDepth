@@ -16,6 +16,8 @@ int getInputInt()
 char getInputChar()
 {
     char *line = (char *)malloc(sizeof(char) * BUFFER_SIZE);
+    if (!line) return '\0';
+    
     char c;
 
     if (fgets(line, BUFFER_SIZE, stdin)) {

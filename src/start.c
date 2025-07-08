@@ -197,6 +197,10 @@ Spell *affectSpellToPlayer(int playerId, int spellId)
     sqlite3_step(select);
 
     Spell *s = (Spell *)malloc(sizeof(Spell));
+    if (!s) {
+        sqlite3_finalize(select);
+        return NULL;
+    }
 
     s->id = sqlite3_column_int(select, 0);
     s->name = strdup((const char *)sqlite3_column_text(select, 1));
@@ -340,9 +344,24 @@ Spell **loadPlayerSpells(int playerId)
     int nbrSpell = sqlite3_column_int(select, 0);
 
     Spell **spells = (Spell **)malloc(nbrSpell * sizeof(Spell *));
+    if (!spells) {
+        sqlite3_finalize(select);
+        return NULL;
+    }
 
     for (int i = 0; i < nbrSpell; i++) {
         spells[i] = (Spell *)malloc(sizeof(Spell));
+        if (!spells[i]) {
+            for (int j = 0; j < i; j++) {
+                free(spells[j]->name);
+                free(spells[j]->description);
+                free(spells[j]->type);
+                free(spells[j]);
+            }
+            free(spells);
+            sqlite3_finalize(select);
+            return NULL;
+        }
         spells[i]->id = sqlite3_column_int(select, 1);
         spells[i]->name = strdup((const char *)sqlite3_column_text(select, 2));
         spells[i]->description = strdup((const char *)sqlite3_column_text(select, 3));
