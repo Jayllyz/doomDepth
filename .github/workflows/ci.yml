@@ -1,0 +1,39 @@
+name: "CI"
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+
+
+env:
+  CI: true
+  FORCE_COLOR: 1
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Cache apt packages
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: cmake build-essential libsqlite3-dev make sqlite3
+        version: 1.0
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build project
+      run: cmake --build build
+
+    - name: Check code formatting
+      uses: jayllyz/clang-format-action@latest
+      with:
+        check: true
+        style: file
+        extensions: cpp,h,hpp,c
