@@ -24,5 +24,16 @@ if(CLANG_FORMAT)
     )
 endif()
 
-add_executable(doomDepth src/*.c)
+add_executable(doomDepth 
+    src/main.c
+    src/ansii_print.c
+    src/event.c
+    src/fight.c
+    src/items.c
+    src/map.c
+    src/shop.c
+    src/smith.c
+    src/start.c
+    src/utils.c
+)
 target_link_libraries(doomDepth ${SQLITE3_LIBRARIES})

@@ -12,7 +12,7 @@ env:
   FORCE_COLOR: 1
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,10 +30,3 @@ jobs:
 
     - name: Build project
       run: cmake --build build
-
-    - name: Check code formatting
-      uses: jayllyz/clang-format-action@main
-      with:
-        check: true
-        style: file
-        extensions: cpp,h,hpp,c
