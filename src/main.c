@@ -93,6 +93,18 @@ int main(int argc, char **argv)
         clearBuffer();
     } while (choice < 1 || choice > 3);
 
+    int *idToFight = (int *)malloc(sizeof(int));
+    if (!idToFight) {
+        printf("Memory allocation failed\n");
+        return 1;
+    }
+    int *nbMonster = (int *)malloc(sizeof(int));
+    if (!nbMonster) {
+        free(idToFight);
+        printf("Memory allocation failed\n");
+        return 1;
+    }
+
     switch (choice) {
     case 1:
         clearScreen();
@@ -129,18 +141,7 @@ int main(int argc, char **argv)
         printf("HERE IS THE FINAL BOSS\n");
         fgetc(stdin);
         changeTextColor("reset");
-        int *idToFight = (int *)malloc(sizeof(int));
-        if (!idToFight) {
-            printf("Memory allocation failed\n");
-            return 1;
-        }
         idToFight[0] = 5;
-        int *nbMonster = (int *)malloc(sizeof(int));
-        if (!nbMonster) {
-            free(idToFight);
-            printf("Memory allocation failed\n");
-            return 1;
-        }
         *nbMonster = 1;
         fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
 
@@ -177,11 +178,9 @@ int main(int argc, char **argv)
 
         char *map_save = readFileContent(fp);
         fclose(fp);
-        // convert char to int
 
         for (int i = map_save[0] - '0'; i < 4; i++) {
             printf("loading map %d\n", i);
-            // fgetc(stdin);
 
             if (snprintf(filename, 25, "ascii/map%d.txt", i) < 0) {
                 printf("Error while loading map %d\n", i);
@@ -216,6 +215,8 @@ int main(int argc, char **argv)
         printf("HERE IS THE FINAL BOSS\n");
         fgetc(stdin);
         changeTextColor("reset");
+        idToFight[0] = 5;
+        *nbMonster = 1;
         fightMonster(p, loadFightScene(p, nbMonster, idToFight), nbMonster);
 
         clearScreen();

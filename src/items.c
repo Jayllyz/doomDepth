@@ -219,20 +219,19 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
             if (target == -1)
                 return -1;
             m[target]->life -= stuffs[choice]->attack;
-            printItemsLogs(p, stuffs[choice], target, m, maxLines);
+            printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
             break;
         case BONUS:
             if (stuffs[choice]->attack > 0) {
                 p->attack += stuffs[choice]->attack;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
             }
 
             else if (stuffs[choice]->defense > 0) {
                 p->defense += stuffs[choice]->defense;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
             }
-            else if (stuffs[choice]->life > 0)
-
+            else if (stuffs[choice]->life > 0) {
                 if (p->life < p->maxLife) {
                     clearLinesFrom(maxLines + 4);
                     //movCursor(0, maxLines + 21);
@@ -261,25 +260,26 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
                 }
                 else if (stuffs[choice]->mana > 0) {
                     p->mana += stuffs[choice]->mana;
-                    printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                    printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
                 }
+            }
             break;
         case MALUS:
             if (stuffs[choice]->attack > 0) {
                 p->attack -= stuffs[choice]->attack;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
             }
             else if (stuffs[choice]->defense > 0) {
                 p->defense -= stuffs[choice - 1]->defense;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
             }
             else if (stuffs[choice]->life > 0) {
                 p->life -= stuffs[choice]->life;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
             }
             else if (stuffs[choice]->mana > 0) {
                 p->mana -= stuffs[choice]->mana;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], nbrMonster, m, maxLines);
             }
             break;
         }
