@@ -262,6 +262,7 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
                     p->mana += stuffs[choice]->mana;
                     printItemsLogs(p, stuffs[choice], target, m, maxLines);
                 }
+            }
             break;
         case MALUS:
             if (stuffs[choice]->attack > 0) {
