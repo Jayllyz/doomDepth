@@ -22,7 +22,7 @@ jobs:
     - name: Cache apt packages
       uses: awalsh128/cache-apt-pkgs-action@latest
       with:
-        packages: cmake build-essential libsqlite3-dev make sqlite3
+        packages: cmake build-essential libsqlite3-dev make sqlite3 cppcheck
         version: 1.0
 
     - name: Configure CMake
@@ -30,3 +30,6 @@ jobs:
 
     - name: Build project
       run: cmake --build build
+
+    - name: Run cppcheck
+      run: cppcheck --enable=performance src/
