@@ -224,15 +224,14 @@ int showPlayerInventory(Player *p, Monster **m, int nbrMonster, int maxLines)
         case BONUS:
             if (stuffs[choice]->attack > 0) {
                 p->attack += stuffs[choice]->attack;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], -1, m, maxLines);
             }
 
             else if (stuffs[choice]->defense > 0) {
                 p->defense += stuffs[choice]->defense;
-                printItemsLogs(p, stuffs[choice], target, m, maxLines);
+                printItemsLogs(p, stuffs[choice], -1, m, maxLines);
             }
-            else if (stuffs[choice]->life > 0)
-
+            else if (stuffs[choice]->life > 0) {
                 if (p->life < p->maxLife) {
                     clearLinesFrom(maxLines + 4);
                     //movCursor(0, maxLines + 21);
